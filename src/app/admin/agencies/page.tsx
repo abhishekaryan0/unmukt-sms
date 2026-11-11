@@ -29,51 +29,56 @@ export default function AdminAgenciesPage() {
     {
       header: "Mobile",
       accessorKey: "mobile",
+      className: "whitespace-nowrap",
       cell: (row) => (
         <span className="font-mono text-xs text-slate-800 font-medium">
-          {formatIndianMobile(row.mobile)}
+          {formatIndianMobile(row.mobile || (row as any).phone)}
         </span>
       ),
     },
     {
       header: "Clients Managed",
       accessorKey: "clientsManaged",
+      className: "whitespace-nowrap",
       cell: (row) => (
         <span className="inline-flex items-center gap-1 font-bold text-xs text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-full">
           <Users className="w-3 h-3 text-slate-600" />
-          {row.clientsManaged} Sub-accounts
+          {row.clientsManaged ?? (row as any).clientCount ?? 0} Sub-accounts
         </span>
       ),
     },
     {
       header: "Agency Wallet",
       accessorKey: "walletBalance",
-      cell: (row) => <span className="font-bold text-slate-900">{formatINR(row.walletBalance)}</span>,
+      className: "whitespace-nowrap",
+      cell: (row) => <span className="font-bold text-slate-900">{formatINR(row.walletBalance ?? 0)}</span>,
     },
     {
       header: "Custom Pricing Tier",
+      className: "min-w-[140px] whitespace-nowrap",
       cell: (row) => (
         <div className="text-[11px] space-y-0.5">
-          <div>SMS: <span className="font-semibold text-slate-900">{formatINR(row.customPricing.smsPromo)}</span></div>
-          <div>WA: <span className="font-semibold text-slate-900">{formatINR(row.customPricing.whatsappMarketing)}</span></div>
+          <div>SMS: <span className="font-semibold text-slate-900">{formatINR(row.customPricing?.smsPromo ?? 0.18)}</span></div>
+          <div>WA: <span className="font-semibold text-slate-900">{formatINR(row.customPricing?.whatsappMarketing ?? 0.95)}</span></div>
         </div>
       ),
     },
     {
       header: "Account Status",
       accessorKey: "accountStatus",
+      className: "whitespace-nowrap",
       cell: (row) => <StatusBadge status={row.accountStatus} />,
     },
     {
       header: "Actions",
-      className: "whitespace-nowrap text-right",
+      className: "whitespace-nowrap text-right pr-4",
       cell: (row) => (
         <div className="flex items-center justify-end">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setSelectedAgency(row)}
-            className="h-7 px-2.5 text-xs font-semibold whitespace-nowrap shadow-none"
+            className="h-7.5 px-3 text-xs font-semibold whitespace-nowrap shadow-none border-slate-300 hover:bg-slate-50"
           >
             Manage Agency
           </Button>
@@ -134,19 +139,19 @@ export default function AdminAgenciesPage() {
                 <div>
                   <div className="text-[10px] text-slate-500">SMS Promo</div>
                   <div className="font-bold text-slate-900">
-                    {formatINR(selectedAgency.customPricing.smsPromo)}
+                    {formatINR(selectedAgency.customPricing?.smsPromo ?? 0.18)}
                   </div>
                 </div>
                 <div>
                   <div className="text-[10px] text-slate-500">SMS Trans</div>
                   <div className="font-bold text-slate-900">
-                    {formatINR(selectedAgency.customPricing.smsTrans)}
+                    {formatINR(selectedAgency.customPricing?.smsTrans ?? 0.20)}
                   </div>
                 </div>
                 <div>
                   <div className="text-[10px] text-slate-500">WhatsApp Marketing</div>
                   <div className="font-bold text-slate-900">
-                    {formatINR(selectedAgency.customPricing.whatsappMarketing)}
+                    {formatINR(selectedAgency.customPricing?.whatsappMarketing ?? 0.95)}
                   </div>
                 </div>
               </div>
@@ -154,10 +159,10 @@ export default function AdminAgenciesPage() {
 
             <div>
               <span className="font-bold text-slate-900 block mb-1.5">
-                Sub-Accounts Linked ({selectedAgency.managedClientIds.length}):
+                Sub-Accounts Linked ({selectedAgency.managedClientIds?.length || 0}):
               </span>
               <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                {selectedAgency.managedClientIds.map((cid) => {
+                {(selectedAgency.managedClientIds || []).map((cid) => {
                   const cust = customers.find((c) => c.id === cid);
                   return (
                     <div

@@ -119,8 +119,9 @@ export function calculateSMSSegments(text: string) {
  * Validate 10-digit Indian mobile number
  * Starts with 6, 7, 8, or 9
  */
-export function validateIndianMobile(phone: string): boolean {
-  const cleaned = phone.replace(/\D/g, "");
+export function validateIndianMobile(phone?: string | number | null): boolean {
+  if (!phone) return false;
+  const cleaned = String(phone).replace(/\D/g, "");
   // Accept either 10 digits or 12 digits starting with 91
   if (cleaned.length === 10) {
     return /^[6-9]\d{9}$/.test(cleaned);
@@ -134,8 +135,10 @@ export function validateIndianMobile(phone: string): boolean {
 /**
  * Format Indian mobile number nicely (+91 98765 43210)
  */
-export function formatIndianMobile(phone: string): string {
-  const cleaned = phone.replace(/\D/g, "");
+export function formatIndianMobile(phone?: string | number | null): string {
+  if (!phone) return "";
+  const str = String(phone);
+  const cleaned = str.replace(/\D/g, "");
   if (cleaned.length === 10) {
     return `+91 ${cleaned.slice(0, 5)} ${cleaned.slice(5)}`;
   }
@@ -143,7 +146,7 @@ export function formatIndianMobile(phone: string): string {
     const core = cleaned.slice(2);
     return `+91 ${core.slice(0, 5)} ${core.slice(5)}`;
   }
-  return phone;
+  return str;
 }
 
 /**

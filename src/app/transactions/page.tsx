@@ -55,7 +55,7 @@ export default function TransactionsPage() {
             </div>
             <div>
               <div className="font-semibold text-slate-900 capitalize">
-                {row.type.replace("_", " ")}
+                {(row.type || "transaction").replace(/_/g, " ")}
               </div>
               <div className="text-[11px] text-slate-500 font-mono">{row.reference}</div>
             </div>

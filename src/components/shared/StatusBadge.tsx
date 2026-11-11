@@ -7,7 +7,11 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const normalized = (status || "").toLowerCase().trim();
+  const safeStatus = typeof status === "string" ? status : "";
+  const normalized = safeStatus.toLowerCase().trim();
+  const label = safeStatus
+    ? safeStatus.charAt(0).toUpperCase() + safeStatus.slice(1).replace(/_/g, " ")
+    : "Active";
 
   switch (normalized) {
     case "delivered":
@@ -20,7 +24,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
     case "success":
       return (
         <Badge variant="success" dot className={className}>
-          {status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
+          {label}
         </Badge>
       );
 
@@ -32,7 +36,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
     case "error":
       return (
         <Badge variant="destructive" dot className={className}>
-          {status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
+          {label}
         </Badge>
       );
 
@@ -44,7 +48,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
     case "degraded":
       return (
         <Badge variant="warning" dot className={className}>
-          {status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
+          {label}
         </Badge>
       );
 

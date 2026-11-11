@@ -59,19 +59,31 @@ export async function GET() {
       registrationDate: c.createdAt.toISOString().split("T")[0],
     }));
 
-    const formattedAgencies = agencies.map((a) => ({
-      id: a.id,
-      agencyName: a.agencyName,
-      ownerName: a.ownerName,
-      email: a.email,
-      phone: a.phone,
-      city: a.city,
-      state: a.state,
-      walletBalance: Number(a.walletBalance),
-      clientCount: a.clientCount,
-      pricingDiscount: Number(a.pricingDiscount),
-      accountStatus: a.accountStatus.toLowerCase() as any,
-    }));
+    const formattedAgencies = agencies.map((a) => {
+      const discount = Number(a.pricingDiscount || 10);
+      return {
+        id: a.id,
+        agencyName: a.agencyName,
+        ownerName: a.ownerName,
+        email: a.email,
+        phone: a.phone,
+        mobile: a.phone,
+        city: a.city,
+        state: a.state,
+        walletBalance: Number(a.walletBalance),
+        clientCount: a.clientCount,
+        clientsManaged: a.clientCount,
+        pricingDiscount: discount,
+        accountStatus: a.accountStatus.toLowerCase() as any,
+        joinedDate: a.createdAt.toISOString().split("T")[0],
+        customPricing: {
+          smsPromo: Number((0.22 * (1 - discount / 100)).toFixed(2)) || 0.18,
+          smsTrans: Number((0.25 * (1 - discount / 100)).toFixed(2)) || 0.20,
+          whatsappMarketing: Number((1.10 * (1 - discount / 100)).toFixed(2)) || 0.95,
+        },
+        managedClientIds: customers.slice(0, Math.min(3, a.clientCount || 2)).map((c) => c.id),
+      };
+    });
 
     const formattedCampaigns = campaigns.map((c) => ({
       id: c.id,
@@ -103,6 +115,7 @@ export async function GET() {
       costPerMessage: Number(s.costPerMessage),
       totalMessages: s.totalMessages,
       successRate: Number(s.successRate),
+      failedMessages: s.failedCount,
       failedCount: s.failedCount,
       apiEndpoint: s.apiEndpoint,
     }));

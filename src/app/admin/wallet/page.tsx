@@ -97,7 +97,7 @@ export default function AdminWalletTransactionsPage() {
             }`}
           >
             {isCredit ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-            {row.type.replace("_", " ")}
+            {(row.type || "transaction").replace(/_/g, " ")}
           </span>
         );
       },
