@@ -253,12 +253,12 @@ export default function AdminSMSPage() {
         activeTab={activeTab}
         onChange={setActiveTab}
         tabs={[
-          { id: "logs", label: "Carrier Message Logs", count: smsLogs.length, icon: <FileText /> },
+          { id: "logs", label: "Carrier Message Logs", count: smsLogs.length, icon: <FileText className="w-4 h-4" /> },
           {
             id: "headers",
             label: "TRAI DLT Sender Headers Registry",
             count: senderHeaders.length,
-            icon: <ShieldCheck />,
+            icon: <ShieldCheck className="w-4 h-4" />,
           },
         ]}
       />

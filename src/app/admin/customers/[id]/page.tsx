@@ -54,29 +54,30 @@ export default function CustomerDetailsPage() {
   return (
     <AdminLayout>
       {/* Top Breadcrumb & Action */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+        <div className="flex items-center gap-3 min-w-0">
           <Link
             href="/admin/customers"
-            className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 shadow-subtle"
+            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-subtle shrink-0 transition-colors"
+            title="Back to Customer Directory"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 truncate">
                 {customer.businessName}
               </h1>
               <StatusBadge status={customer.accountStatus} />
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Customer ID: {customer.id} • {customer.businessCategory} • Registered on{" "}
+            <p className="text-xs text-slate-500 mt-0.5 truncate">
+              Customer ID: <span className="font-mono font-medium text-slate-700">{customer.id}</span> • {customer.businessCategory} • Registered on{" "}
               {formatDate(customer.registrationDate, false)}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0 flex-wrap">
           <Button
             variant="outline"
             size="sm"
@@ -84,17 +85,18 @@ export default function CustomerDetailsPage() {
               switchActiveCustomer(customer.id);
               router.push("/dashboard");
             }}
-            className="bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300 font-semibold"
+            className="h-8 px-3 text-xs bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300 font-semibold gap-1.5 whitespace-nowrap shrink-0 shadow-none"
+            title="Impersonate and login as this client"
           >
-            <LogIn className="w-3.5 h-3.5 mr-1.5 text-amber-700" />
-            Login as Customer
+            <LogIn className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+            <span>Login as Client</span>
           </Button>
 
-          <div className="text-right pl-3 border-l border-slate-200">
-            <span className="text-[10px] text-slate-500 uppercase block font-semibold">
-              Wallet Balance
+          <div className="text-right pl-3.5 border-l border-slate-200 shrink-0">
+            <span className="text-[10px] text-slate-500 uppercase block font-semibold tracking-wider">
+              Prepaid Balance
             </span>
-            <span className="text-lg font-bold text-slate-900">
+            <span className="text-base sm:text-lg font-bold text-slate-900">
               {formatINR(customer.walletBalance)}
             </span>
           </div>
@@ -106,12 +108,12 @@ export default function CustomerDetailsPage() {
         activeTab={activeTab}
         onChange={setActiveTab}
         tabs={[
-          { id: "overview", label: "Overview", icon: <Building2 /> },
-          { id: "campaigns", label: "Campaigns", count: custCampaigns.length, icon: <Megaphone /> },
-          { id: "wallet", label: "Wallet & Credits", icon: <Wallet /> },
-          { id: "transactions", label: "Transactions", count: custTx.length, icon: <Receipt /> },
-          { id: "contacts", label: "Contacts", count: custContacts.length, icon: <Users /> },
-          { id: "activity", label: "Activity Log", icon: <Activity /> },
+          { id: "overview", label: "Overview", icon: <Building2 className="w-4 h-4" /> },
+          { id: "campaigns", label: "Campaigns", count: custCampaigns.length, icon: <Megaphone className="w-4 h-4" /> },
+          { id: "wallet", label: "Wallet & Credits", icon: <Wallet className="w-4 h-4" /> },
+          { id: "transactions", label: "Transactions", count: custTx.length, icon: <Receipt className="w-4 h-4" /> },
+          { id: "contacts", label: "Contacts", count: custContacts.length, icon: <Users className="w-4 h-4" /> },
+          { id: "activity", label: "Activity Log", icon: <Activity className="w-4 h-4" /> },
         ]}
       />
 
