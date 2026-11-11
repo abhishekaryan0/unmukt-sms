@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useMemo } from "react";
 import {
   Customer,
   Agency,
@@ -15,6 +15,8 @@ import {
   SupportTicket,
   Invoice,
   MessageLog,
+  SenderHeader,
+  WhatsAppProfile,
 } from "@/types";
 import {
   INITIAL_CUSTOMERS,
@@ -30,7 +32,10 @@ import {
   INITIAL_SUPPORT_TICKETS,
   INITIAL_INVOICES,
   INITIAL_MESSAGE_LOGS,
+  INITIAL_SENDER_HEADERS,
+  INITIAL_WHATSAPP_PROFILE,
 } from "./mock-data";
+import { getClientSession, impersonateCustomer, stopImpersonation } from "./auth";
 
 interface AppContextType {
   customers: Customer[];
@@ -46,7 +51,15 @@ interface AppContextType {
   supportTickets: SupportTicket[];
   invoices: Invoice[];
   messageLogs: MessageLog[];
+  senderHeaders: SenderHeader[];
+  whatsappProfile: WhatsAppProfile;
+
+  // Active client context (supports Super Admin impersonation)
+  activeCustomerId: string;
+  activeCustomer: Customer;
   clientWalletBalance: number;
+  switchActiveCustomer: (customerId: string) => void;
+  exitImpersonation: () => void;
 
   // Actions
   rechargeWallet: (amount: number, method: "UPI" | "Net Banking" | "Credit Card" | "Debit Card") => {
@@ -60,17 +73,22 @@ interface AppContextType {
     error?: string;
     campaign?: Campaign;
   };
+  addCustomer: (customer: Omit<Customer, "id" | "totalMessages" | "registrationDate">) => Customer;
   addContact: (contact: Omit<Contact, "id" | "dateAdded">) => void;
+  importContacts: (newContacts: Omit<Contact, "id" | "dateAdded">[]) => number;
   updateContact: (contact: Contact) => void;
   deleteContact: (id: string) => void;
   addGroup: (group: Omit<ContactGroup, "id" | "createdDate" | "contactCount">) => void;
   deleteGroup: (id: string) => void;
   addTemplate: (template: Omit<Template, "id" | "createdDate">) => void;
   updateTemplateStatus: (id: string, status: "approved" | "pending" | "rejected") => void;
+  addSenderHeader: (header: Omit<SenderHeader, "id" | "createdDate" | "status">) => SenderHeader;
+  updateSenderHeaderStatus: (id: string, status: "approved" | "pending" | "rejected") => void;
   addRoutingRule: (rule: Omit<RoutingRule, "id">) => void;
   updateRoutingRule: (rule: RoutingRule) => void;
   deleteRoutingRule: (id: string) => void;
   updatePricing: (type: string, sellingPrice: number) => void;
+  updateWhatsAppProfile: (profile: Partial<WhatsAppProfile>) => void;
   createSupportTicket: (ticket: {
     subject: string;
     category: SupportTicket["category"];
@@ -81,6 +99,7 @@ interface AppContextType {
   updateSupplier: (supplier: Supplier) => void;
   updateCustomerStatus: (customerId: string, status: Customer["accountStatus"]) => void;
   manualCustomerWalletAdjustment: (customerId: string, amount: number, type: "credit" | "debit", note: string) => void;
+  sendTestMessage: (mobile: string, channel: "sms" | "whatsapp", content: string) => { success: boolean; message: string };
   resetAllData: () => void;
 }
 
@@ -102,7 +121,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [supportTickets, setSupportTickets] = useState<SupportTicket[]>(INITIAL_SUPPORT_TICKETS);
   const [invoices, setInvoices] = useState<Invoice[]>(INITIAL_INVOICES);
   const [messageLogs, setMessageLogs] = useState<MessageLog[]>(INITIAL_MESSAGE_LOGS);
-  const [clientWalletBalance, setClientWalletBalance] = useState<number>(4850.5);
+  const [senderHeaders, setSenderHeaders] = useState<SenderHeader[]>(INITIAL_SENDER_HEADERS);
+  const [whatsappProfile, setWhatsappProfile] = useState<WhatsAppProfile>(INITIAL_WHATSAPP_PROFILE);
+  const [activeCustomerId, setActiveCustomerId] = useState<string>("cust-01");
 
   // Load from localStorage on client mount
   useEffect(() => {
@@ -143,8 +164,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const storedLogs = localStorage.getItem("smsunmukt_message_logs");
       if (storedLogs) setMessageLogs(JSON.parse(storedLogs));
 
-      const storedBalance = localStorage.getItem("smsunmukt_client_wallet");
-      if (storedBalance !== null) setClientWalletBalance(parseFloat(storedBalance));
+      const storedHeaders = localStorage.getItem("smsunmukt_sender_headers");
+      if (storedHeaders) setSenderHeaders(JSON.parse(storedHeaders));
+
+      const storedWaProfile = localStorage.getItem("smsunmukt_wa_profile");
+      if (storedWaProfile) setWhatsappProfile(JSON.parse(storedWaProfile));
+
+      // Active customer from session
+      const clientSession = getClientSession();
+      if (clientSession && clientSession.id) {
+        setActiveCustomerId(clientSession.id);
+      }
     } catch (e) {
       console.error("Failed to parse localStorage data", e);
     } finally {
@@ -168,7 +198,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("smsunmukt_tickets", JSON.stringify(supportTickets));
       localStorage.setItem("smsunmukt_invoices", JSON.stringify(invoices));
       localStorage.setItem("smsunmukt_message_logs", JSON.stringify(messageLogs));
-      localStorage.setItem("smsunmukt_client_wallet", clientWalletBalance.toString());
+      localStorage.setItem("smsunmukt_sender_headers", JSON.stringify(senderHeaders));
+      localStorage.setItem("smsunmukt_wa_profile", JSON.stringify(whatsappProfile));
     } catch (e) {
       console.error("Failed to save to localStorage", e);
     }
@@ -186,8 +217,41 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     supportTickets,
     invoices,
     messageLogs,
-    clientWalletBalance,
+    senderHeaders,
+    whatsappProfile,
   ]);
+
+  // Active customer object
+  const activeCustomer = useMemo(() => {
+    return customers.find((c) => c.id === activeCustomerId) || customers[0] || INITIAL_CUSTOMERS[0];
+  }, [customers, activeCustomerId]);
+
+  const clientWalletBalance = activeCustomer.walletBalance;
+
+  // Switch active customer (Impersonation by Super Admin)
+  const switchActiveCustomer = (customerId: string) => {
+    const target = customers.find((c) => c.id === customerId);
+    if (!target) return;
+    setActiveCustomerId(customerId);
+    impersonateCustomer(target);
+  };
+
+  const exitImpersonation = () => {
+    stopImpersonation();
+    setActiveCustomerId("cust-01");
+  };
+
+  // Add new customer (Super Admin onboarding)
+  const addCustomer = (customerData: Omit<Customer, "id" | "totalMessages" | "registrationDate">) => {
+    const newCustomer: Customer = {
+      ...customerData,
+      id: `cust-${Date.now().toString().slice(-4)}`,
+      totalMessages: 0,
+      registrationDate: new Date().toISOString().split("T")[0],
+    };
+    setCustomers((prev) => [newCustomer, ...prev]);
+    return newCustomer;
+  };
 
   // Recharge client wallet
   const rechargeWallet = (amount: number, method: "UPI" | "Net Banking" | "Credit Card" | "Debit Card") => {
@@ -196,8 +260,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const newTx: Transaction = {
       id: `tx-${Date.now().toString().slice(-6)}`,
-      customerId: "cust-01",
-      customerName: "Sharma Fashion Store",
+      customerId: activeCustomer.id,
+      customerName: activeCustomer.businessName,
       type: "recharge",
       amount,
       previousBalance: prevBalance,
@@ -214,11 +278,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const newInvoice: Invoice = {
       id: `inv-2026-${Date.now().toString().slice(-4)}`,
       invoiceNumber: `UNM/2026-27/${Math.floor(1000 + Math.random() * 9000)}`,
-      customerId: "cust-01",
-      businessName: "Sharma Fashion Store",
-      ownerName: "Rajesh Sharma",
-      gstin: "07AAAAA0000A1Z5",
-      billingAddress: "Shop 14, Main Cloth Market, Chandni Chowk, Central Delhi - 110006",
+      customerId: activeCustomer.id,
+      businessName: activeCustomer.businessName,
+      ownerName: activeCustomer.ownerName,
+      gstin: activeCustomer.gstin || "07AAAAA0000A1Z5",
+      billingAddress: `${activeCustomer.city}, ${activeCustomer.state}`,
       amount: baseAmount,
       gst: gstAmount,
       totalAmount: amount,
@@ -228,14 +292,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       transactionReference: newTx.reference,
     };
 
-    setClientWalletBalance(newBalance);
+    setCustomers((prev) =>
+      prev.map((c) => (c.id === activeCustomer.id ? { ...c, walletBalance: newBalance } : c))
+    );
     setTransactions((prev) => [newTx, ...prev]);
     setInvoices((prev) => [newInvoice, ...prev]);
-
-    // Also update Sharma Fashion Store in customers list
-    setCustomers((prev) =>
-      prev.map((c) => (c.id === "cust-01" ? { ...c, walletBalance: newBalance } : c))
-    );
 
     return {
       success: true,
@@ -247,26 +308,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Create Campaign
   const createCampaign = (campaignData: Omit<Campaign, "id" | "createdDate" | "delivered" | "failed" | "pending">) => {
-    // If client is sending, check wallet balance
-    if (campaignData.customerId === "cust-01") {
-      if (clientWalletBalance < campaignData.cost) {
-        return {
-          success: false,
-          error: `Insufficient wallet balance. Campaign cost is ₹${campaignData.cost.toFixed(
-            2
-          )}, but your balance is ₹${clientWalletBalance.toFixed(2)}. Please recharge your wallet.`,
-        };
-      }
+    if (clientWalletBalance < campaignData.cost) {
+      return {
+        success: false,
+        error: `Insufficient wallet balance. Campaign cost is ₹${campaignData.cost.toFixed(
+          2
+        )}, but your balance is ₹${clientWalletBalance.toFixed(2)}. Please recharge your wallet.`,
+      };
     }
 
     const totalRecipients = campaignData.totalRecipients || 1;
-    // Calculate realistic delivered & failed numbers (approx 98.2% deliverability)
-    const delivered = Math.floor(totalRecipients * 0.982);
+    const delivered = Math.floor(totalRecipients * 0.985);
     const failed = totalRecipients - delivered;
 
     const newCampaign: Campaign = {
       ...campaignData,
       id: `cmp-${Date.now().toString().slice(-6)}`,
+      customerId: activeCustomer.id,
+      customerName: activeCustomer.businessName,
       createdDate: new Date().toISOString(),
       delivered,
       failed,
@@ -275,45 +334,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     setCampaigns((prev) => [newCampaign, ...prev]);
 
-    // If client, deduct from wallet
-    if (campaignData.customerId === "cust-01") {
-      const prevBal = clientWalletBalance;
-      const newBal = Number((prevBal - campaignData.cost).toFixed(2));
-      setClientWalletBalance(newBal);
+    // Deduct from wallet
+    const prevBal = clientWalletBalance;
+    const newBal = Number((prevBal - campaignData.cost).toFixed(2));
 
-      const tx: Transaction = {
-        id: `tx-${Date.now().toString().slice(-6)}`,
-        customerId: "cust-01",
-        customerName: "Sharma Fashion Store",
-        type: campaignData.channel === "sms" ? "sms_deduction" : "whatsapp_deduction",
-        amount: campaignData.cost,
-        previousBalance: prevBal,
-        newBalance: newBal,
-        reference: `${newCampaign.id} (${newCampaign.campaignName})`,
-        date: new Date().toISOString(),
-        channel: campaignData.channel,
-      };
+    const tx: Transaction = {
+      id: `tx-${Date.now().toString().slice(-6)}`,
+      customerId: activeCustomer.id,
+      customerName: activeCustomer.businessName,
+      type: campaignData.channel === "sms" ? "sms_deduction" : "whatsapp_deduction",
+      amount: campaignData.cost,
+      previousBalance: prevBal,
+      newBalance: newBal,
+      reference: `${newCampaign.id} (${newCampaign.campaignName})`,
+      date: new Date().toISOString(),
+      channel: campaignData.channel,
+    };
 
-      setTransactions((prev) => [tx, ...prev]);
+    setCustomers((prev) =>
+      prev.map((c) =>
+        c.id === activeCustomer.id
+          ? {
+              ...c,
+              walletBalance: newBal,
+              totalMessages: c.totalMessages + totalRecipients,
+            }
+          : c
+      )
+    );
+    setTransactions((prev) => [tx, ...prev]);
 
-      setCustomers((prev) =>
-        prev.map((c) =>
-          c.id === "cust-01"
-            ? {
-                ...c,
-                walletBalance: newBal,
-                totalMessages: c.totalMessages + totalRecipients,
-              }
-            : c
-        )
-      );
-    }
-
-    // Add log entries
     const sampleLog: MessageLog = {
       id: `msg-${Date.now().toString().slice(-5)}`,
-      customerId: campaignData.customerId,
-      customerName: campaignData.customerName,
+      customerId: activeCustomer.id,
+      customerName: activeCustomer.businessName,
       channel: campaignData.channel,
       type: campaignData.messageType,
       recipient: "+91 98101 23456 (and batch)",
@@ -340,10 +394,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       dateAdded: new Date().toISOString().split("T")[0],
     };
     setContacts((prev) => [newContact, ...prev]);
-    // update group count
     setContactGroups((prev) =>
       prev.map((g) => (g.name === contactData.group ? { ...g, contactCount: g.contactCount + 1 } : g))
     );
+  };
+
+  const importContacts = (newContactsData: Omit<Contact, "id" | "dateAdded">[]) => {
+    const today = new Date().toISOString().split("T")[0];
+    const createdContacts: Contact[] = newContactsData.map((c, idx) => ({
+      ...c,
+      id: `cnt-${Date.now().toString().slice(-4)}-${idx}`,
+      dateAdded: today,
+    }));
+
+    setContacts((prev) => [...createdContacts, ...prev]);
+
+    // Update group counts
+    const countsByGroup: Record<string, number> = {};
+    createdContacts.forEach((c) => {
+      countsByGroup[c.group] = (countsByGroup[c.group] || 0) + 1;
+    });
+
+    setContactGroups((prev) =>
+      prev.map((g) => {
+        const added = countsByGroup[g.name] || 0;
+        return added ? { ...g, contactCount: g.contactCount + added } : g;
+      })
+    );
+
+    return createdContacts.length;
   };
 
   const updateContact = (contact: Contact) => {
@@ -389,6 +468,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTemplates((prev) => prev.map((t) => (t.id === id ? { ...t, approvalStatus: status } : t)));
   };
 
+  // Sender Headers (DLT)
+  const addSenderHeader = (headerData: Omit<SenderHeader, "id" | "createdDate" | "status">) => {
+    const newHeader: SenderHeader = {
+      ...headerData,
+      id: `hdr-${Date.now().toString().slice(-4)}`,
+      status: "pending",
+      createdDate: new Date().toISOString().split("T")[0],
+    };
+    setSenderHeaders((prev) => [newHeader, ...prev]);
+    return newHeader;
+  };
+
+  const updateSenderHeaderStatus = (id: string, status: "approved" | "pending" | "rejected") => {
+    setSenderHeaders((prev) => prev.map((h) => (h.id === id ? { ...h, status } : h)));
+  };
+
   // Routing
   const addRoutingRule = (ruleData: Omit<RoutingRule, "id">) => {
     const newRule: RoutingRule = {
@@ -425,6 +520,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const updateWhatsAppProfile = (profile: Partial<WhatsAppProfile>) => {
+    setWhatsappProfile((prev) => ({ ...prev, ...profile }));
+  };
+
   // Support Tickets
   const createSupportTicket = (ticketData: {
     subject: string;
@@ -434,8 +533,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }) => {
     const newTicket: SupportTicket = {
       id: `tkt-${Date.now().toString().slice(-4)}`,
-      customerId: "cust-01",
-      customerName: "Sharma Fashion Store",
+      customerId: activeCustomer.id,
+      customerName: activeCustomer.businessName,
       subject: ticketData.subject,
       category: ticketData.category,
       priority: ticketData.priority || "medium",
@@ -445,7 +544,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       messages: [
         {
           sender: "customer",
-          senderName: "Rajesh Sharma",
+          senderName: activeCustomer.ownerName,
           message: ticketData.message,
           timestamp: new Date().toISOString(),
         },
@@ -504,10 +603,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     setCustomers((prev) => prev.map((c) => (c.id === customerId ? { ...c, walletBalance: newBal } : c)));
 
-    if (customerId === "cust-01") {
-      setClientWalletBalance(newBal);
-    }
-
     const tx: Transaction = {
       id: `tx-${Date.now().toString().slice(-6)}`,
       customerId,
@@ -522,6 +617,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     setTransactions((prev) => [tx, ...prev]);
+  };
+
+  // Test message dispatcher
+  const sendTestMessage = (mobile: string, channel: "sms" | "whatsapp", content: string) => {
+    const testLog: MessageLog = {
+      id: `test-${Date.now().toString().slice(-5)}`,
+      customerId: activeCustomer.id,
+      customerName: activeCustomer.businessName,
+      channel,
+      type: "test_broadcast",
+      recipient: mobile,
+      senderId: channel === "sms" ? "SHRFSH" : "+91 80009 12345",
+      route: channel === "sms" ? "EJOIN EIMS (Test Node)" : "Meta Cloud Sandbox",
+      cost: 0,
+      supplierCost: 0,
+      status: "delivered",
+      timestamp: new Date().toISOString(),
+    };
+    setMessageLogs((prev) => [testLog, ...prev]);
+
+    return {
+      success: true,
+      message: `Simulated test ${channel.toUpperCase()} delivered to ${mobile}. Handset received 100% OK.`,
+    };
   };
 
   const resetAllData = () => {
@@ -539,7 +658,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setSupportTickets(INITIAL_SUPPORT_TICKETS);
     setInvoices(INITIAL_INVOICES);
     setMessageLogs(INITIAL_MESSAGE_LOGS);
-    setClientWalletBalance(4850.5);
+    setSenderHeaders(INITIAL_SENDER_HEADERS);
+    setWhatsappProfile(INITIAL_WHATSAPP_PROFILE);
+    setActiveCustomerId("cust-01");
   };
 
   return (
@@ -558,25 +679,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         supportTickets,
         invoices,
         messageLogs,
+        senderHeaders,
+        whatsappProfile,
+        activeCustomerId,
+        activeCustomer,
         clientWalletBalance,
+        switchActiveCustomer,
+        exitImpersonation,
         rechargeWallet,
         createCampaign,
+        addCustomer,
         addContact,
+        importContacts,
         updateContact,
         deleteContact,
         addGroup,
         deleteGroup,
         addTemplate,
         updateTemplateStatus,
+        addSenderHeader,
+        updateSenderHeaderStatus,
         addRoutingRule,
         updateRoutingRule,
         deleteRoutingRule,
         updatePricing,
+        updateWhatsAppProfile,
         createSupportTicket,
         replyToTicket,
         updateSupplier,
         updateCustomerStatus,
         manualCustomerWalletAdjustment,
+        sendTestMessage,
         resetAllData,
       }}
     >

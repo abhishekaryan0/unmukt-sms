@@ -3,9 +3,13 @@
 import React, { useState } from "react";
 import { ClientLayout } from "@/components/client/ClientLayout";
 import { useToast } from "@/components/ui/ToastContext";
+import { useAppStore } from "@/lib/store";
 import { DEMO_CLIENT } from "@/lib/auth";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Modal } from "@/components/ui/Modal";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { formatDate } from "@/lib/utils";
 import {
   Building2,
   User,
@@ -15,24 +19,47 @@ import {
   CheckCircle2,
   KeyRound,
   Store,
+  Plus,
+  MessageCircle,
+  Smartphone,
+  ExternalLink,
+  Sparkles,
 } from "lucide-react";
 
 export default function ClientSettingsPage() {
   const { toast } = useToast();
+  const {
+    activeCustomer,
+    senderHeaders,
+    addSenderHeader,
+    whatsappProfile,
+  } = useAppStore();
 
   // Business state
-  const [businessName, setBusinessName] = useState(DEMO_CLIENT.user.businessName);
-  const [category, setCategory] = useState(DEMO_CLIENT.user.category);
-  const [gstin, setGstin] = useState("07AAAAA0000A1Z5");
-  const [dltEntityId, setDltEntityId] = useState("110145892300001");
+  const [businessName, setBusinessName] = useState(
+    activeCustomer?.businessName || DEMO_CLIENT.user.businessName
+  );
+  const [category, setCategory] = useState(
+    activeCustomer?.businessCategory || DEMO_CLIENT.user.category
+  );
+  const [gstin, setGstin] = useState(activeCustomer?.gstin || "07AAAAA0000A1Z5");
+  const [dltEntityId, setDltEntityId] = useState(
+    activeCustomer?.dltEntityId || "110145892300001"
+  );
   const [address, setAddress] = useState(
     "Shop 14, Main Cloth Market, Chandni Chowk, Central Delhi - 110006"
   );
 
   // Owner state
-  const [ownerName, setOwnerName] = useState(DEMO_CLIENT.user.name);
-  const [ownerEmail, setOwnerEmail] = useState(DEMO_CLIENT.email);
-  const [ownerMobile, setOwnerMobile] = useState("9811234567");
+  const [ownerName, setOwnerName] = useState(
+    activeCustomer?.ownerName || DEMO_CLIENT.user.name
+  );
+  const [ownerEmail, setOwnerEmail] = useState(
+    activeCustomer?.email || DEMO_CLIENT.email
+  );
+  const [ownerMobile, setOwnerMobile] = useState(
+    activeCustomer?.mobile || "9811234567"
+  );
 
   // Notifications
   const [lowBalanceAlert, setLowBalanceAlert] = useState(true);
@@ -43,6 +70,20 @@ export default function ClientSettingsPage() {
   const [currentPass, setCurrentPass] = useState("");
   const [newPass, setNewPass] = useState("");
 
+  // New Header Modal
+  const [showHeaderModal, setShowHeaderModal] = useState(false);
+  const [headerCode, setHeaderCode] = useState("");
+  const [headerCategory, setHeaderCategory] = useState<"promotional" | "transactional">(
+    "promotional"
+  );
+  const [headerOperator, setHeaderOperator] = useState("Jio DLT");
+  const [headerDescription, setHeaderDescription] = useState("");
+
+  // Filter sender headers for this business (or show all matching customer or default)
+  const myHeaders = senderHeaders.filter(
+    (h) => h.customerId === activeCustomer?.id || h.customerId === "cust-01"
+  );
+
   const handleSaveBusiness = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
@@ -50,6 +91,41 @@ export default function ClientSettingsPage() {
       message: "Company profile and DLT headers saved successfully.",
       type: "success",
     });
+  };
+
+  const handleApplyHeader = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanHeader = headerCode.trim().toUpperCase();
+
+    if (cleanHeader.length !== 6 || !/^[A-Z0-9]+$/.test(cleanHeader)) {
+      toast({
+        title: "Invalid Sender ID Header",
+        message: "Indian TRAI DLT headers must be exactly 6 alphanumeric characters (e.g. SHRFSH, 150044).",
+        type: "error",
+      });
+      return;
+    }
+
+    addSenderHeader({
+      customerId: activeCustomer?.id || "cust-01",
+      customerName: activeCustomer?.businessName || "Sharma Fashion Store",
+      header: cleanHeader,
+      category: headerCategory,
+      dltEntityId: dltEntityId || "110145892300001",
+      dltOperator: headerOperator,
+      operator: headerOperator,
+      description: headerDescription || `${headerCategory.toUpperCase()} Sender ID for customer communication`,
+    });
+
+    toast({
+      title: "DLT Header Submitted",
+      message: `Header "${cleanHeader}" submitted for telecom operator & admin approval.`,
+      type: "success",
+    });
+
+    setShowHeaderModal(false);
+    setHeaderCode("");
+    setHeaderDescription("");
   };
 
   const handleUpdatePassword = (e: React.FormEvent) => {
@@ -74,7 +150,7 @@ export default function ClientSettingsPage() {
           Profile & Business Settings
         </h1>
         <p className="text-xs text-slate-500 mt-0.5">
-          Manage your retail business details, GSTIN, DLT registration, and notification preferences
+          Manage your retail business details, TRAI DLT sender headers, WhatsApp Business API telemetry, and alerts
         </p>
       </div>
 
@@ -87,7 +163,7 @@ export default function ClientSettingsPage() {
               <Store className="w-5 h-5 text-slate-700" />
               <div>
                 <h3 className="text-sm font-bold text-slate-900">Registered Business Information</h3>
-                <p className="text-xs text-slate-500">Legal entity for GST invoicing and billing</p>
+                <p className="text-xs text-slate-500">Legal entity for GST invoicing, TRAI DLT, and telecom verification</p>
               </div>
             </div>
 
@@ -139,7 +215,7 @@ export default function ClientSettingsPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    TRAI DLT Entity ID
+                    TRAI DLT Principal Entity ID
                   </label>
                   <Input
                     value={dltEntityId}
@@ -167,6 +243,150 @@ export default function ClientSettingsPage() {
                 </Button>
               </div>
             </form>
+          </div>
+
+          {/* TRAI DLT 6-Character Sender IDs / Headers Management */}
+          <div className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-card space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <Smartphone className="w-5 h-5 text-blue-600" />
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    TRAI DLT Sender IDs (Headers)
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Approved 6-character Alpha sender headers for Indian telecom routes
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowHeaderModal(true)}
+                className="gap-1.5 text-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Apply for New Header
+              </Button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-500">
+                    <th className="py-2 px-3 font-semibold">Sender ID / Header</th>
+                    <th className="py-2 px-3 font-semibold">Category</th>
+                    <th className="py-2 px-3 font-semibold">Operator</th>
+                    <th className="py-2 px-3 font-semibold">Status</th>
+                    <th className="py-2 px-3 font-semibold">Registered</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {myHeaders.length > 0 ? (
+                    myHeaders.map((hdr) => (
+                      <tr key={hdr.id} className="hover:bg-slate-50">
+                        <td className="py-2.5 px-3">
+                          <span className="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                            {hdr.header}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 capitalize text-slate-700">
+                          {hdr.category}
+                        </td>
+                        <td className="py-2.5 px-3 text-slate-600">
+                          {hdr.dltOperator || hdr.operator}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <StatusBadge status={hdr.status} />
+                        </td>
+                        <td className="py-2.5 px-3 text-slate-500">
+                          {formatDate(hdr.createdDate, false)}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="py-4 text-center text-slate-400">
+                        No registered sender headers found. Apply for one above.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-[11px] text-slate-600 flex items-start gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              <div>
+                <strong>TRAI Telecom Compliance Notice:</strong> Promotional SMS headers are approved for 9:00 AM to 9:00 PM transmission. Transactional and OTP headers operate 24x7 with instantaneous carrier handoff.
+              </div>
+            </div>
+          </div>
+
+          {/* WhatsApp Business API Profile & Meta Telemetry */}
+          <div className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-card space-y-4">
+            <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+              <MessageCircle className="w-5 h-5 text-[#25D366]" />
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">
+                  Meta WhatsApp Business API Telemetry
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Direct official Meta Cloud API integration and broadcast throughput rating
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 text-[11px]">Display Name:</span>
+                  <span className="font-bold text-slate-900 flex items-center gap-1">
+                    {whatsappProfile.displayName}
+                    {whatsappProfile.verifiedBadge && (
+                      <span className="text-emerald-600" title="Green Tick Verified">
+                        ✓
+                      </span>
+                    )}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 text-[11px]">WhatsApp Phone:</span>
+                  <span className="font-mono font-semibold text-slate-800">
+                    {whatsappProfile.phoneNumber}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 text-[11px]">WABA Account ID:</span>
+                  <span className="font-mono text-slate-600 text-[10px]">
+                    {whatsappProfile.wabaId || "waba_781290348123"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-[#E8F8EE] rounded-xl border border-[#b5e7c8] space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[#075E54] text-[11px] font-medium">Messaging Tier:</span>
+                  <span className="font-bold text-[#075E54]">
+                    {whatsappProfile.tierLimit || whatsappProfile.messagingTier}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#075E54] text-[11px] font-medium">Quality Rating:</span>
+                  <span className="font-bold text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-200">
+                    {whatsappProfile.qualityRating}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#075E54] text-[11px] font-medium">Webhook Status:</span>
+                  <span className="font-bold text-emerald-800 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Active / Synced
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Owner Profile Card */}
@@ -277,6 +497,85 @@ export default function ClientSettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Apply for New Header Modal */}
+      <Modal
+        isOpen={showHeaderModal}
+        onClose={() => setShowHeaderModal(false)}
+        size="md"
+        title="Apply for TRAI DLT Sender ID (Header)"
+        description="Register an official 6-character sender ID for SMS broadcasts in India."
+      >
+        <form onSubmit={handleApplyHeader} className="space-y-4 text-xs">
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              6-Character Sender ID (Header) *
+            </label>
+            <Input
+              placeholder="e.g. SHRFSH or 150044"
+              value={headerCode}
+              onChange={(e) => setHeaderCode(e.target.value.toUpperCase())}
+              maxLength={6}
+              required
+            />
+            <p className="text-[10px] text-slate-500 mt-1">
+              Must be exactly 6 uppercase alphanumeric characters matching your brand.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Header Category
+              </label>
+              <select
+                value={headerCategory}
+                onChange={(e) => setHeaderCategory(e.target.value as any)}
+                className="w-full h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-900"
+              >
+                <option value="promotional">Promotional (Offers / Sales)</option>
+                <option value="transactional">Transactional (OTPs / Alerts)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                DLT Operator Portal
+              </label>
+              <select
+                value={headerOperator}
+                onChange={(e) => setHeaderOperator(e.target.value)}
+                className="w-full h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-900"
+              >
+                <option value="Jio DLT">Reliance Jio DLT</option>
+                <option value="Airtel DLT">Bharti Airtel DLT</option>
+                <option value="Vilpower DLT">Vodafone Idea (Vi) DLT</option>
+                <option value="BSNL DLT">BSNL DLT Portal</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Business Justification / Purpose
+            </label>
+            <Input
+              placeholder="e.g. Header represents Sharma Fashion Store brand identity"
+              value={headerDescription}
+              onChange={(e) => setHeaderDescription(e.target.value)}
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+            <Button variant="outline" type="button" onClick={() => setShowHeaderModal(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" className="bg-slate-900 text-white">
+              Submit for Approval
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </ClientLayout>
   );
 }

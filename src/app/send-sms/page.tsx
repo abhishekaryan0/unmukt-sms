@@ -13,6 +13,7 @@ import {
 } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Modal } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { RechargeModal } from "@/components/client/RechargeModal";
 import {
@@ -36,17 +37,24 @@ export default function SendSMSPage() {
   const router = useRouter();
   const { toast } = useToast();
   const {
+    activeCustomer,
     clientWalletBalance,
     templates,
     contactGroups,
     contacts,
     createCampaign,
+    sendTestMessage,
   } = useAppStore();
 
   const [step, setStep] = useState<number>(1);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showRecharge, setShowRecharge] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Test send state
+  const [showTestModal, setShowTestModal] = useState(false);
+  const [testNumber, setTestNumber] = useState(activeCustomer?.mobile || "9811234567");
+  const [isSendingTest, setIsSendingTest] = useState(false);
 
   // Form State
   const [campaignName, setCampaignName] = useState("Festive Weekend Mega Sale");
@@ -164,8 +172,8 @@ export default function SendSMSPage() {
     setTimeout(() => {
       const res = createCampaign({
         campaignName,
-        customerId: "cust-01",
-        customerName: "Sharma Fashion Store",
+        customerId: activeCustomer?.id || "cust-01",
+        customerName: activeCustomer?.businessName || "Sharma Fashion Store",
         channel: "sms",
         messageType: smsType,
         totalRecipients: Math.max(1, totalRecipients),
@@ -197,6 +205,31 @@ export default function SendSMSPage() {
         });
       }
     }, 1200);
+  };
+
+  const handleSendTest = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanNum = testNumber.replace(/\D/g, "").slice(-10);
+    if (cleanNum.length !== 10) {
+      toast({
+        title: "Invalid Mobile Number",
+        message: "Enter a valid 10-digit Indian mobile number for test preview.",
+        type: "error",
+      });
+      return;
+    }
+
+    setIsSendingTest(true);
+    setTimeout(() => {
+      sendTestMessage(cleanNum, "sms", messageText);
+      setIsSendingTest(false);
+      setShowTestModal(false);
+      toast({
+        title: "Test SMS Dispatched! 📲",
+        message: `Carrier simulation routed via ${senderHeader} to +91 ${cleanNum}. Delivered in 1.1s.`,
+        type: "success",
+      });
+    }, 600);
   };
 
   return (
@@ -621,6 +654,17 @@ export default function SendSMSPage() {
                   Delivered via Route Mobile Priority Route
                 </div>
               </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                onClick={() => setShowTestModal(true)}
+                className="w-full mt-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700 text-xs gap-1.5"
+              >
+                <Smartphone className="w-3.5 h-3.5 text-blue-400" />
+                <span>Send Test SMS to My Mobile</span>
+              </Button>
             </div>
 
             <div className="mt-4 text-center text-[10px] text-slate-400">
@@ -785,6 +829,55 @@ export default function SendSMSPage() {
           </div>
         </div>
       )}
+
+      {/* Test SMS Modal */}
+      <Modal
+        isOpen={showTestModal}
+        onClose={() => setShowTestModal(false)}
+        size="sm"
+        title="Send Test SMS to My Mobile"
+        description="Verify delivery, sender header, and character formatting on your personal phone before broadcasting to all recipients."
+      >
+        <form onSubmit={handleSendTest} className="space-y-4 text-xs">
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Indian Mobile Number (+91) *
+            </label>
+            <Input
+              type="tel"
+              value={testNumber}
+              onChange={(e) => setTestNumber(e.target.value)}
+              placeholder="9811234567"
+              required
+            />
+          </div>
+
+          <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-[11px] text-slate-600 space-y-1">
+            <div>
+              Sender Header: <strong className="font-mono text-slate-900">{senderHeader}</strong>
+            </div>
+            <div>
+              SMS Units: <strong>{smsCalc.segments} segment(s)</strong> ({smsCalc.characters} characters)
+            </div>
+            <div className="text-[10px] text-emerald-700 font-semibold">
+              ✓ Test simulation routes instantly through carrier sandbox.
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+            <Button variant="outline" type="button" onClick={() => setShowTestModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSendingTest}
+              className="bg-slate-900 text-white"
+            >
+              {isSendingTest ? "Sending Test..." : "Send Test SMS"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Confirmation Dialog */}
       <ConfirmDialog

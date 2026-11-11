@@ -27,7 +27,7 @@ interface ClientHeaderProps {
 
 export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
   const router = useRouter();
-  const { clientWalletBalance } = useAppStore();
+  const { clientWalletBalance, activeCustomer } = useAppStore();
   const [showRecharge, setShowRecharge] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
@@ -35,6 +35,18 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
     logoutClient();
     router.push("/login");
   };
+
+  const businessDisplayName = activeCustomer?.businessName || DEMO_CLIENT.user.businessName;
+  const businessCategory = activeCustomer?.businessCategory || DEMO_CLIENT.user.category;
+  const businessCity = activeCustomer?.city || "Delhi";
+  const ownerName = activeCustomer?.ownerName || DEMO_CLIENT.user.name;
+  const ownerEmail = activeCustomer?.email || DEMO_CLIENT.email;
+  const ownerInitials = ownerName
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <>
@@ -54,10 +66,10 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
             </div>
             <div>
               <div className="text-xs font-bold text-slate-900 leading-tight">
-                {DEMO_CLIENT.user.businessName}
+                {businessDisplayName}
               </div>
               <div className="text-[10px] text-slate-500 font-medium">
-                {DEMO_CLIENT.user.category} • Delhi
+                {businessCategory} • {businessCity}
               </div>
             </div>
           </div>
@@ -125,17 +137,17 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
               className="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-100 transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-bold ring-2 ring-slate-100">
-                RS
+                {ownerInitials}
               </div>
             </button>
 
             {showProfileMenu && (
-              <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-slate-200 py-1 z-50 text-xs">
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 py-1 z-50 text-xs">
                 <div className="px-3 py-2 border-b border-slate-100">
-                  <div className="font-semibold text-slate-900">{DEMO_CLIENT.user.name}</div>
-                  <div className="text-slate-500 text-[11px] truncate">{DEMO_CLIENT.email}</div>
+                  <div className="font-semibold text-slate-900">{ownerName}</div>
+                  <div className="text-slate-500 text-[11px] truncate">{ownerEmail}</div>
                   <div className="text-[10px] text-emerald-600 font-medium mt-0.5">
-                    DLT Verified Entity
+                    DLT Entity ID: {activeCustomer?.dltEntityId || "1701159820000034"}
                   </div>
                 </div>
 

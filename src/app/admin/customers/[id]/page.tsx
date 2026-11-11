@@ -25,6 +25,7 @@ import {
   Calendar,
   Send,
   MessageCircle,
+  LogIn,
 } from "lucide-react";
 
 export default function CustomerDetailsPage() {
@@ -32,7 +33,7 @@ export default function CustomerDetailsPage() {
   const router = useRouter();
   const customerId = params.id as string;
 
-  const { customers, campaigns, transactions, contacts } = useAppStore();
+  const { customers, campaigns, transactions, contacts, switchActiveCustomer } = useAppStore();
   const customer = customers.find((c) => c.id === customerId) || customers[0];
 
   const [activeTab, setActiveTab] = useState("overview");
@@ -75,8 +76,21 @@ export default function CustomerDetailsPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="text-right">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              switchActiveCustomer(customer.id);
+              router.push("/dashboard");
+            }}
+            className="bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300 font-semibold"
+          >
+            <LogIn className="w-3.5 h-3.5 mr-1.5 text-amber-700" />
+            Login as Customer
+          </Button>
+
+          <div className="text-right pl-3 border-l border-slate-200">
             <span className="text-[10px] text-slate-500 uppercase block font-semibold">
               Wallet Balance
             </span>

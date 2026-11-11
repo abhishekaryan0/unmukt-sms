@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAppStore } from "@/lib/store";
@@ -41,6 +41,11 @@ import {
 export default function AdminDashboardPage() {
   const { customers, agencies, campaigns, suppliers, transactions } = useAppStore();
   const [dateFilter, setDateFilter] = useState<DateFilterOption>("30d");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Compute platform metrics
   const totalCustomers = customers.length;
@@ -201,55 +206,61 @@ export default function AdminDashboardPage() {
             }
           >
             <div className="h-72 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={revenueTrendData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    tick={{ fontSize: 11, fill: "#64748b" }}
-                    tickFormatter={(v) => `₹${(v / 100000).toFixed(1)}L`}
-                  />
-                  <Tooltip
-                    formatter={(v: any) => formatINR(Number(v))}
-                    contentStyle={{
-                      backgroundColor: "#0f172a",
-                      borderRadius: "8px",
-                      color: "#fff",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="revenue"
-                    name="Gross Revenue"
-                    stroke="#2563eb"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorRev)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="profit"
-                    name="Platform Profit"
-                    stroke="#10b981"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorProfit)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              {mounted ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={revenueTrendData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      tick={{ fontSize: 11, fill: "#64748b" }}
+                      tickFormatter={(v) => `₹${(v / 100000).toFixed(1)}L`}
+                    />
+                    <Tooltip
+                      formatter={(v: any) => formatINR(Number(v))}
+                      contentStyle={{
+                        backgroundColor: "#0f172a",
+                        borderRadius: "8px",
+                        color: "#fff",
+                        fontSize: "12px",
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="revenue"
+                      name="Gross Revenue"
+                      stroke="#2563eb"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorRev)"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="profit"
+                      name="Platform Profit"
+                      stroke="#10b981"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorProfit)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-xs text-slate-400">
+                  Loading revenue charts...
+                </div>
+              )}
             </div>
             <div className="flex items-center justify-center gap-6 mt-3 text-xs text-slate-600">
               <span className="flex items-center gap-1.5">
@@ -271,30 +282,34 @@ export default function AdminDashboardPage() {
             description="Breakdown of 9.74M messages sent"
           >
             <div className="h-52 w-full flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={channelData}
-                    innerRadius={50}
-                    outerRadius={75}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {channelData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(v: any) => formatNumber(Number(v))}
-                    contentStyle={{
-                      backgroundColor: "#0f172a",
-                      borderRadius: "8px",
-                      color: "#fff",
-                      fontSize: "12px",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+              {mounted ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={channelData}
+                      innerRadius={50}
+                      outerRadius={75}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {channelData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(v: any) => formatNumber(Number(v))}
+                      contentStyle={{
+                        backgroundColor: "#0f172a",
+                        borderRadius: "8px",
+                        color: "#fff",
+                        fontSize: "12px",
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="text-xs text-slate-400">Loading channel distribution...</div>
+              )}
             </div>
             <div className="space-y-1.5 mt-2">
               {channelData.map((c) => (
@@ -317,29 +332,35 @@ export default function AdminDashboardPage() {
         description="Real-time message traffic delivered through carrier SMS banks and Meta WhatsApp Cloud"
       >
         <div className="h-60 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={dailyVolumeData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tick={{ fontSize: 11, fill: "#64748b" }}
-                tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
-              />
-              <Tooltip
-                formatter={(v: any) => formatNumber(Number(v))}
-                contentStyle={{
-                  backgroundColor: "#0f172a",
-                  borderRadius: "8px",
-                  color: "#fff",
-                  fontSize: "12px",
-                }}
-              />
-              <Bar dataKey="sms" name="SMS Volume" fill="#2563eb" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="wa" name="WhatsApp Volume" fill="#25D366" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {mounted ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={dailyVolumeData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 11, fill: "#64748b" }}
+                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                />
+                <Tooltip
+                  formatter={(v: any) => formatNumber(Number(v))}
+                  contentStyle={{
+                    backgroundColor: "#0f172a",
+                    borderRadius: "8px",
+                    color: "#fff",
+                    fontSize: "12px",
+                  }}
+                />
+                <Bar dataKey="sms" name="SMS Volume" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="wa" name="WhatsApp Volume" fill="#25D366" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex items-center justify-center text-xs text-slate-400">
+              Loading daily telemetry...
+            </div>
+          )}
         </div>
       </ChartCard>
 

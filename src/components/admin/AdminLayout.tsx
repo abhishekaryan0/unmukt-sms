@@ -16,7 +16,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const session = getAdminSession();
     if (!session || session.role !== "super_admin") {
-      router.push("/admin/login");
+      router.replace("/admin/login");
     } else {
       setIsAuthenticated(true);
     }

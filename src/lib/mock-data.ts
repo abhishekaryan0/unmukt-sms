@@ -12,6 +12,8 @@ import {
   ContactGroup,
   SupportTicket,
   Invoice,
+  SenderHeader,
+  WhatsAppProfile,
 } from "@/types";
 
 export const INITIAL_CUSTOMERS: Customer[] = [
@@ -703,6 +705,7 @@ export const INITIAL_CONTACTS: Contact[] = [
     smsConsent: true,
     whatsappConsent: false,
     dateAdded: "2026-10-02",
+    isDnd: true,
   },
   {
     id: "cnt-07",
@@ -714,6 +717,7 @@ export const INITIAL_CONTACTS: Contact[] = [
     smsConsent: true,
     whatsappConsent: true,
     dateAdded: "2026-10-15",
+    isDnd: false,
   },
   {
     id: "cnt-08",
@@ -725,6 +729,7 @@ export const INITIAL_CONTACTS: Contact[] = [
     smsConsent: true,
     whatsappConsent: true,
     dateAdded: "2026-10-28",
+    isDnd: true,
   },
 ];
 
@@ -1015,3 +1020,83 @@ export const INITIAL_MESSAGE_LOGS: MessageLog[] = [
     errorCode: "ERR_DND_BLOCKED",
   },
 ];
+
+export const INITIAL_SENDER_HEADERS: SenderHeader[] = [
+  {
+    id: "hdr-01",
+    customerId: "cust-01",
+    customerName: "Sharma Fashion Store",
+    header: "SHRFSH",
+    category: "promotional",
+    dltEntityId: "110145892300001",
+    dltOperator: "Airtel DLT",
+    status: "approved",
+    createdDate: "2026-08-16",
+  },
+  {
+    id: "hdr-02",
+    customerId: "cust-01",
+    customerName: "Sharma Fashion Store",
+    header: "SHRETH",
+    category: "promotional",
+    dltEntityId: "110145892300001",
+    dltOperator: "Airtel DLT",
+    status: "approved",
+    createdDate: "2026-10-12",
+  },
+  {
+    id: "hdr-03",
+    customerId: "cust-02",
+    customerName: "Gupta Electronics",
+    header: "GUPTAE",
+    category: "promotional",
+    dltEntityId: "110156903400002",
+    dltOperator: "Jio DLT",
+    status: "approved",
+    createdDate: "2026-07-22",
+  },
+  {
+    id: "hdr-04",
+    customerId: "cust-03",
+    customerName: "Bright Future Coaching",
+    header: "BFCEDU",
+    category: "transactional",
+    dltEntityId: "110178451200003",
+    dltOperator: "Vodafone Idea DLT",
+    status: "approved",
+    createdDate: "2026-09-05",
+  },
+  {
+    id: "hdr-05",
+    customerId: "cust-04",
+    customerName: "Royal Restaurant",
+    header: "ROYRST",
+    category: "promotional",
+    dltEntityId: "110189237600004",
+    dltOperator: "Airtel DLT",
+    status: "approved",
+    createdDate: "2026-09-20",
+  },
+  {
+    id: "hdr-06",
+    customerId: "cust-01",
+    customerName: "Sharma Fashion Store",
+    header: "SHRSLK",
+    category: "promotional",
+    dltEntityId: "110145892300001",
+    dltOperator: "Airtel DLT",
+    status: "pending",
+    createdDate: "2026-11-10",
+  },
+];
+
+export const INITIAL_WHATSAPP_PROFILE: WhatsAppProfile = {
+  displayName: "Sharma Fashion Store",
+  phoneNumber: "+91 80009 12345",
+  qualityRating: "High",
+  messagingTier: "Tier 2 (10,000 unique recipients / 24h)",
+  verifiedBadge: true,
+  webhookStatus: "active",
+  about: "Premier ethnic wear & wedding boutique in Chandni Chowk, Delhi. Official WhatsApp Business API Cloud.",
+  category: "Apparel & Clothing",
+};

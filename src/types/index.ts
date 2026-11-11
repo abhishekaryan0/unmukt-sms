@@ -10,6 +10,8 @@ export interface UserSession {
   phone?: string;
   avatar?: string;
   token?: string;
+  isImpersonated?: boolean;
+  impersonatedBy?: string;
 }
 
 export type Channel = "sms" | "whatsapp";
@@ -182,6 +184,7 @@ export interface Contact {
   smsConsent: boolean;
   whatsappConsent: boolean;
   dateAdded: string;
+  isDnd?: boolean;
 }
 
 export interface ContactGroup {
@@ -225,4 +228,31 @@ export interface Invoice {
   invoiceDate: string;
   description: string;
   transactionReference: string;
+}
+
+export interface SenderHeader {
+  id: string;
+  customerId: string;
+  customerName: string;
+  header: string; // 6-character alpha header, e.g. SHRFSH, GUPTAE
+  category: "promotional" | "transactional";
+  dltEntityId: string;
+  dltOperator: string;
+  operator?: string;
+  description?: string;
+  status: "approved" | "pending" | "rejected";
+  createdDate: string;
+}
+
+export interface WhatsAppProfile {
+  displayName: string;
+  phoneNumber: string;
+  qualityRating: "High" | "Medium" | "Low";
+  messagingTier: string;
+  tierLimit?: string;
+  verifiedBadge: boolean;
+  webhookStatus: "active" | "degraded";
+  wabaId?: string;
+  about: string;
+  category: string;
 }

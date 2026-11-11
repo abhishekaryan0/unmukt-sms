@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ClientLayout } from "@/components/client/ClientLayout";
 import { useAppStore } from "@/lib/store";
@@ -42,6 +42,11 @@ export default function ClientDashboardPage() {
   const { clientWalletBalance, campaigns, transactions } = useAppStore();
   const [showRecharge, setShowRecharge] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Filter client's campaigns (Sharma Fashion Store: cust-01)
   const clientCampaigns = campaigns.filter(
@@ -238,50 +243,56 @@ export default function ClientDashboardPage() {
             }
           >
             <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={usageTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorSms" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="colorWa" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#25D366" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#25D366" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
-                  <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#0f172a",
-                      borderRadius: "8px",
-                      border: "none",
-                      color: "#fff",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="sms"
-                    name="SMS"
-                    stroke="#2563eb"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorSms)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="whatsapp"
-                    name="WhatsApp"
-                    stroke="#25D366"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorWa)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              {mounted ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={usageTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorSms" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorWa" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#25D366" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#25D366" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                    <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#0f172a",
+                        borderRadius: "8px",
+                        border: "none",
+                        color: "#fff",
+                        fontSize: "12px",
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="sms"
+                      name="SMS"
+                      stroke="#2563eb"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorSms)"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="whatsapp"
+                      name="WhatsApp"
+                      stroke="#25D366"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorWa)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-xs text-slate-400">
+                  Loading usage telemetry...
+                </div>
+              )}
             </div>
             <div className="flex items-center justify-center gap-6 mt-3 text-xs text-slate-600">
               <span className="flex items-center gap-1.5">
@@ -303,29 +314,33 @@ export default function ClientDashboardPage() {
             description="Message distribution by platform"
           >
             <div className="h-52 w-full flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={channelData}
-                    innerRadius={55}
-                    outerRadius={80}
-                    paddingAngle={4}
-                    dataKey="value"
-                  >
-                    {channelData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#0f172a",
-                      borderRadius: "8px",
-                      color: "#fff",
-                      fontSize: "12px",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+              {mounted ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={channelData}
+                      innerRadius={55}
+                      outerRadius={80}
+                      paddingAngle={4}
+                      dataKey="value"
+                    >
+                      {channelData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#0f172a",
+                        borderRadius: "8px",
+                        color: "#fff",
+                        fontSize: "12px",
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="text-xs text-slate-400">Loading channel distribution...</div>
+              )}
             </div>
             <div className="space-y-2 mt-2">
               {channelData.map((c) => (

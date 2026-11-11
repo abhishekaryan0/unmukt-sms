@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAppStore } from "@/lib/store";
 import { useToast } from "@/components/ui/ToastContext";
@@ -24,10 +25,14 @@ import {
   MoreVertical,
   CheckCircle2,
   XCircle,
+  LogIn,
+  Building2,
 } from "lucide-react";
 
 export default function AdminCustomersPage() {
-  const { customers, updateCustomerStatus, manualCustomerWalletAdjustment } = useAppStore();
+  const router = useRouter();
+  const { customers, updateCustomerStatus, manualCustomerWalletAdjustment, switchActiveCustomer, addCustomer } =
+    useAppStore();
   const { toast } = useToast();
 
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -38,6 +43,21 @@ export default function AdminCustomersPage() {
   const [adjustAmount, setAdjustAmount] = useState("");
   const [adjustType, setAdjustType] = useState<"credit" | "debit">("credit");
   const [adjustNote, setAdjustNote] = useState("");
+
+  // Onboard Customer modal
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newCust, setNewCust] = useState({
+    businessName: "",
+    ownerName: "",
+    email: "",
+    mobile: "",
+    businessCategory: "Retail & Apparel",
+    city: "Mumbai",
+    state: "Maharashtra",
+    gstin: "",
+    dltEntityId: "",
+    initialWallet: "500",
+  });
 
   const filteredCustomers = customers.filter((c) => {
     if (categoryFilter !== "all" && c.businessCategory !== categoryFilter) return false;
@@ -52,6 +72,60 @@ export default function AdminCustomersPage() {
       title: `Customer ${newStatus === "active" ? "Activated" : "Suspended"}`,
       message: `${cust.businessName} account status set to ${newStatus}.`,
       type: newStatus === "active" ? "success" : "error",
+    });
+  };
+
+  const handleLoginAsCustomer = (cust: Customer) => {
+    switchActiveCustomer(cust.id);
+    toast({
+      title: "Workspace Activated",
+      message: `Impersonating ${cust.businessName}. Redirecting to client dashboard...`,
+      type: "success",
+    });
+    router.push("/dashboard");
+  };
+
+  const handleCreateCustomer = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCust.businessName || !newCust.ownerName || !newCust.email || !newCust.mobile) {
+      toast({ title: "Missing Fields", message: "Please fill all required fields", type: "error" });
+      return;
+    }
+
+    const created = addCustomer({
+      businessName: newCust.businessName.trim(),
+      ownerName: newCust.ownerName.trim(),
+      email: newCust.email.trim(),
+      mobile: newCust.mobile.trim(),
+      businessCategory: newCust.businessCategory,
+      city: newCust.city.trim() || "Mumbai",
+      state: newCust.state.trim() || "Maharashtra",
+      gstin: newCust.gstin.trim() || undefined,
+      dltEntityId: newCust.dltEntityId.trim() || `17011${Math.floor(1000000000 + Math.random() * 9000000000)}`,
+      walletBalance: parseFloat(newCust.initialWallet) || 500,
+      accountStatus: "active",
+    });
+
+    toast({
+      title: "Customer Onboarded Successfully",
+      message: `${created.businessName} (ID: ${created.id}) created with initial balance ${formatINR(
+        created.walletBalance
+      )}`,
+      type: "success",
+    });
+
+    setShowAddModal(false);
+    setNewCust({
+      businessName: "",
+      ownerName: "",
+      email: "",
+      mobile: "",
+      businessCategory: "Retail & Apparel",
+      city: "Mumbai",
+      state: "Maharashtra",
+      gstin: "",
+      dltEntityId: "",
+      initialWallet: "500",
     });
   };
 
@@ -178,7 +252,18 @@ export default function AdminCustomersPage() {
     {
       header: "Actions",
       cell: (row) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleLoginAsCustomer(row)}
+            className="h-7 px-2 text-[11px] bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300 font-semibold"
+            title="Log in to customer portal as this business"
+          >
+            <LogIn className="w-3 h-3 mr-1 text-amber-700" />
+            Login as Client
+          </Button>
+
           <Link href={`/admin/customers/${row.id}`}>
             <Button variant="outline" size="sm" className="h-7 px-2 text-xs">
               <Eye className="w-3.5 h-3.5 mr-1" />
@@ -209,9 +294,13 @@ export default function AdminCustomersPage() {
             Customer Directory
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Manage Indian business accounts, prepaid balances, TRAI DLT verification, and switch logs
+            Manage Indian business accounts, prepaid balances, TRAI DLT verification, and switch workspaces
           </p>
         </div>
+        <Button onClick={() => setShowAddModal(true)} size="sm">
+          <UserPlus className="w-3.5 h-3.5 mr-1.5" />
+          Onboard New Customer
+        </Button>
       </div>
 
       <DataTable
@@ -248,6 +337,155 @@ export default function AdminCustomersPage() {
           </div>
         }
       />
+
+      {/* Onboard Customer Modal */}
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        size="md"
+        title="Onboard New Business Customer"
+        description="Provision a verified business account with Indian DLT credentials and initial prepaid credits."
+      >
+        <form onSubmit={handleCreateCustomer} className="space-y-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Business / Legal Name *
+              </label>
+              <Input
+                placeholder="e.g. Verma Sweets & Dairy"
+                value={newCust.businessName}
+                onChange={(e) => setNewCust({ ...newCust, businessName: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Owner / Authorized Person *
+              </label>
+              <Input
+                placeholder="e.g. Vikram Verma"
+                value={newCust.ownerName}
+                onChange={(e) => setNewCust({ ...newCust, ownerName: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Email Address *
+              </label>
+              <Input
+                type="email"
+                placeholder="owner@business.com"
+                value={newCust.email}
+                onChange={(e) => setNewCust({ ...newCust, email: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Mobile Number (+91) *
+              </label>
+              <Input
+                type="tel"
+                placeholder="9812345678"
+                value={newCust.mobile}
+                onChange={(e) => setNewCust({ ...newCust, mobile: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Category
+              </label>
+              <select
+                value={newCust.businessCategory}
+                onChange={(e) => setNewCust({ ...newCust, businessCategory: e.target.value })}
+                className="w-full h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-900"
+              >
+                <option value="Retail & Apparel">Retail & Apparel</option>
+                <option value="Consumer Electronics">Consumer Electronics</option>
+                <option value="Education & Coaching">Education & Coaching</option>
+                <option value="Hospitality & Dining">Hospitality & Dining</option>
+                <option value="Real Estate">Real Estate</option>
+                <option value="Digital Marketing Agency">Digital Marketing Agency</option>
+                <option value="Healthcare & Labs">Healthcare & Labs</option>
+                <option value="F&B & Retail">F&B & Retail</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                City
+              </label>
+              <Input
+                placeholder="Mumbai"
+                value={newCust.city}
+                onChange={(e) => setNewCust({ ...newCust, city: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                State
+              </label>
+              <Input
+                placeholder="Maharashtra"
+                value={newCust.state}
+                onChange={(e) => setNewCust({ ...newCust, state: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                GSTIN (Optional)
+              </label>
+              <Input
+                placeholder="27AABCU9603R1ZM"
+                value={newCust.gstin}
+                onChange={(e) => setNewCust({ ...newCust, gstin: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                TRAI DLT Entity ID
+              </label>
+              <Input
+                placeholder="Auto-assigned if empty"
+                value={newCust.dltEntityId}
+                onChange={(e) => setNewCust({ ...newCust, dltEntityId: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Initial Wallet Credit (₹)
+              </label>
+              <Input
+                type="number"
+                placeholder="500"
+                value={newCust.initialWallet}
+                onChange={(e) => setNewCust({ ...newCust, initialWallet: e.target.value })}
+                leftIcon={<span className="text-xs font-bold text-slate-500">₹</span>}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+            <Button variant="outline" type="button" onClick={() => setShowAddModal(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" className="bg-slate-900 text-white">
+              Complete Onboarding
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Manual Wallet Adjustment Modal */}
       <Modal

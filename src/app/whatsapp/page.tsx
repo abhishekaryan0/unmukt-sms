@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/ToastContext";
 import { formatINR, formatNumber } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Modal } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { RechargeModal } from "@/components/client/RechargeModal";
 import {
@@ -22,17 +23,30 @@ import {
   Sparkles,
   ShieldCheck,
   Check,
+  Smartphone,
+  Radio,
 } from "lucide-react";
 
 export default function WhatsAppCampaignPage() {
   const router = useRouter();
   const { toast } = useToast();
   const {
+    activeCustomer,
     clientWalletBalance,
     templates,
     contactGroups,
     createCampaign,
+    whatsappProfile,
+    sendTestMessage,
   } = useAppStore();
+
+  const businessDisplayName = activeCustomer?.businessName || "Sharma Fashion Store";
+  const businessInitials = businessDisplayName
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   const [campaignName, setCampaignName] = useState("Diwali Festive WhatsApp Broadcast");
   const [selectedGroupId, setSelectedGroupId] = useState("grp-02"); // Festival Offers
@@ -47,6 +61,11 @@ export default function WhatsAppCampaignPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showRecharge, setShowRecharge] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Test modal state
+  const [showTestModal, setShowTestModal] = useState(false);
+  const [testNumber, setTestNumber] = useState(activeCustomer?.mobile || "9811234567");
+  const [isSendingTest, setIsSendingTest] = useState(false);
 
   // Filter WhatsApp templates
   const waTemplates = templates.filter((t) => t.channel === "whatsapp");
@@ -72,6 +91,31 @@ export default function WhatsAppCampaignPage() {
     return txt;
   }, [selectedTemplate, var1, var2]);
 
+  const handleSendTest = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanNum = testNumber.replace(/\D/g, "").slice(-10);
+    if (cleanNum.length !== 10) {
+      toast({
+        title: "Invalid Mobile Number",
+        message: "Enter a valid 10-digit Indian mobile number for test preview.",
+        type: "error",
+      });
+      return;
+    }
+
+    setIsSendingTest(true);
+    setTimeout(() => {
+      sendTestMessage(cleanNum, "whatsapp", renderedContent);
+      setIsSendingTest(false);
+      setShowTestModal(false);
+      toast({
+        title: "Test WhatsApp Dispatched! 📲",
+        message: `Simulated message delivered to +91 ${cleanNum}. Verified with double blue ticks.`,
+        type: "success",
+      });
+    }, 600);
+  };
+
   const handleSend = () => {
     if (selectedTemplate?.approvalStatus !== "approved") {
       toast({
@@ -86,8 +130,8 @@ export default function WhatsAppCampaignPage() {
     setTimeout(() => {
       const res = createCampaign({
         campaignName,
-        customerId: "cust-01",
-        customerName: "Sharma Fashion Store",
+        customerId: activeCustomer?.id || "cust-01",
+        customerName: businessDisplayName,
         channel: "whatsapp",
         messageType: selectedTemplate.category as any,
         totalRecipients: recipientCount,
@@ -140,9 +184,63 @@ export default function WhatsAppCampaignPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg text-xs">
-          <span className="text-slate-500 font-medium">Wallet:</span>
-          <span className="font-bold text-slate-900">{formatINR(clientWalletBalance)}</span>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowTestModal(true)}
+            className="text-xs gap-1.5 border-slate-300"
+          >
+            <Smartphone className="w-3.5 h-3.5 text-[#25D366]" />
+            <span>Send Test to Mobile</span>
+          </Button>
+
+          <div className="flex items-center gap-2 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg text-xs">
+            <span className="text-slate-500 font-medium">Wallet:</span>
+            <span className="font-bold text-slate-900">{formatINR(clientWalletBalance)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Meta API Telemetry Status Strip */}
+      <div className="bg-white rounded-xl border border-slate-200 p-3 shadow-subtle flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-7 h-7 rounded-full bg-[#E8F8EE] flex items-center justify-center text-[#075E54]">
+            <Radio className="w-4 h-4 text-[#25D366] animate-pulse" />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5 font-bold text-slate-900">
+              <span>{whatsappProfile.displayName}</span>
+              {whatsappProfile.verifiedBadge && (
+                <span className="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.2 rounded font-semibold flex items-center gap-0.5">
+                  ✓ Verified Green Tick
+                </span>
+              )}
+            </div>
+            <div className="text-[11px] text-slate-500">
+              WABA Phone: {whatsappProfile.phoneNumber} • Account ID: {whatsappProfile.wabaId || "waba_781290348123"}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 text-[11px]">
+          <div>
+            <span className="text-slate-500 block">Throughput Tier</span>
+            <span className="font-bold text-slate-900">{whatsappProfile.tierLimit || whatsappProfile.messagingTier}</span>
+          </div>
+          <div>
+            <span className="text-slate-500 block">Quality Rating</span>
+            <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              {whatsappProfile.qualityRating}
+            </span>
+          </div>
+          <div>
+            <span className="text-slate-500 block">Webhook</span>
+            <span className="font-bold text-emerald-600 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Connected
+            </span>
+          </div>
         </div>
       </div>
 
@@ -203,79 +301,111 @@ export default function WhatsAppCampaignPage() {
             </select>
           </div>
 
-          {/* Header Image Upload URL */}
+          {/* Header Media (if image supported) */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Header Image URL (Optional)
+              Header Media (Banner Image URL)
             </label>
             <Input
               value={headerImageUrl}
               onChange={(e) => setHeaderImageUrl(e.target.value)}
-              placeholder="https://..."
-              leftIcon={<ImageIcon className="w-4 h-4 text-slate-400" />}
+              placeholder="https://example.com/banner.jpg"
             />
+            <p className="text-[10px] text-slate-500 mt-1">
+              Supports JPG/PNG (1080x1080 or 1200x628). Displays at the top of the WhatsApp message.
+            </p>
           </div>
 
-          {/* Dynamic Template Variables */}
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-900">Template Dynamic Variables</span>
-              <span className="text-[10px] text-slate-500">Substituted per customer</span>
-            </div>
+          {/* Template Dynamic Variables */}
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3.5 space-y-3">
+            <span className="text-xs font-bold text-slate-900 block">
+              Fill Template Dynamic Placeholders
+            </span>
 
-            <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-1">
-                  Variable {"{{1}}"} (Customer Name)
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  {"{{1}}"} (Customer Name sample)
                 </label>
                 <Input
                   value={var1}
                   onChange={(e) => setVar1(e.target.value)}
-                  placeholder="e.g. Amitabh ji"
-                  className="h-8 text-xs"
+                  placeholder="Priya ji"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-1">
-                  Variable {"{{2}}"} (Offer / Discount)
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  {"{{2}}"} (Discount / Offer %)
                 </label>
-                <Input
-                  value={var2}
-                  onChange={(e) => setVar2(e.target.value)}
-                  placeholder="e.g. 40"
-                  className="h-8 text-xs"
-                />
+                <Input value={var2} onChange={(e) => setVar2(e.target.value)} placeholder="40" />
               </div>
             </div>
           </div>
 
-          {/* Rate & Cost Box */}
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2 text-xs">
+          {/* Schedule Options */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              Delivery Schedule
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setScheduleType("now")}
+                className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                  scheduleType === "now"
+                    ? "bg-slate-900 text-white border-slate-900"
+                    : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                }`}
+              >
+                <span>Send Instantly</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setScheduleType("later")}
+                className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                  scheduleType === "later"
+                    ? "bg-slate-900 text-white border-slate-900"
+                    : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                }`}
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Schedule Later</span>
+              </button>
+            </div>
+
+            {scheduleType === "later" && (
+              <div className="mt-2.5">
+                <Input
+                  type="datetime-local"
+                  value={scheduleDate}
+                  onChange={(e) => setScheduleDate(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Pricing & Estimation Breakdown */}
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3.5 space-y-2 text-xs">
             <div className="flex justify-between text-slate-600">
               <span>Recipients:</span>
-              <span className="font-bold text-slate-900">{formatNumber(recipientCount)}</span>
+              <span className="font-semibold text-slate-900">{formatNumber(recipientCount)}</span>
             </div>
             <div className="flex justify-between text-slate-600">
-              <span>Meta Message Category:</span>
-              <span className="font-semibold uppercase text-slate-900">
-                {selectedTemplate?.category}
-              </span>
+              <span>Meta Tier Rate ({selectedTemplate?.category}):</span>
+              <span className="font-semibold text-slate-900">{formatINR(ratePerMessage)} / message</span>
             </div>
-            <div className="flex justify-between text-slate-600">
-              <span>Rate per WhatsApp message:</span>
-              <span className="font-semibold text-slate-900">{formatINR(ratePerMessage)}</span>
-            </div>
-            <div className="border-t border-slate-200 pt-2 flex justify-between font-bold text-slate-900 text-sm">
-              <span>Estimated Campaign Cost:</span>
-              <span className="text-[#075E54] text-base">{formatINR(estimatedCost)}</span>
+            <div className="flex justify-between pt-2 border-t border-slate-200 text-sm font-bold text-slate-900">
+              <span>Total Estimated Cost:</span>
+              <span className="text-emerald-700">{formatINR(estimatedCost)}</span>
             </div>
           </div>
 
-          {/* Wallet Balance Warning if needed */}
+          {/* Insufficient balance warning */}
           {!hasEnoughBalance && (
-            <div className="p-3.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 text-xs flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+            <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 text-xs text-rose-800 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
               <div>
                 <div className="font-bold">Insufficient Balance</div>
                 <div className="text-[11px]">
@@ -292,15 +422,27 @@ export default function WhatsAppCampaignPage() {
             </div>
           )}
 
-          {/* Action Button */}
-          <Button
-            onClick={() => setShowConfirm(true)}
-            disabled={!hasEnoughBalance || recipientCount === 0}
-            className="w-full bg-[#25D366] hover:bg-[#1ebd5b] text-white font-bold h-11 text-sm shadow-subtle gap-2"
-          >
-            <MessageCircle className="w-4 h-4" />
-            <span>Broadcast WhatsApp Campaign ({formatINR(estimatedCost)})</span>
-          </Button>
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => setShowTestModal(true)}
+              className="w-1/3 text-xs gap-1.5"
+            >
+              <Smartphone className="w-3.5 h-3.5 text-[#25D366]" />
+              <span>Test Send</span>
+            </Button>
+
+            <Button
+              onClick={() => setShowConfirm(true)}
+              disabled={!hasEnoughBalance || recipientCount === 0}
+              className="w-2/3 bg-[#25D366] hover:bg-[#1ebd5b] text-white font-bold h-11 text-sm shadow-subtle gap-2"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>Broadcast Campaign ({formatINR(estimatedCost)})</span>
+            </Button>
+          </div>
         </div>
 
         {/* Right Column: Live Interactive WhatsApp Screen (5 cols) */}
@@ -310,10 +452,10 @@ export default function WhatsAppCampaignPage() {
             <div className="bg-[#075E54] rounded-t-2xl p-3 text-white flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-white text-slate-900 font-bold flex items-center justify-center text-xs">
-                  SF
+                  {businessInitials}
                 </div>
                 <div>
-                  <div className="text-xs font-bold leading-none">Sharma Fashion Store</div>
+                  <div className="text-xs font-bold leading-none">{businessDisplayName}</div>
                   <div className="text-[10px] text-emerald-200 mt-0.5">Verified Business Account</div>
                 </div>
               </div>
@@ -371,6 +513,47 @@ export default function WhatsAppCampaignPage() {
           </div>
         </div>
       </div>
+
+      {/* Test Message Modal */}
+      <Modal
+        isOpen={showTestModal}
+        onClose={() => setShowTestModal(false)}
+        size="sm"
+        title="Send Test WhatsApp Message"
+        description="Verify your message layout and image rendering on an actual phone before broadcasting to all customers."
+      >
+        <form onSubmit={handleSendTest} className="space-y-4 text-xs">
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Indian Mobile Number (+91) *
+            </label>
+            <Input
+              type="tel"
+              value={testNumber}
+              onChange={(e) => setTestNumber(e.target.value)}
+              placeholder="9811234567"
+              required
+            />
+          </div>
+
+          <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-[11px] text-slate-600">
+            A test dispatch does not deduct bulk campaign credits. It tests live Meta Cloud API delivery simulation.
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+            <Button variant="outline" type="button" onClick={() => setShowTestModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSendingTest}
+              className="bg-[#25D366] hover:bg-[#1ebd5b] text-white"
+            >
+              {isSendingTest ? "Dispatching..." : "Dispatch Test WhatsApp"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Confirmation Dialog */}
       <ConfirmDialog
