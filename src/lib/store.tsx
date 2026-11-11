@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
 import {
   Customer,
   Agency,
@@ -36,6 +36,7 @@ import {
   INITIAL_WHATSAPP_PROFILE,
 } from "./mock-data";
 import { getClientSession, impersonateCustomer, stopImpersonation } from "./auth";
+import { useToast } from "@/components/ui/ToastContext";
 
 interface AppContextType {
   customers: Customer[];
@@ -60,6 +61,10 @@ interface AppContextType {
   clientWalletBalance: number;
   switchActiveCustomer: (customerId: string) => void;
   exitImpersonation: () => void;
+
+  // Real-time synchronization
+  refreshFromDatabase: () => Promise<void>;
+  isDbConnected: boolean;
 
   // Actions
   rechargeWallet: (amount: number, method: "UPI" | "Net Banking" | "Credit Card" | "Debit Card") => {
@@ -106,7 +111,9 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
+  const { toast } = useToast();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isDbConnected, setIsDbConnected] = useState(true);
 
   const [customers, setCustomers] = useState<Customer[]>(INITIAL_CUSTOMERS);
   const [agencies, setAgencies] = useState<Agency[]>(INITIAL_AGENCIES);
@@ -125,7 +132,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [whatsappProfile, setWhatsappProfile] = useState<WhatsAppProfile>(INITIAL_WHATSAPP_PROFILE);
   const [activeCustomerId, setActiveCustomerId] = useState<string>("cust-01");
 
-  // Load from localStorage on client mount
+  // Synchronize state from PostgreSQL mind-tree database
+  const refreshFromDatabase = useCallback(async () => {
+    try {
+      const res = await fetch("/api/bootstrap");
+      if (!res.ok) throw new Error("Bootstrap endpoint responded with status " + res.status);
+      const json = await res.json();
+      if (json.success && json.data) {
+        const d = json.data;
+        if (d.customers?.length) setCustomers(d.customers);
+        if (d.agencies?.length) setAgencies(d.agencies);
+        if (d.campaigns?.length) setCampaigns(d.campaigns);
+        if (d.suppliers?.length) setSuppliers(d.suppliers);
+        if (d.routingRules?.length) setRoutingRules(d.routingRules);
+        if (d.pricing?.length) setPricing(d.pricing);
+        if (d.transactions?.length) setTransactions(d.transactions);
+        if (d.templates?.length) setTemplates(d.templates);
+        if (d.contactGroups?.length) setContactGroups(d.contactGroups);
+        if (d.contacts?.length) setContacts(d.contacts);
+        if (d.supportTickets?.length) setSupportTickets(d.supportTickets);
+        if (d.invoices?.length) setInvoices(d.invoices);
+        if (d.messageLogs?.length) setMessageLogs(d.messageLogs);
+        if (d.senderHeaders?.length) setSenderHeaders(d.senderHeaders);
+        if (d.whatsappProfile) setWhatsappProfile(d.whatsappProfile);
+        setIsDbConnected(true);
+      }
+    } catch (err) {
+      console.warn("Using local cache, database syncing will retry:", err);
+      setIsDbConnected(false);
+    }
+  }, []);
+
+  // Initial load: fast local storage hydration + background PostgreSQL synchronization
   useEffect(() => {
     try {
       const storedCust = localStorage.getItem("smsunmukt_customers");
@@ -170,7 +208,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const storedWaProfile = localStorage.getItem("smsunmukt_wa_profile");
       if (storedWaProfile) setWhatsappProfile(JSON.parse(storedWaProfile));
 
-      // Active customer from session
       const clientSession = getClientSession();
       if (clientSession && clientSession.id) {
         setActiveCustomerId(clientSession.id);
@@ -179,10 +216,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       console.error("Failed to parse localStorage data", e);
     } finally {
       setIsLoaded(true);
+      refreshFromDatabase();
     }
-  }, []);
+  }, [refreshFromDatabase]);
 
-  // Save changes to localStorage whenever state changes after initial load
+  // Persist state changes to localStorage
   useEffect(() => {
     if (!isLoaded) return;
     try {
@@ -228,28 +266,62 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const clientWalletBalance = activeCustomer.walletBalance;
 
-  // Switch active customer (Impersonation by Super Admin)
+  // Switch active customer (Super Admin impersonation)
   const switchActiveCustomer = (customerId: string) => {
     const target = customers.find((c) => c.id === customerId);
     if (!target) return;
     setActiveCustomerId(customerId);
     impersonateCustomer(target);
+    toast({
+      title: "Switched Account",
+      message: `Now viewing dashboard as ${target.businessName}`,
+      type: "info",
+    });
   };
 
   const exitImpersonation = () => {
     stopImpersonation();
     setActiveCustomerId("cust-01");
+    toast({
+      title: "Exit Impersonation",
+      message: "Returned to default Super Admin context",
+      type: "info",
+    });
   };
 
   // Add new customer (Super Admin onboarding)
   const addCustomer = (customerData: Omit<Customer, "id" | "totalMessages" | "registrationDate">) => {
+    const newId = `cust-${Date.now().toString().slice(-4)}`;
     const newCustomer: Customer = {
       ...customerData,
-      id: `cust-${Date.now().toString().slice(-4)}`,
+      id: newId,
       totalMessages: 0,
       registrationDate: new Date().toISOString().split("T")[0],
     };
+
     setCustomers((prev) => [newCustomer, ...prev]);
+
+    // Async sync to PostgreSQL
+    fetch("/api/customers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(customerData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setCustomers((prev) => prev.map((c) => (c.id === newId ? { ...c, id: data.data.id } : c)));
+          toast({
+            title: "Customer Onboarded",
+            message: `${customerData.businessName} saved to PostgreSQL database.`,
+            type: "success",
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("API /api/customers error:", err);
+      });
+
     return newCustomer;
   };
 
@@ -271,7 +343,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       paymentMethod: method,
     };
 
-    // Calculate GST breakdown: amount is total paid, base is amount / 1.18
     const baseAmount = Number((amount / 1.18).toFixed(2));
     const gstAmount = Number((amount - baseAmount).toFixed(2));
 
@@ -298,6 +369,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTransactions((prev) => [newTx, ...prev]);
     setInvoices((prev) => [newInvoice, ...prev]);
 
+    // Dynamic PostgreSQL Atomic Transaction
+    fetch("/api/wallet/recharge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customerId: activeCustomer.id,
+        amount,
+        paymentMethod: method,
+      }),
+    })
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success) {
+          toast({
+            title: "Wallet Recharged",
+            message: `₹${amount.toFixed(2)} credited via ${method}. GST Invoice ${resData.invoice?.invoiceNumber || ""} issued.`,
+            type: "success",
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Recharge API sync error:", err);
+      });
+
     return {
       success: true,
       newBalance,
@@ -309,6 +404,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Create Campaign
   const createCampaign = (campaignData: Omit<Campaign, "id" | "createdDate" | "delivered" | "failed" | "pending">) => {
     if (clientWalletBalance < campaignData.cost) {
+      toast({
+        title: "Insufficient Balance",
+        message: `Campaign requires ₹${campaignData.cost.toFixed(2)}, available ₹${clientWalletBalance.toFixed(2)}. Please recharge.`,
+        type: "error",
+      });
       return {
         success: false,
         error: `Insufficient wallet balance. Campaign cost is ₹${campaignData.cost.toFixed(
@@ -334,7 +434,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     setCampaigns((prev) => [newCampaign, ...prev]);
 
-    // Deduct from wallet
+    // Deduct from wallet optimistically
     const prevBal = clientWalletBalance;
     const newBal = Number((prevBal - campaignData.cost).toFixed(2));
 
@@ -380,6 +480,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     setMessageLogs((prev) => [sampleLog, ...prev]);
 
+    // Dynamic PostgreSQL Atomic Transaction
+    fetch("/api/campaigns", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...campaignData,
+        customerId: activeCustomer.id,
+        customerName: activeCustomer.businessName,
+      }),
+    })
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success) {
+          toast({
+            title: "Campaign Broadcast Dispatched",
+            message: `'${campaignData.campaignName}' successfully queued for ${totalRecipients.toLocaleString("en-IN")} recipients.`,
+            type: "success",
+          });
+        } else {
+          toast({
+            title: "Database Sync Alert",
+            message: resData.error || "Failed to persist campaign record",
+            type: "error",
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Campaign API sync error:", err);
+      });
+
     return {
       success: true,
       campaign: newCampaign,
@@ -397,6 +527,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setContactGroups((prev) =>
       prev.map((g) => (g.name === contactData.group ? { ...g, contactCount: g.contactCount + 1 } : g))
     );
+
+    fetch("/api/contacts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customerId: activeCustomer.id,
+        contact: contactData,
+      }),
+    })
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success) {
+          toast({
+            title: "Contact Saved to DB",
+            message: `${contactData.name} (${contactData.mobile}) registered.`,
+            type: "success",
+          });
+        }
+      })
+      .catch((e) => console.error("Contact add API error:", e));
   };
 
   const importContacts = (newContactsData: Omit<Contact, "id" | "dateAdded">[]) => {
@@ -409,7 +559,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     setContacts((prev) => [...createdContacts, ...prev]);
 
-    // Update group counts
     const countsByGroup: Record<string, number> = {};
     createdContacts.forEach((c) => {
       countsByGroup[c.group] = (countsByGroup[c.group] || 0) + 1;
@@ -422,11 +571,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })
     );
 
+    fetch("/api/contacts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customerId: activeCustomer.id,
+        contacts: newContactsData,
+      }),
+    })
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success) {
+          toast({
+            title: "PostgreSQL Import Complete",
+            message: `${newContactsData.length} contacts written to database.`,
+            type: "success",
+          });
+        }
+      })
+      .catch((e) => console.error("Contacts batch API error:", e));
+
     return createdContacts.length;
   };
 
   const updateContact = (contact: Contact) => {
     setContacts((prev) => prev.map((c) => (c.id === contact.id ? contact : c)));
+    fetch("/api/contacts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customerId: activeCustomer.id,
+        contact,
+      }),
+    }).catch((e) => console.error("Update contact API error:", e));
   };
 
   const deleteContact = (id: string) => {
@@ -437,6 +614,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
     }
     setContacts((prev) => prev.filter((c) => c.id !== id));
+
+    fetch(`/api/contacts?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    }).catch((e) => console.error("Delete contact API error:", e));
   };
 
   // Contact Groups
@@ -448,10 +629,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createdDate: new Date().toISOString().split("T")[0],
     };
     setContactGroups((prev) => [...prev, newGroup]);
+
+    fetch("/api/contact-groups", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(groupData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "Group Created in DB",
+            message: `'${groupData.name}' stored in PostgreSQL.`,
+            type: "success",
+          });
+        }
+      })
+      .catch((e) => console.error("Group API error:", e));
   };
 
   const deleteGroup = (id: string) => {
     setContactGroups((prev) => prev.filter((g) => g.id !== id));
+    fetch(`/api/contact-groups?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    }).catch((e) => console.error("Delete group API error:", e));
   };
 
   // Templates
@@ -462,10 +663,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createdDate: new Date().toISOString().split("T")[0],
     };
     setTemplates((prev) => [newTemplate, ...prev]);
+
+    fetch("/api/templates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(templateData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "Template Registered",
+            message: `'${templateData.name}' submitted for TRAI / Meta compliance review.`,
+            type: "success",
+          });
+        }
+      })
+      .catch((e) => console.error("Template API error:", e));
   };
 
   const updateTemplateStatus = (id: string, status: "approved" | "pending" | "rejected") => {
     setTemplates((prev) => prev.map((t) => (t.id === id ? { ...t, approvalStatus: status } : t)));
+
+    fetch("/api/templates", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "Template Status Updated",
+            message: `Status updated to ${status.toUpperCase()} in database.`,
+            type: "info",
+          });
+        }
+      })
+      .catch((e) => console.error("Update template API error:", e));
   };
 
   // Sender Headers (DLT)
@@ -477,11 +712,46 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createdDate: new Date().toISOString().split("T")[0],
     };
     setSenderHeaders((prev) => [newHeader, ...prev]);
+
+    fetch("/api/sms/headers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(headerData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "DLT Header Applied",
+            message: `Header '${headerData.header}' submitted to telecom portal.`,
+            type: "success",
+          });
+        }
+      })
+      .catch((e) => console.error("Header API error:", e));
+
     return newHeader;
   };
 
   const updateSenderHeaderStatus = (id: string, status: "approved" | "pending" | "rejected") => {
     setSenderHeaders((prev) => prev.map((h) => (h.id === id ? { ...h, status } : h)));
+
+    fetch("/api/sms/headers", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "DLT Header Status Updated",
+            message: `Header status set to ${status.toUpperCase()}.`,
+            type: "info",
+          });
+        }
+      })
+      .catch((e) => console.error("Update header API error:", e));
   };
 
   // Routing
@@ -491,14 +761,52 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: `rule-${Date.now().toString().slice(-4)}`,
     };
     setRoutingRules((prev) => [...prev, newRule]);
+
+    fetch("/api/routing-rules", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(ruleData),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "Carrier Route Added",
+            message: `Rule '${ruleData.name}' stored in database.`,
+            type: "success",
+          });
+        }
+      })
+      .catch((e) => console.error("Routing rule API error:", e));
   };
 
   const updateRoutingRule = (rule: RoutingRule) => {
     setRoutingRules((prev) => prev.map((r) => (r.id === rule.id ? rule : r)));
+
+    fetch("/api/routing-rules", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(rule),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "Carrier Route Saved",
+            message: `Route '${rule.name}' updated.`,
+            type: "success",
+          });
+        }
+      })
+      .catch((e) => console.error("Update rule API error:", e));
   };
 
   const deleteRoutingRule = (id: string) => {
     setRoutingRules((prev) => prev.filter((r) => r.id !== id));
+
+    fetch(`/api/routing-rules?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    }).catch((e) => console.error("Delete rule API error:", e));
   };
 
   // Pricing
@@ -518,10 +826,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return p;
       })
     );
+
+    fetch("/api/pricing", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, sellingPrice }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "Pricing Updated in DB",
+            message: `${type} set to ₹${sellingPrice.toFixed(2)}/unit.`,
+            type: "success",
+          });
+        }
+      })
+      .catch((e) => console.error("Pricing API error:", e));
   };
 
   const updateWhatsAppProfile = (profile: Partial<WhatsAppProfile>) => {
     setWhatsappProfile((prev) => ({ ...prev, ...profile }));
+
+    fetch("/api/whatsapp/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(profile),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "Meta Profile Synced",
+            message: "WhatsApp Business profile updated.",
+            type: "success",
+          });
+        }
+      })
+      .catch((e) => console.error("WA Profile API error:", e));
   };
 
   // Support Tickets
@@ -551,6 +893,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ],
     };
     setSupportTickets((prev) => [newTicket, ...prev]);
+
+    fetch("/api/tickets", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...ticketData,
+        customerId: activeCustomer.id,
+        customerName: activeCustomer.businessName,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "Support Ticket Logged",
+            message: "Our telecom desk will respond within 2 business hours.",
+            type: "success",
+          });
+        }
+      })
+      .catch((e) => console.error("Ticket API error:", e));
+
     return newTicket;
   };
 
@@ -576,16 +940,67 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return t;
       })
     );
+
+    fetch("/api/tickets", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ticketId, message, sender, senderName }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "Message Delivered",
+            message: "Response appended to ticket history.",
+            type: "info",
+          });
+        }
+      })
+      .catch((e) => console.error("Reply ticket API error:", e));
   };
 
   // Supplier
   const updateSupplier = (supplier: Supplier) => {
     setSuppliers((prev) => prev.map((s) => (s.id === supplier.id ? supplier : s)));
+
+    fetch("/api/suppliers", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(supplier),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "Gateway Configuration Saved",
+            message: `Carrier ${supplier.name} updated.`,
+            type: "success",
+          });
+        }
+      })
+      .catch((e) => console.error("Supplier API error:", e));
   };
 
   // Customer status
   const updateCustomerStatus = (customerId: string, status: Customer["accountStatus"]) => {
     setCustomers((prev) => prev.map((c) => (c.id === customerId ? { ...c, accountStatus: status } : c)));
+
+    fetch(`/api/customers/${encodeURIComponent(customerId)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "Account Status Updated",
+            message: `Customer status is now ${status.toUpperCase()}.`,
+            type: "info",
+          });
+        }
+      })
+      .catch((e) => console.error("Customer status API error:", e));
   };
 
   // Manual Customer Wallet Adjustment (Super Admin)
@@ -617,6 +1032,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     setTransactions((prev) => [tx, ...prev]);
+
+    fetch(`/api/customers/${encodeURIComponent(customerId)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "adjust_wallet",
+        amount,
+        type,
+        note,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "Wallet Manually Adjusted",
+            message: `${type === "credit" ? "Credited" : "Debited"} ₹${amount.toFixed(2)}: ${note}`,
+            type: "success",
+          });
+        }
+      })
+      .catch((e) => console.error("Wallet adjustment API error:", e));
   };
 
   // Test message dispatcher
@@ -636,6 +1073,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       timestamp: new Date().toISOString(),
     };
     setMessageLogs((prev) => [testLog, ...prev]);
+
+    fetch("/api/test-message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customerId: activeCustomer.id,
+        mobile,
+        channel,
+        content,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          toast({
+            title: "Test Handset Delivery OK",
+            message: `Carrier ACK received for ${mobile}. Message ID: ${data.messageId}`,
+            type: "success",
+          });
+        }
+      })
+      .catch((e) => console.error("Test message API error:", e));
 
     return {
       success: true,
@@ -661,6 +1120,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setSenderHeaders(INITIAL_SENDER_HEADERS);
     setWhatsappProfile(INITIAL_WHATSAPP_PROFILE);
     setActiveCustomerId("cust-01");
+    refreshFromDatabase();
+    toast({
+      title: "Data Reset",
+      message: "Restored seed state from PostgreSQL database.",
+      type: "info",
+    });
   };
 
   return (
@@ -686,6 +1151,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         clientWalletBalance,
         switchActiveCustomer,
         exitImpersonation,
+        refreshFromDatabase,
+        isDbConnected,
         rechargeWallet,
         createCampaign,
         addCustomer,

@@ -18,14 +18,38 @@ export default function ClientLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = (e?: React.FormEvent) => {
+  const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, portal: "client" }),
+      });
+      const data = await res.json();
+      if (data.success && data.session) {
+        localStorage.setItem("smsunmukt_client_session", JSON.stringify(data.session));
+        localStorage.removeItem("smsunmukt_impersonation");
+        toast({
+          title: "Login Successful",
+          message: `Welcome back, ${data.session.name}! Signed in to ${data.session.businessName}.`,
+          type: "success",
+        });
+        router.push("/dashboard");
+      } else {
+        setError(data.error || "Authentication failed");
+        toast({
+          title: "Login Failed",
+          message: data.error || "Invalid credentials",
+          type: "error",
+        });
+      }
+    } catch {
+      // Fallback
       const result = loginClient(email, password);
-      setIsLoading(false);
       if (result.success) {
         toast({
           title: "Login Successful",
@@ -41,7 +65,9 @@ export default function ClientLoginPage() {
           type: "error",
         });
       }
-    }, 500);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleFillDemo = () => {

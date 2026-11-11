@@ -18,14 +18,37 @@ export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = (e?: React.FormEvent) => {
+  const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, portal: "admin" }),
+      });
+      const data = await res.json();
+      if (data.success && data.session) {
+        localStorage.setItem("smsunmukt_admin_session", JSON.stringify(data.session));
+        toast({
+          title: "Admin Authenticated",
+          message: `Welcome ${data.session.name} to SMS Unmukt Carrier Control Plane`,
+          type: "success",
+        });
+        router.push("/admin/dashboard");
+      } else {
+        setError(data.error || "Authentication failed");
+        toast({
+          title: "Access Denied",
+          message: data.error || "Invalid credentials",
+          type: "error",
+        });
+      }
+    } catch {
+      // Fallback
       const result = loginAdmin(email, password);
-      setIsLoading(false);
       if (result.success) {
         toast({
           title: "Admin Authenticated",
@@ -41,7 +64,9 @@ export default function AdminLoginPage() {
           type: "error",
         });
       }
-    }, 600);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleFillDemo = () => {
