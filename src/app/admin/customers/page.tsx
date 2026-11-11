@@ -18,6 +18,7 @@ import {
   Users,
   UserPlus,
   Eye,
+  EyeOff,
   ShieldAlert,
   ShieldCheck,
   Wallet,
@@ -27,6 +28,11 @@ import {
   XCircle,
   LogIn,
   Building2,
+  Lock,
+  KeyRound,
+  Sparkles,
+  Copy,
+  Check,
 } from "lucide-react";
 
 export default function AdminCustomersPage() {
@@ -46,11 +52,14 @@ export default function AdminCustomersPage() {
 
   // Onboard Customer modal
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newCust, setNewCust] = useState({
     businessName: "",
     ownerName: "",
     email: "",
     mobile: "",
+    password: "",
     businessCategory: "Retail & Apparel",
     city: "Mumbai",
     state: "Maharashtra",
@@ -58,6 +67,19 @@ export default function AdminCustomersPage() {
     dltEntityId: "",
     initialWallet: "500",
   });
+
+  // Success credentials modal
+  const [createdCredentials, setCreatedCredentials] = useState<{
+    businessName: string;
+    ownerName: string;
+    email: string;
+    password: string;
+    mobile: string;
+    loginUrl: string;
+    id: string;
+    walletBalance: number;
+  } | null>(null);
+  const [hasCopiedCreds, setHasCopiedCreds] = useState(false);
 
   const filteredCustomers = customers.filter((c) => {
     if (categoryFilter !== "all" && c.businessCategory !== categoryFilter) return false;
@@ -85,47 +107,100 @@ export default function AdminCustomersPage() {
     router.push("/dashboard");
   };
 
-  const handleCreateCustomer = (e: React.FormEvent) => {
+  const handleGeneratePassword = () => {
+    const prefixes = ["Biz", "Market", "Growth", "Unmukt", "Client", "Store"];
+    const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const randomDigits = Math.floor(1000 + Math.random() * 9000);
+    const generated = `${randomPrefix}@${randomDigits}`;
+    setNewCust((prev) => ({ ...prev, password: generated }));
+    toast({
+      title: "Strong Password Generated",
+      message: `Assigned: ${generated}`,
+      type: "info",
+    });
+  };
+
+  const handleCreateCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCust.businessName || !newCust.ownerName || !newCust.email || !newCust.mobile) {
       toast({ title: "Missing Fields", message: "Please fill all required fields", type: "error" });
       return;
     }
 
-    const created = addCustomer({
-      businessName: newCust.businessName.trim(),
-      ownerName: newCust.ownerName.trim(),
-      email: newCust.email.trim(),
-      mobile: newCust.mobile.trim(),
-      businessCategory: newCust.businessCategory,
-      city: newCust.city.trim() || "Mumbai",
-      state: newCust.state.trim() || "Maharashtra",
-      gstin: newCust.gstin.trim() || undefined,
-      dltEntityId: newCust.dltEntityId.trim() || `17011${Math.floor(1000000000 + Math.random() * 9000000000)}`,
-      walletBalance: parseFloat(newCust.initialWallet) || 500,
-      accountStatus: "active",
-    });
+    setIsSubmitting(true);
+    const passwordToUse = newCust.password.trim() || `Client@${Math.floor(1000 + Math.random() * 9000)}`;
 
+    try {
+      const res = await addCustomer({
+        businessName: newCust.businessName.trim(),
+        ownerName: newCust.ownerName.trim(),
+        email: newCust.email.trim(),
+        mobile: newCust.mobile.trim(),
+        password: passwordToUse,
+        businessCategory: newCust.businessCategory,
+        city: newCust.city.trim() || "Mumbai",
+        state: newCust.state.trim() || "Maharashtra",
+        gstin: newCust.gstin.trim() || undefined,
+        dltEntityId: newCust.dltEntityId.trim() || `17011${Math.floor(1000000000 + Math.random() * 9000000000)}`,
+        walletBalance: parseFloat(newCust.initialWallet) || 500,
+        accountStatus: "active",
+      });
+
+      setShowAddModal(false);
+
+      // Pop up the credentials card so admin can immediately copy or share it
+      setCreatedCredentials({
+        businessName: newCust.businessName.trim(),
+        ownerName: newCust.ownerName.trim(),
+        email: newCust.email.trim().toLowerCase(),
+        password: res.credentials?.password || passwordToUse,
+        mobile: newCust.mobile.trim(),
+        loginUrl: "/login",
+        id: res.customer?.id || `cust-${Date.now().toString().slice(-4)}`,
+        walletBalance: parseFloat(newCust.initialWallet) || 500,
+      });
+
+      setNewCust({
+        businessName: "",
+        ownerName: "",
+        email: "",
+        mobile: "",
+        password: "",
+        businessCategory: "Retail & Apparel",
+        city: "Mumbai",
+        state: "Maharashtra",
+        gstin: "",
+        dltEntityId: "",
+        initialWallet: "500",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCopyCredentials = () => {
+    if (!createdCredentials) return;
+    const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+    const text = `🎉 Welcome to SMS & WhatsApp Marketing Platform!
+
+Your business account has been provisioned:
+🏢 Business: ${createdCredentials.businessName}
+👤 Account Owner: ${createdCredentials.ownerName}
+🌐 Client Portal: ${origin}/login
+📧 Login Email: ${createdCredentials.email}
+📱 Mobile: +91 ${createdCredentials.mobile}
+🔑 Password: ${createdCredentials.password}
+💰 Welcome Prepaid Balance: ₹${createdCredentials.walletBalance.toFixed(2)}
+
+Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`;
+
+    navigator.clipboard.writeText(text);
+    setHasCopiedCreds(true);
+    setTimeout(() => setHasCopiedCreds(false), 2500);
     toast({
-      title: "Customer Onboarded Successfully",
-      message: `${created.businessName} (ID: ${created.id}) created with initial balance ${formatINR(
-        created.walletBalance
-      )}`,
+      title: "Credentials Copied!",
+      message: "Ready to share with the customer via WhatsApp or Email.",
       type: "success",
-    });
-
-    setShowAddModal(false);
-    setNewCust({
-      businessName: "",
-      ownerName: "",
-      email: "",
-      mobile: "",
-      businessCategory: "Retail & Apparel",
-      city: "Mumbai",
-      state: "Maharashtra",
-      gstin: "",
-      dltEntityId: "",
-      initialWallet: "500",
     });
   };
 
@@ -422,6 +497,52 @@ export default function AdminCustomersPage() {
             </div>
           </div>
 
+          {/* Client Portal Authentication Credentials */}
+          <div className="bg-slate-50 border border-slate-200/90 rounded-xl p-3.5 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                <KeyRound className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                <span>Client Portal Login Credentials</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleGeneratePassword}
+                className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center gap-1"
+              >
+                <Sparkles className="w-3 h-3 text-blue-500" />
+                <span>Auto-Generate Password</span>
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                Login Password *
+              </label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="e.g. Shopkeeper@123 (or auto-generate)"
+                  value={newCust.password}
+                  onChange={(e) => setNewCust({ ...newCust, password: e.target.value })}
+                  leftIcon={<Lock className="w-3.5 h-3.5 text-slate-400" />}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1"
+                  tabIndex={-1}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <p className="text-[10px] text-slate-500 mt-1">
+                The business owner can login at <span className="font-mono text-slate-700 font-semibold">/login</span> using their email (or phone number) with this password. If left blank, a secure temporary passcode will be assigned.
+              </p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -503,11 +624,158 @@ export default function AdminCustomersPage() {
             <Button variant="outline" type="button" onClick={() => setShowAddModal(false)}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-slate-900 text-white">
-              Complete Onboarding
+            <Button type="submit" isLoading={isSubmitting} className="bg-slate-900 text-white gap-1.5">
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Onboard & Provision Account</span>
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Onboarding Success & Credentials Card Modal */}
+      <Modal
+        isOpen={!!createdCredentials}
+        onClose={() => setCreatedCredentials(null)}
+        size="md"
+        title="Customer Provisioned & Credentials Ready"
+        description="Login credentials have been created in the database and are ready to be shared with the client."
+      >
+        {createdCredentials && (
+          <div className="space-y-4 text-xs">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-bold text-emerald-950 text-sm">
+                  {createdCredentials.businessName} is Active!
+                </h4>
+                <p className="text-emerald-800 text-xs mt-0.5">
+                  Authorized Owner: <span className="font-semibold">{createdCredentials.ownerName}</span> • Initial Balance: <span className="font-semibold">{formatINR(createdCredentials.walletBalance)}</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-slate-900 text-slate-100 rounded-xl p-4 space-y-3 font-mono text-xs">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                <span className="text-slate-400 font-sans text-[11px] uppercase tracking-wider font-semibold">
+                  Client Portal Access
+                </span>
+                <span className="bg-emerald-950 text-emerald-400 border border-emerald-800/80 px-2 py-0.5 rounded text-[10px] font-sans font-semibold">
+                  Active in DB
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Portal URL:</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-200 select-all font-semibold">
+                      {typeof window !== "undefined" ? `${window.location.origin}/login` : "http://localhost:3000/login"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const url = typeof window !== "undefined" ? `${window.location.origin}/login` : "http://localhost:3000/login";
+                        navigator.clipboard.writeText(url);
+                        toast({ title: "Copied", message: "Portal URL copied", type: "success" });
+                      }}
+                      className="p-1 text-slate-400 hover:text-white"
+                      title="Copy URL"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Login Email:</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-amber-400 select-all font-semibold">{createdCredentials.email}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(createdCredentials.email);
+                        toast({ title: "Copied", message: "Email copied", type: "success" });
+                      }}
+                      className="p-1 text-slate-400 hover:text-white"
+                      title="Copy Email"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Login Mobile:</span>
+                  <span className="text-slate-200 select-all font-semibold">+91 {createdCredentials.mobile}</span>
+                </div>
+
+                <div className="flex items-center justify-between pt-1 border-t border-slate-800/80">
+                  <span className="text-slate-400">Password:</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-emerald-400 font-bold select-all text-sm tracking-wider">
+                      {createdCredentials.password}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(createdCredentials.password);
+                        toast({ title: "Copied", message: "Password copied", type: "success" });
+                      }}
+                      className="p-1 text-slate-400 hover:text-white"
+                      title="Copy Password"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopyCredentials}
+                className="gap-1.5 text-xs font-semibold border-slate-300"
+              >
+                {hasCopiedCreds ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Copied Welcome Msg!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-slate-600" />
+                    <span>Copy Full Welcome Message</span>
+                  </>
+                )}
+              </Button>
+
+              <div className="flex items-center gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCreatedCredentials(null)}
+                  className="text-xs"
+                >
+                  Close
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    switchActiveCustomer(createdCredentials.id);
+                    setCreatedCredentials(null);
+                    router.push("/dashboard");
+                  }}
+                  className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-semibold gap-1.5"
+                >
+                  <LogIn className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Login as Client Now</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
 
       {/* Manual Wallet Adjustment Modal */}

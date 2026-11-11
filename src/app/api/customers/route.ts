@@ -75,6 +75,7 @@ export async function POST(request: Request) {
       ownerName,
       email,
       mobile,
+      password,
       businessCategory,
       city,
       state,
@@ -93,7 +94,7 @@ export async function POST(request: Request) {
     const cleanEmail = email.trim().toLowerCase();
     const cleanMobile = mobile.replace(/\D/g, "").slice(-10);
 
-    // Check existing
+    // Check existing customer
     const existing = await prisma.customerProfile.findFirst({
       where: {
         OR: [{ email: cleanEmail }, { mobile: cleanMobile }],
@@ -107,13 +108,42 @@ export async function POST(request: Request) {
       );
     }
 
+    const passwordToUse =
+      password && password.trim().length >= 6
+        ? password.trim()
+        : `Client@${Math.floor(100 + Math.random() * 900)}`;
+
     const assignedDlt = dltEntityId?.trim() || `17011${Math.floor(1000000000 + Math.random() * 9000000000)}`;
     const balanceNum = parseFloat(initialWallet) || 0;
 
-    // Execute atomic transaction: create customer + initial wallet transaction
+    // Execute atomic transaction: create User + create CustomerProfile + initial wallet transaction
     const result = await prisma.$transaction(async (tx) => {
+      // 1. Provision or update User authentication record
+      let user = await tx.user.findUnique({ where: { email: cleanEmail } });
+      if (user) {
+        user = await tx.user.update({
+          where: { id: user.id },
+          data: {
+            passwordHash: passwordToUse,
+            name: ownerName.trim(),
+            role: "CLIENT",
+          },
+        });
+      } else {
+        user = await tx.user.create({
+          data: {
+            email: cleanEmail,
+            name: ownerName.trim(),
+            passwordHash: passwordToUse,
+            role: "CLIENT",
+          },
+        });
+      }
+
+      // 2. Provision CustomerProfile linked to userId
       const customer = await tx.customerProfile.create({
         data: {
+          userId: user.id,
           businessName: businessName.trim(),
           ownerName: ownerName.trim(),
           email: cleanEmail,
@@ -129,6 +159,7 @@ export async function POST(request: Request) {
         },
       });
 
+      // 3. Welcome credit
       if (balanceNum > 0) {
         await tx.walletTransaction.create({
           data: {
@@ -143,7 +174,7 @@ export async function POST(request: Request) {
         });
       }
 
-      // Create default contact group
+      // 4. Create default contact group
       await tx.contactGroup.create({
         data: {
           customerId: customer.id,
@@ -152,27 +183,34 @@ export async function POST(request: Request) {
         },
       });
 
-      return customer;
+      return { customer, user, password: passwordToUse };
     });
 
     return NextResponse.json({
       success: true,
-      message: `Customer ${result.businessName} onboarded successfully`,
+      message: `Customer ${result.customer.businessName} onboarded successfully with portal access`,
       data: {
-        id: result.id,
-        businessName: result.businessName,
-        ownerName: result.ownerName,
-        email: result.email,
-        mobile: result.mobile,
-        businessCategory: result.businessCategory,
-        city: result.city,
-        state: result.state,
-        gstin: result.gstin || undefined,
-        dltEntityId: result.dltEntityId,
-        walletBalance: Number(result.walletBalance),
-        totalMessages: result.totalMessages,
+        id: result.customer.id,
+        userId: result.user.id,
+        businessName: result.customer.businessName,
+        ownerName: result.customer.ownerName,
+        email: result.customer.email,
+        mobile: result.customer.mobile,
+        businessCategory: result.customer.businessCategory,
+        city: result.customer.city,
+        state: result.customer.state,
+        gstin: result.customer.gstin || undefined,
+        dltEntityId: result.customer.dltEntityId,
+        walletBalance: Number(result.customer.walletBalance),
+        totalMessages: result.customer.totalMessages,
         accountStatus: "active",
-        registrationDate: result.createdAt.toISOString().split("T")[0],
+        registrationDate: result.customer.createdAt.toISOString().split("T")[0],
+      },
+      credentials: {
+        email: result.user.email,
+        password: result.password,
+        loginUrl: "/login",
+        mobile: result.customer.mobile,
       },
     });
   } catch (error: any) {

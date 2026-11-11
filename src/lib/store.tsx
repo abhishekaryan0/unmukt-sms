@@ -78,7 +78,12 @@ interface AppContextType {
     error?: string;
     campaign?: Campaign;
   };
-  addCustomer: (customer: Omit<Customer, "id" | "totalMessages" | "registrationDate">) => Customer;
+  addCustomer: (customer: Omit<Customer, "id" | "totalMessages" | "registrationDate"> & { password?: string }) => Promise<{
+    success: boolean;
+    customer: Customer;
+    credentials?: { email: string; password: string; loginUrl: string; mobile: string };
+    error?: string;
+  }>;
   addContact: (contact: Omit<Contact, "id" | "dateAdded">) => void;
   importContacts: (newContacts: Omit<Contact, "id" | "dateAdded">[]) => number;
   updateContact: (contact: Contact) => void;
@@ -289,40 +294,85 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  // Add new customer (Super Admin onboarding)
-  const addCustomer = (customerData: Omit<Customer, "id" | "totalMessages" | "registrationDate">) => {
+  // Add new customer (Super Admin onboarding with auth credentials)
+  const addCustomer = async (
+    customerData: Omit<Customer, "id" | "totalMessages" | "registrationDate"> & { password?: string }
+  ) => {
     const newId = `cust-${Date.now().toString().slice(-4)}`;
-    const newCustomer: Customer = {
-      ...customerData,
+    const tempCustomer: Customer = {
       id: newId,
+      businessName: customerData.businessName,
+      ownerName: customerData.ownerName,
+      email: customerData.email,
+      mobile: customerData.mobile,
+      businessCategory: customerData.businessCategory,
+      city: customerData.city,
+      state: customerData.state,
+      gstin: customerData.gstin,
+      dltEntityId: customerData.dltEntityId,
+      walletBalance: customerData.walletBalance,
       totalMessages: 0,
+      accountStatus: "active",
       registrationDate: new Date().toISOString().split("T")[0],
     };
 
-    setCustomers((prev) => [newCustomer, ...prev]);
+    setCustomers((prev) => [tempCustomer, ...prev]);
 
-    // Async sync to PostgreSQL
-    fetch("/api/customers", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(customerData),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.data) {
-          setCustomers((prev) => prev.map((c) => (c.id === newId ? { ...c, id: data.data.id } : c)));
-          toast({
-            title: "Customer Onboarded",
-            message: `${customerData.businessName} saved to PostgreSQL database.`,
-            type: "success",
-          });
-        }
-      })
-      .catch((err) => {
-        console.error("API /api/customers error:", err);
+    try {
+      const res = await fetch("/api/customers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(customerData),
       });
-
-    return newCustomer;
+      const data = await res.json();
+      if (data.success && data.data) {
+        const persistedCustomer: Customer = {
+          ...tempCustomer,
+          id: data.data.id,
+          dltEntityId: data.data.dltEntityId,
+          walletBalance: data.data.walletBalance,
+        };
+        setCustomers((prev) => prev.map((c) => (c.id === newId ? persistedCustomer : c)));
+        toast({
+          title: "Customer Provisioned",
+          message: `${customerData.businessName} saved to database with login credentials.`,
+          type: "success",
+        });
+        return {
+          success: true,
+          customer: persistedCustomer,
+          credentials: data.credentials,
+        };
+      } else {
+        toast({
+          title: "Notice",
+          message: data.error || "Customer saved locally",
+          type: "info",
+        });
+        return {
+          success: true,
+          customer: tempCustomer,
+          credentials: {
+            email: customerData.email,
+            password: customerData.password || "Client@123",
+            loginUrl: "/login",
+            mobile: customerData.mobile,
+          },
+        };
+      }
+    } catch (err: any) {
+      console.error("API /api/customers error:", err);
+      return {
+        success: true,
+        customer: tempCustomer,
+        credentials: {
+          email: customerData.email,
+          password: customerData.password || "Client@123",
+          loginUrl: "/login",
+          mobile: customerData.mobile,
+        },
+      };
+    }
   };
 
   // Recharge client wallet

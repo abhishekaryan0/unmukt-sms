@@ -14,10 +14,17 @@ export async function POST(request: Request) {
     }
 
     const cleanEmail = email.trim().toLowerCase();
+    const cleanMobile = email.replace(/\D/g, "").slice(-10);
 
-    // Query user with customer profile
-    const user = await prisma.user.findUnique({
-      where: { email: cleanEmail },
+    // Query user by email OR registered customer mobile number
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: cleanEmail },
+          ...(cleanMobile.length === 10 ? [{ customer: { mobile: cleanMobile } }] : []),
+          { customer: { mobile: email.trim() } },
+        ],
+      },
       include: {
         customer: true,
         agency: true,
@@ -47,7 +54,8 @@ export async function POST(request: Request) {
     }
 
     const session = {
-      id: user.id,
+      id: user.customer?.id || user.id,
+      userId: user.id,
       email: user.email,
       name: user.name,
       role: user.role === "SUPER_ADMIN" ? "super_admin" : "client",
