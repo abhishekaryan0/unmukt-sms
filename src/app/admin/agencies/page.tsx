@@ -66,15 +66,18 @@ export default function AdminAgenciesPage() {
     },
     {
       header: "Actions",
+      className: "whitespace-nowrap text-right",
       cell: (row) => (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSelectedAgency(row)}
-          className="h-7 px-2.5 text-xs"
-        >
-          Manage Agency
-        </Button>
+        <div className="flex items-center justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSelectedAgency(row)}
+            className="h-7 px-2.5 text-xs font-semibold whitespace-nowrap shadow-none"
+          >
+            Manage Agency
+          </Button>
+        </div>
       ),
     },
   ];
@@ -96,6 +99,7 @@ export default function AdminAgenciesPage() {
         data={agencies}
         columns={columns}
         searchPlaceholder="Search agency partner name..."
+        tableClassName="min-w-[1050px]"
       />
 
       {/* Agency Details Modal */}

@@ -170,6 +170,7 @@ export default function AdminWalletTransactionsPage() {
         data={filtered}
         columns={columns}
         searchPlaceholder="Search customer, reference, ID..."
+        tableClassName="min-w-[1050px]"
         filters={
           <select
             value={typeFilter}

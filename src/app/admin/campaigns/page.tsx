@@ -111,16 +111,19 @@ export default function AdminCampaignsPage() {
     },
     {
       header: "Actions",
+      className: "whitespace-nowrap text-right",
       cell: (row) => (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSelectedCampaign(row)}
-          className="h-7 px-2.5 text-xs gap-1"
-        >
-          <Eye className="w-3.5 h-3.5" />
-          <span>Inspect</span>
-        </Button>
+        <div className="flex items-center justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSelectedCampaign(row)}
+            className="h-7 px-2.5 text-xs gap-1 font-semibold whitespace-nowrap shadow-none"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            <span>Inspect</span>
+          </Button>
+        </div>
       ),
     },
   ];
@@ -142,6 +145,7 @@ export default function AdminCampaignsPage() {
         data={filtered}
         columns={columns}
         searchPlaceholder="Search campaign name or customer..."
+        tableClassName="min-w-[1250px]"
         filters={
           <select
             value={channelFilter}

@@ -185,6 +185,7 @@ export default function AdminRoutingPage() {
         data={routingRules}
         columns={columns}
         searchPlaceholder="Search routing rules..."
+        tableClassName="min-w-[1050px]"
       />
 
       {/* Add / Edit Rule Modal */}

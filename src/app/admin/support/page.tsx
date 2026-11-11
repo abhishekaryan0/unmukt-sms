@@ -94,16 +94,19 @@ export default function AdminSupportPage() {
     },
     {
       header: "Actions",
+      className: "whitespace-nowrap text-right",
       cell: (row) => (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSelectedTicket(row)}
-          className="h-7 px-2.5 text-xs gap-1"
-        >
-          <Eye className="w-3.5 h-3.5" />
-          <span>Reply</span>
-        </Button>
+        <div className="flex items-center justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSelectedTicket(row)}
+            className="h-7 px-2.5 text-xs gap-1 font-semibold whitespace-nowrap shadow-none"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            <span>Reply</span>
+          </Button>
+        </div>
       ),
     },
   ];
@@ -125,6 +128,7 @@ export default function AdminSupportPage() {
         data={supportTickets}
         columns={columns}
         searchPlaceholder="Search tickets, subject, customer..."
+        tableClassName="min-w-[1050px]"
       />
 
       {/* Admin Ticket Thread & Reply Modal */}

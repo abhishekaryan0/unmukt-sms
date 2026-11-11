@@ -372,8 +372,9 @@ export default function ContactsPage() {
     },
     {
       header: "Actions",
+      className: "whitespace-nowrap text-right",
       cell: (row) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center justify-end gap-1 whitespace-nowrap">
           <button
             onClick={() => {
               setViewingContact(row);
@@ -455,6 +456,7 @@ export default function ContactsPage() {
         data={filteredContacts}
         columns={columns}
         searchPlaceholder="Search by name, mobile, tag..."
+        tableClassName="min-w-[1100px]"
         filters={
           <div className="flex items-center gap-2">
             <select

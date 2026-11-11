@@ -104,6 +104,7 @@ export default function InvoicesPage() {
         data={clientInvoices}
         columns={columns}
         searchPlaceholder="Search invoice #, reference..."
+        tableClassName="min-w-[950px]"
       />
 
       <InvoiceModal

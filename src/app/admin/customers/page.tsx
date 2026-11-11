@@ -162,6 +162,7 @@ export default function AdminCustomersPage() {
     {
       header: "Customer ID",
       accessorKey: "id",
+      className: "whitespace-nowrap",
       cell: (row) => (
         <Link
           href={`/admin/customers/${row.id}`}
@@ -174,6 +175,7 @@ export default function AdminCustomersPage() {
     {
       header: "Business Name",
       accessorKey: "businessName",
+      className: "min-w-[180px]",
       cell: (row) => (
         <div>
           <Link
@@ -191,6 +193,7 @@ export default function AdminCustomersPage() {
     {
       header: "Owner",
       accessorKey: "ownerName",
+      className: "min-w-[160px]",
       cell: (row) => (
         <div>
           <div className="font-medium text-slate-900">{row.ownerName}</div>
@@ -201,6 +204,7 @@ export default function AdminCustomersPage() {
     {
       header: "Mobile",
       accessorKey: "mobile",
+      className: "whitespace-nowrap",
       cell: (row) => (
         <span className="font-mono text-slate-800 text-xs">
           {formatIndianMobile(row.mobile)}
@@ -210,6 +214,7 @@ export default function AdminCustomersPage() {
     {
       header: "Category",
       accessorKey: "businessCategory",
+      className: "whitespace-nowrap",
       cell: (row) => (
         <span className="text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
           {row.businessCategory}
@@ -219,12 +224,13 @@ export default function AdminCustomersPage() {
     {
       header: "Wallet Balance",
       accessorKey: "walletBalance",
+      className: "whitespace-nowrap",
       cell: (row) => (
         <div className="flex items-center gap-1.5">
           <span className="font-bold text-slate-900">{formatINR(row.walletBalance)}</span>
           <button
             onClick={() => setWalletCust(row)}
-            className="p-1 rounded text-blue-600 hover:bg-blue-50"
+            className="p-1 rounded text-blue-600 hover:bg-blue-50 transition-colors"
             title="Adjust Wallet Balance"
           >
             <Wallet className="w-3.5 h-3.5" />
@@ -235,6 +241,7 @@ export default function AdminCustomersPage() {
     {
       header: "Total Msgs",
       accessorKey: "totalMessages",
+      className: "whitespace-nowrap",
       cell: (row) => (
         <span className="font-semibold text-slate-700">{formatNumber(row.totalMessages)}</span>
       ),
@@ -242,45 +249,60 @@ export default function AdminCustomersPage() {
     {
       header: "Status",
       accessorKey: "accountStatus",
+      className: "whitespace-nowrap",
       cell: (row) => <StatusBadge status={row.accountStatus} />,
     },
     {
       header: "Registered",
       accessorKey: "registrationDate",
+      className: "whitespace-nowrap",
       cell: (row) => <span className="text-slate-500 text-[11px]">{formatDate(row.registrationDate, false)}</span>,
     },
     {
       header: "Actions",
+      className: "min-w-[320px] text-right pr-5",
       cell: (row) => (
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
           <Button
             variant="outline"
             size="sm"
             onClick={() => handleLoginAsCustomer(row)}
-            className="h-7 px-2 text-[11px] bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300 font-semibold"
+            className="h-7.5 px-2.5 text-xs bg-amber-50/80 hover:bg-amber-100/90 text-amber-900 border-amber-300/80 font-medium gap-1.5 whitespace-nowrap shrink-0 shadow-none transition-colors"
             title="Log in to customer portal as this business"
           >
-            <LogIn className="w-3 h-3 mr-1 text-amber-700" />
-            Login as Client
+            <LogIn className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+            <span>Login as Client</span>
           </Button>
 
-          <Link href={`/admin/customers/${row.id}`}>
-            <Button variant="outline" size="sm" className="h-7 px-2 text-xs">
-              <Eye className="w-3.5 h-3.5 mr-1" />
-              View
+          <Link href={`/admin/customers/${row.id}`} className="inline-flex shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7.5 px-2.5 text-xs text-slate-700 hover:text-slate-900 border-slate-300 gap-1.5 whitespace-nowrap shrink-0 shadow-none transition-colors"
+            >
+              <Eye className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+              <span>View</span>
             </Button>
           </Link>
-          <button
+
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => handleToggleStatus(row)}
-            className={`p-1.5 rounded transition-colors text-xs font-semibold ${
+            className={`h-7.5 px-2.5 text-xs font-medium gap-1.5 whitespace-nowrap shrink-0 shadow-none transition-colors ${
               row.accountStatus === "active"
-                ? "text-rose-600 hover:bg-rose-50"
-                : "text-emerald-600 hover:bg-emerald-50"
+                ? "border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300"
+                : "border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300"
             }`}
-            title={row.accountStatus === "active" ? "Suspend Customer" : "Activate Customer"}
+            title={row.accountStatus === "active" ? "Suspend Customer Account" : "Activate Customer Account"}
           >
-            {row.accountStatus === "active" ? "Suspend" : "Activate"}
-          </button>
+            {row.accountStatus === "active" ? (
+              <XCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+            ) : (
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+            )}
+            <span>{row.accountStatus === "active" ? "Suspend" : "Activate"}</span>
+          </Button>
         </div>
       ),
     },
@@ -307,6 +329,7 @@ export default function AdminCustomersPage() {
         data={filteredCustomers}
         columns={columns}
         searchPlaceholder="Search customer, business, mobile..."
+        tableClassName="min-w-[1250px]"
         filters={
           <div className="flex items-center gap-2">
             <select

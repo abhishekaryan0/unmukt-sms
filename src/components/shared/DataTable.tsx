@@ -4,6 +4,7 @@ import React, { useState, ReactNode } from "react";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { EmptyState } from "./EmptyState";
+import { cn } from "@/lib/utils";
 
 export interface Column<T> {
   header: string;
@@ -12,7 +13,7 @@ export interface Column<T> {
   className?: string;
 }
 
-interface DataTableProps<T> {
+export interface DataTableProps<T> {
   data: T[];
   columns: Column<T>[];
   searchPlaceholder?: string;
@@ -23,6 +24,7 @@ interface DataTableProps<T> {
   emptyTitle?: string;
   emptyDescription?: string;
   className?: string;
+  tableClassName?: string;
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -36,6 +38,7 @@ export function DataTable<T extends Record<string, any>>({
   emptyTitle = "No records found",
   emptyDescription = "There are no entries matching your search or filters.",
   className,
+  tableClassName,
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,7 +91,7 @@ export function DataTable<T extends Record<string, any>>({
       {/* Table container */}
       <div className="bg-white rounded-xl border border-slate-200/80 shadow-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className={cn("w-full text-left border-collapse", tableClassName || "min-w-full")}>
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50/75 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                 {columns.map((col, idx) => (

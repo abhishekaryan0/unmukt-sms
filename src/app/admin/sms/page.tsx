@@ -171,8 +171,9 @@ export default function AdminSMSPage() {
     },
     {
       header: "Actions",
+      className: "whitespace-nowrap text-right min-w-[180px]",
       cell: (row) => (
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
           {row.status !== "approved" && (
             <Button
               size="sm"
@@ -299,6 +300,7 @@ export default function AdminSMSPage() {
             data={smsLogs}
             columns={logColumns}
             searchPlaceholder="Search recipient, sender, ID..."
+            tableClassName="min-w-[1000px]"
           />
         </div>
       )}
@@ -323,6 +325,7 @@ export default function AdminSMSPage() {
             data={senderHeaders}
             columns={headerColumns}
             searchPlaceholder="Search header (e.g. SHRFSH), customer name..."
+            tableClassName="min-w-[1100px]"
           />
         </div>
       )}

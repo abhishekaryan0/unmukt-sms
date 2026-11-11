@@ -124,6 +124,7 @@ export default function TransactionsPage() {
         data={filteredTx}
         columns={columns}
         searchPlaceholder="Search reference, tx ID..."
+        tableClassName="min-w-[950px]"
         filters={
           <select
             value={typeFilter}

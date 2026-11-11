@@ -80,8 +80,9 @@ export default function AdminTemplatesPage() {
     },
     {
       header: "Review Actions",
+      className: "whitespace-nowrap text-right",
       cell: (row) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
           {row.approvalStatus === "pending" && (
             <>
               <button
@@ -125,6 +126,7 @@ export default function AdminTemplatesPage() {
         data={templates}
         columns={columns}
         searchPlaceholder="Search template name, content..."
+        tableClassName="min-w-[1050px]"
       />
     </AdminLayout>
   );

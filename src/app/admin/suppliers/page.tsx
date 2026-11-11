@@ -143,6 +143,7 @@ export default function AdminSuppliersPage() {
         data={suppliers}
         columns={columns}
         searchPlaceholder="Search gateway suppliers..."
+        tableClassName="min-w-[1050px]"
       />
 
       {/* Edit Supplier Modal */}

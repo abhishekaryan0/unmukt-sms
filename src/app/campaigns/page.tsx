@@ -155,6 +155,7 @@ export default function CampaignHistoryPage() {
         data={filteredCampaigns}
         columns={columns}
         searchPlaceholder="Search campaigns..."
+        tableClassName="min-w-[1050px]"
         filters={
           <select
             value={channelFilter}

@@ -140,6 +140,7 @@ export default function AdminWhatsAppPage() {
         data={waLogs}
         columns={columns}
         searchPlaceholder="Search WhatsApp recipient, customer..."
+        tableClassName="min-w-[1050px]"
       />
     </AdminLayout>
   );
