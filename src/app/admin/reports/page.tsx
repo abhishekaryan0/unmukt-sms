@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { useAppStore } from "@/lib/store";
 import { formatINR, formatNumber, exportToCSV } from "@/lib/utils";
 import { StatCard } from "@/components/shared/StatCard";
 import { ChartCard } from "@/components/shared/ChartCard";
@@ -21,15 +22,20 @@ import {
 import { Download, Users, Smartphone, MessageSquare, TrendingUp, CheckCircle2 } from "lucide-react";
 
 export default function AdminReportsPage() {
+  const { customers, campaigns, suppliers } = useAppStore();
   const [dateFilter, setDateFilter] = useState<DateFilterOption>("30d");
 
+  const totalCust = customers.length;
+  const totalMsgs = campaigns.reduce((acc: number, c: any) => acc + c.totalRecipients, 0) || 4900000;
+  const avgSupplierRate = (suppliers.reduce((acc: number, s: any) => acc + s.successRate, 0) / (suppliers.length || 1)).toFixed(2);
+
   const customerGrowthData = [
-    { month: "Jun", customers: 4, messages: 1200000 },
-    { month: "Jul", customers: 5, messages: 1800000 },
-    { month: "Aug", customers: 6, messages: 2400000 },
-    { month: "Sep", customers: 7, messages: 3100000 },
-    { month: "Oct", customers: 8, messages: 4500000 },
-    { month: "Nov", customers: 8, messages: 4900000 },
+    { month: "Jun", customers: Math.max(1, Math.round(totalCust * 0.4)), messages: Math.round(totalMsgs * 0.25) },
+    { month: "Jul", customers: Math.max(2, Math.round(totalCust * 0.5)), messages: Math.round(totalMsgs * 0.38) },
+    { month: "Aug", customers: Math.max(2, Math.round(totalCust * 0.65)), messages: Math.round(totalMsgs * 0.5) },
+    { month: "Sep", customers: Math.max(3, Math.round(totalCust * 0.75)), messages: Math.round(totalMsgs * 0.65) },
+    { month: "Oct", customers: Math.max(4, Math.round(totalCust * 0.9)), messages: Math.round(totalMsgs * 0.85) },
+    { month: "Nov", customers: totalCust, messages: totalMsgs },
   ];
 
   const handleExport = () => {
@@ -60,17 +66,17 @@ export default function AdminReportsPage() {
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Customer Expansion"
-          value="100%"
-          change="+4 accounts"
+          title="Active Customer Base"
+          value={formatNumber(totalCust)}
+          change={`+${totalCust} accounts`}
           trend="up"
-          subtitle="Enterprise & Retail"
+          subtitle="Enterprise, Retail & Coaching"
           icon={<Users className="w-4 h-4 text-slate-700" />}
         />
 
         <StatCard
-          title="SMS Switch Uptime"
-          value="99.98%"
+          title="Carrier Switch Delivery"
+          value={`${avgSupplierRate}%`}
           trend="up"
           subtitle="EJOIN & RouteMobile"
           icon={<Smartphone className="w-4 h-4 text-blue-600" />}
@@ -87,10 +93,10 @@ export default function AdminReportsPage() {
         />
 
         <StatCard
-          title="Carrier Latency"
-          value="2.8s"
+          title="Total Message Traffic"
+          value={formatNumber(totalMsgs)}
           trend="up"
-          subtitle="Average dispatch to DLR"
+          subtitle="Across all gateways"
           icon={<CheckCircle2 className="w-4 h-4 text-emerald-600" />}
           iconBg="bg-emerald-50 text-emerald-600"
         />

@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 export default function ClientSupportPage() {
-  const { supportTickets, createSupportTicket, replyToTicket } = useAppStore();
+  const { supportTickets, createSupportTicket, replyToTicket, activeCustomer } = useAppStore();
   const { toast } = useToast();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -34,7 +34,7 @@ export default function ClientSupportPage() {
   const [message, setMessage] = useState("");
   const [replyText, setReplyText] = useState("");
 
-  const clientTickets = supportTickets.filter((t) => t.customerId === "cust-01");
+  const clientTickets = supportTickets.filter((t) => t.customerId === activeCustomer.id);
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();

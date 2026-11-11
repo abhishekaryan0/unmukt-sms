@@ -10,10 +10,10 @@ import { Transaction } from "@/types";
 import { Receipt, Download, ArrowUpRight, ArrowDownRight } from "lucide-react";
 
 export default function TransactionsPage() {
-  const { transactions } = useAppStore();
+  const { transactions, activeCustomer } = useAppStore();
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
-  const clientTx = transactions.filter((t) => t.customerId === "cust-01");
+  const clientTx = transactions.filter((t) => t.customerId === activeCustomer.id);
 
   const filteredTx = clientTx.filter((t) => {
     if (typeFilter === "all") return true;

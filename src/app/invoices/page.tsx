@@ -11,10 +11,10 @@ import { Invoice } from "@/types";
 import { FileCheck2, Printer, Eye, Download, ShieldCheck } from "lucide-react";
 
 export default function InvoicesPage() {
-  const { invoices } = useAppStore();
+  const { invoices, activeCustomer } = useAppStore();
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
-  const clientInvoices = invoices.filter((inv) => inv.customerId === "cust-01");
+  const clientInvoices = invoices.filter((inv) => inv.customerId === activeCustomer.id);
 
   const columns: Column<Invoice>[] = [
     {

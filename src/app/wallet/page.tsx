@@ -25,11 +25,11 @@ import {
 } from "lucide-react";
 
 export default function WalletPage() {
-  const { clientWalletBalance, transactions, invoices } = useAppStore();
+  const { clientWalletBalance, transactions, invoices, activeCustomer } = useAppStore();
   const [showRecharge, setShowRecharge] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
-  const clientTx = transactions.filter((t) => t.customerId === "cust-01");
+  const clientTx = transactions.filter((t) => t.customerId === activeCustomer.id);
   const totalRecharged = clientTx
     .filter((t) => t.type === "recharge")
     .reduce((acc, t) => acc + t.amount, 0);
@@ -38,7 +38,7 @@ export default function WalletPage() {
     .filter((t) => t.type === "sms_deduction" || t.type === "whatsapp_deduction")
     .reduce((acc, t) => acc + t.amount, 0);
 
-  const clientInvoices = invoices.filter((inv) => inv.customerId === "cust-01");
+  const clientInvoices = invoices.filter((inv) => inv.customerId === activeCustomer.id);
 
   return (
     <ClientLayout>

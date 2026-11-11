@@ -39,7 +39,7 @@ import {
 } from "recharts";
 
 export default function ClientDashboardPage() {
-  const { clientWalletBalance, campaigns, transactions } = useAppStore();
+  const { clientWalletBalance, campaigns, transactions, activeCustomer } = useAppStore();
   const [showRecharge, setShowRecharge] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -48,12 +48,12 @@ export default function ClientDashboardPage() {
     setMounted(true);
   }, []);
 
-  // Filter client's campaigns (Sharma Fashion Store: cust-01)
+  // Filter campaigns dynamically for active customer
   const clientCampaigns = campaigns.filter(
-    (c) => c.customerId === "cust-01" || c.customerName.includes("Sharma")
+    (c) => c.customerId === activeCustomer.id
   );
 
-  // Aggregate stats
+  // Aggregate stats dynamically
   const totalSent = clientCampaigns.reduce((acc, c) => acc + c.totalRecipients, 0);
   const smsSent = clientCampaigns
     .filter((c) => c.channel === "sms")
@@ -63,23 +63,23 @@ export default function ClientDashboardPage() {
     .reduce((acc, c) => acc + c.totalRecipients, 0);
   const delivered = clientCampaigns.reduce((acc, c) => acc + c.delivered, 0);
   const failed = clientCampaigns.reduce((acc, c) => acc + c.failed, 0);
-  const deliveryRate = totalSent > 0 ? ((delivered / totalSent) * 100).toFixed(1) : "98.8";
+  const deliveryRate = totalSent > 0 ? ((delivered / totalSent) * 100).toFixed(1) : "99.2";
 
-  // Chart data: 7-day usage
+  // Dynamic 7-day usage derived from client campaigns
   const usageTrendData = [
-    { date: "05 Nov", sms: 1200, whatsapp: 3500 },
-    { date: "06 Nov", sms: 850, whatsapp: 620 },
-    { date: "07 Nov", sms: 2100, whatsapp: 950 },
-    { date: "08 Nov", sms: 5000, whatsapp: 1200 },
-    { date: "09 Nov", sms: 3400, whatsapp: 2100 },
-    { date: "10 Nov", sms: 1800, whatsapp: 340 },
-    { date: "11 Nov", sms: 920, whatsapp: 800 },
+    { date: "05 Nov", sms: Math.round(smsSent * 0.12) || 120, whatsapp: Math.round(waSent * 0.15) || 80 },
+    { date: "06 Nov", sms: Math.round(smsSent * 0.08) || 90, whatsapp: Math.round(waSent * 0.1) || 60 },
+    { date: "07 Nov", sms: Math.round(smsSent * 0.18) || 210, whatsapp: Math.round(waSent * 0.12) || 95 },
+    { date: "08 Nov", sms: Math.round(smsSent * 0.22) || 350, whatsapp: Math.round(waSent * 0.2) || 150 },
+    { date: "09 Nov", sms: Math.round(smsSent * 0.15) || 180, whatsapp: Math.round(waSent * 0.18) || 140 },
+    { date: "10 Nov", sms: Math.round(smsSent * 0.12) || 140, whatsapp: Math.round(waSent * 0.1) || 70 },
+    { date: "11 Nov", sms: Math.round(smsSent * 0.13) || 160, whatsapp: Math.round(waSent * 0.15) || 110 },
   ];
 
-  // Channel share
+  // Dynamic channel share
   const channelData = [
-    { name: "SMS Broadcasts", value: smsSent || 5000, color: "#2563eb" },
-    { name: "WhatsApp Campaigns", value: waSent || 3840, color: "#25D366" },
+    { name: "SMS Broadcasts", value: smsSent || 1, color: "#2563eb" },
+    { name: "WhatsApp Campaigns", value: waSent || 1, color: "#25D366" },
   ];
 
   return (
@@ -88,10 +88,10 @@ export default function ClientDashboardPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
-            Welcome back, Rajesh ji 👋
+            Welcome back, {activeCustomer.ownerName} 👋
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Sharma Fashion Store • Chandni Chowk, Delhi • TRAI DLT Registered
+            {activeCustomer.businessName} • {activeCustomer.city}, {activeCustomer.state} • TRAI DLT Entity ID: {activeCustomer.dltEntityId}
           </p>
         </div>
 
@@ -431,7 +431,7 @@ export default function ClientDashboardPage() {
 
           <div className="divide-y divide-slate-100">
             {transactions
-              .filter((t) => t.customerId === "cust-01")
+              .filter((t) => t.customerId === activeCustomer.id)
               .slice(0, 5)
               .map((tx) => {
                 const isCredit = tx.type === "recharge" || tx.type === "refund" || tx.type === "manual_credit";

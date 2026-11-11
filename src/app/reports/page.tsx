@@ -22,16 +22,28 @@ import {
 import { Download, BarChart2, CheckCircle2, TrendingUp, Zap, MessageSquare } from "lucide-react";
 
 export default function ReportsPage() {
-  const { campaigns } = useAppStore();
+  const { campaigns, activeCustomer } = useAppStore();
   const [dateFilter, setDateFilter] = useState<DateFilterOption>("30d");
 
+  const clientCampaigns = campaigns.filter((c) => c.customerId === activeCustomer.id);
+  const totalSms = clientCampaigns
+    .filter((c) => c.channel === "sms")
+    .reduce((acc, c) => acc + c.totalRecipients, 0);
+  const totalWa = clientCampaigns
+    .filter((c) => c.channel === "whatsapp")
+    .reduce((acc, c) => acc + c.totalRecipients, 0);
+  const totalRecipients = totalSms + totalWa;
+  const totalDelivered = clientCampaigns.reduce((acc, c) => acc + c.delivered, 0);
+  const deliveryRatio = totalRecipients > 0 ? ((totalDelivered / totalRecipients) * 100).toFixed(1) : "99.2";
+  const totalSpent = clientCampaigns.reduce((acc, c) => acc + c.cost, 0);
+
   const monthlyConsumptionData = [
-    { month: "Jun", smsUnits: 15400, waMessages: 2800, cost: 6468 },
-    { month: "Jul", smsUnits: 22000, waMessages: 4100, cost: 9350 },
-    { month: "Aug", smsUnits: 31000, waMessages: 5800, cost: 13200 },
-    { month: "Sep", smsUnits: 28500, waMessages: 7200, cost: 14190 },
-    { month: "Oct", smsUnits: 42000, waMessages: 9800, cost: 20020 },
-    { month: "Nov", smsUnits: 38000, waMessages: 12400, cost: 22000 },
+    { month: "Jun", smsUnits: Math.round(totalSms * 0.1) || 120, waMessages: Math.round(totalWa * 0.08) || 80, cost: Math.round(totalSpent * 0.09) || 150 },
+    { month: "Jul", smsUnits: Math.round(totalSms * 0.12) || 150, waMessages: Math.round(totalWa * 0.12) || 110, cost: Math.round(totalSpent * 0.12) || 200 },
+    { month: "Aug", smsUnits: Math.round(totalSms * 0.15) || 210, waMessages: Math.round(totalWa * 0.16) || 160, cost: Math.round(totalSpent * 0.16) || 280 },
+    { month: "Sep", smsUnits: Math.round(totalSms * 0.18) || 250, waMessages: Math.round(totalWa * 0.18) || 200, cost: Math.round(totalSpent * 0.18) || 320 },
+    { month: "Oct", smsUnits: Math.round(totalSms * 0.22) || 310, waMessages: Math.round(totalWa * 0.22) || 240, cost: Math.round(totalSpent * 0.22) || 410 },
+    { month: "Nov", smsUnits: Math.round(totalSms * 0.23) || 340, waMessages: Math.round(totalWa * 0.24) || 260, cost: Math.round(totalSpent * 0.23) || 450 },
   ];
 
   const deliveryPerformanceData = [
@@ -56,7 +68,7 @@ export default function ReportsPage() {
             Analytics & Delivery Reports
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Deep dive into delivery ratios, monthly message volume, and billing expenditures
+            Deep dive into delivery ratios, monthly message volume, and billing expenditures for {activeCustomer.businessName}
           </p>
         </div>
 
@@ -73,7 +85,7 @@ export default function ReportsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="All-Time SMS Broadcasts"
-          value="1,76,900"
+          value={formatNumber(totalSms)}
           change="+24.2%"
           trend="up"
           subtitle="99.4% telecom delivery"
@@ -83,7 +95,7 @@ export default function ReportsPage() {
 
         <StatCard
           title="All-Time WhatsApp Sent"
-          value="42,100"
+          value={formatNumber(totalWa)}
           change="+45.8%"
           trend="up"
           subtitle="Meta Cloud API verified"
@@ -93,7 +105,7 @@ export default function ReportsPage() {
 
         <StatCard
           title="Average Delivery Ratio"
-          value="99.1%"
+          value={`${deliveryRatio}%`}
           change="+0.3%"
           trend="up"
           subtitle="Carrier latency < 4.2s"
@@ -103,7 +115,7 @@ export default function ReportsPage() {
 
         <StatCard
           title="Total Spent on Marketing"
-          value="₹85,228.00"
+          value={formatINR(totalSpent)}
           subtitle="Across all campaigns"
           icon={<TrendingUp className="w-4 h-4 text-slate-700" />}
         />

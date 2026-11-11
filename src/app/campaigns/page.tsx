@@ -22,12 +22,12 @@ import {
 } from "lucide-react";
 
 export default function CampaignHistoryPage() {
-  const { campaigns } = useAppStore();
+  const { campaigns, activeCustomer } = useAppStore();
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [channelFilter, setChannelFilter] = useState<string>("all");
 
   const clientCampaigns = campaigns.filter(
-    (c) => c.customerId === "cust-01" || c.customerName.includes("Sharma")
+    (c) => c.customerId === activeCustomer.id
   );
 
   const filteredCampaigns = clientCampaigns.filter((c) => {

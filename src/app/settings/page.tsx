@@ -79,9 +79,9 @@ export default function ClientSettingsPage() {
   const [headerOperator, setHeaderOperator] = useState("Jio DLT");
   const [headerDescription, setHeaderDescription] = useState("");
 
-  // Filter sender headers for this business (or show all matching customer or default)
+  // Filter sender headers for this business dynamically
   const myHeaders = senderHeaders.filter(
-    (h) => h.customerId === activeCustomer?.id || h.customerId === "cust-01"
+    (h) => h.customerId === activeCustomer?.id
   );
 
   const handleSaveBusiness = (e: React.FormEvent) => {

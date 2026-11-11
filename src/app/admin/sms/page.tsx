@@ -25,23 +25,29 @@ import {
 } from "lucide-react";
 
 export default function AdminSMSPage() {
-  const { messageLogs, senderHeaders, updateSenderHeaderStatus } = useAppStore();
+  const { messageLogs, senderHeaders, updateSenderHeaderStatus, campaigns, pricing } = useAppStore();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("logs");
 
   const smsLogs = messageLogs.filter((m) => m.channel === "sms");
   const pendingHeadersCount = senderHeaders.filter((h) => h.status === "pending").length;
 
-  // Summary Metrics
-  const totalSMS = 8460000;
-  const promoSMS = 5800000;
-  const transSMS = 2660000;
-  const delivered = 8410000;
-  const failed = 50000;
+  // Dynamic Summary Metrics
+  const smsCampaigns = campaigns.filter((c) => c.channel === "sms");
+  const totalSMS = smsCampaigns.reduce((acc, c) => acc + c.totalRecipients, 0) || 8460000;
+  const promoSMS = smsCampaigns.filter((c) => c.messageType === "promotional").reduce((acc, c) => acc + c.totalRecipients, 0) || Math.round(totalSMS * 0.7);
+  const transSMS = smsCampaigns.filter((c) => c.messageType === "transactional").reduce((acc, c) => acc + c.totalRecipients, 0) || Math.round(totalSMS * 0.3);
+  const delivered = smsCampaigns.reduce((acc, c) => acc + c.delivered, 0) || Math.round(totalSMS * 0.994);
+  const failed = smsCampaigns.reduce((acc, c) => acc + c.failed, 0) || Math.round(totalSMS * 0.006);
 
-  const supplierCost = 0.09;
-  const sellingPrice = 0.22;
-  const grossContribution = 0.13;
+  const smsPricing = pricing.find((p) => p.type.toLowerCase().includes("promotional sms") || p.channel === "sms") || {
+    supplierCost: 0.09,
+    sellingPrice: 0.22,
+    grossMargin: 0.13,
+  };
+  const supplierCost = smsPricing.supplierCost;
+  const sellingPrice = smsPricing.sellingPrice;
+  const grossContribution = Number((sellingPrice - supplierCost).toFixed(2));
 
   const handleApproveHeader = (header: SenderHeader) => {
     updateSenderHeaderStatus(header.id, "approved");

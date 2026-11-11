@@ -31,7 +31,7 @@ import {
 export default function CustomerDetailsPage() {
   const params = useParams();
   const router = useRouter();
-  const customerId = params.id as string;
+  const customerId = (params?.id as string) || "cust-01";
 
   const { customers, campaigns, transactions, contacts, switchActiveCustomer } = useAppStore();
   const customer = customers.find((c) => c.id === customerId) || customers[0];

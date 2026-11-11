@@ -82,7 +82,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         </div>
 
         {navigation.map((item) => {
-          const isActive = pathname === item.href || (item.href !== "/admin/dashboard" && pathname.startsWith(item.href));
+          const isActive = pathname === item.href || (item.href !== "/admin/dashboard" && !!pathname?.startsWith(item.href));
           return (
             <Link
               key={item.name}

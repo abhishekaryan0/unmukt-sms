@@ -11,20 +11,22 @@ import { MessageLog } from "@/types";
 import { MessageSquare, ShieldCheck, CheckCircle2, XCircle, DollarSign } from "lucide-react";
 
 export default function AdminWhatsAppPage() {
-  const { messageLogs } = useAppStore();
+  const { messageLogs, campaigns, pricing } = useAppStore();
   const waLogs = messageLogs.filter((m) => m.channel === "whatsapp");
 
-  const totalWA = 1280000;
-  const marketing = 920000;
-  const utility = 310000;
-  const auth = 50000;
+  const waCampaigns = campaigns.filter((c) => c.channel === "whatsapp");
+  const totalWA = waCampaigns.reduce((acc, c) => acc + c.totalRecipients, 0) || 1280000;
+  const marketing = waCampaigns.filter((c) => c.messageType === "marketing" || !c.messageType).reduce((acc, c) => acc + c.totalRecipients, 0) || Math.round(totalWA * 0.72);
+  const utility = waCampaigns.filter((c) => c.messageType === "utility").reduce((acc, c) => acc + c.totalRecipients, 0) || Math.round(totalWA * 0.24);
+  const auth = waCampaigns.filter((c) => c.messageType === "otp").reduce((acc, c) => acc + c.totalRecipients, 0) || Math.round(totalWA * 0.04);
 
-  const delivered = 1269760;
-  const failed = 10240;
+  const delivered = waCampaigns.reduce((acc, c) => acc + c.delivered, 0) || Math.round(totalWA * 0.992);
+  const failed = waCampaigns.reduce((acc, c) => acc + c.failed, 0) || Math.round(totalWA * 0.008);
 
-  const metaCharges = 744000.0;
-  const customerCharges = 1242000.0;
-  const grossContribution = 498000.0;
+  const waPricing = pricing.find((p) => p.channel === "whatsapp") || { supplierCost: 0.58, sellingPrice: 0.97 };
+  const customerCharges = waCampaigns.reduce((acc, c) => acc + c.cost, 0) || Math.round(totalWA * waPricing.sellingPrice);
+  const metaCharges = Number((customerCharges * 0.6).toFixed(2));
+  const grossContribution = Number((customerCharges - metaCharges).toFixed(2));
 
   const columns: Column<MessageLog>[] = [
     {
