@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/server-auth";
+import { routingRuleSchema } from "@/lib/validations";
 
 export async function GET() {
   try {
@@ -28,12 +30,18 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { name, channel, messageType, primarySupplier, fallbackSupplier, priority, ratePerMsg, status = "active" } = body;
-
-    if (!name || !channel || !primarySupplier) {
-      return NextResponse.json({ success: false, error: "Missing required routing rule attributes" }, { status: 400 });
+    const adminAuth = requireAdmin(request);
+    if (!adminAuth.authorized) {
+      return adminAuth.errorResponse || NextResponse.json({ success: false, error: "Super Admin authorization required" }, { status: 403 });
     }
+
+    const body = await request.json();
+    const parsed = routingRuleSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ success: false, error: parsed.error.issues[0]?.message || "Invalid routing rule data" }, { status: 400 });
+    }
+
+    const { name, channel, messageType, primarySupplier, fallbackSupplier, priority, ratePerMsg, status = "active" } = parsed.data;
 
     const created = await prisma.routingRule.create({
       data: {
@@ -42,9 +50,9 @@ export async function POST(request: Request) {
         messageType: messageType || "promotional",
         primarySupplier,
         fallbackSupplier: fallbackSupplier || primarySupplier,
-        priority: priority ? parseInt(priority, 10) : 1,
-        ratePerMsg: ratePerMsg ? parseFloat(ratePerMsg) : 0.12,
-        status,
+        priority: priority ?? 1,
+        ratePerMsg: ratePerMsg ?? 0.12,
+        status: status || "active",
       },
     });
 
@@ -64,6 +72,11 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
+    const adminAuth = requireAdmin(request);
+    if (!adminAuth.authorized) {
+      return adminAuth.errorResponse || NextResponse.json({ success: false, error: "Super Admin authorization required" }, { status: 403 });
+    }
+
     const body = await request.json();
     const { id, name, channel, messageType, primarySupplier, fallbackSupplier, priority, ratePerMsg, status } = body;
 
@@ -74,7 +87,7 @@ export async function PUT(request: Request) {
     const updated = await prisma.routingRule.update({
       where: { id },
       data: {
-        ...(name && { name }),
+        ...(name && { name: name.trim() }),
         ...(channel && { channel }),
         ...(messageType && { messageType }),
         ...(primarySupplier && { primarySupplier }),
@@ -101,6 +114,11 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const adminAuth = requireAdmin(request);
+    if (!adminAuth.authorized) {
+      return adminAuth.errorResponse || NextResponse.json({ success: false, error: "Super Admin authorization required" }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 

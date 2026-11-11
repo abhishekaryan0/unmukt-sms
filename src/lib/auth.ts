@@ -4,6 +4,17 @@ const ADMIN_STORAGE_KEY = "smsunmukt_admin_session";
 const CLIENT_STORAGE_KEY = "smsunmukt_client_session";
 const IMPERSONATION_KEY = "smsunmukt_impersonation";
 
+function setCookie(name: string, value: string, days: number = 7) {
+  if (typeof document === "undefined") return;
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+}
+
+function deleteCookie(name: string) {
+  if (typeof document === "undefined") return;
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
+}
+
 export const DEMO_ADMIN = {
   email: "admin@messagehub.in",
   password: "Admin@123",
@@ -60,6 +71,7 @@ export function loginAdmin(email: string, pass: string): { success: boolean; err
     };
     if (typeof window !== "undefined") {
       localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(session));
+      setCookie(ADMIN_STORAGE_KEY, JSON.stringify(session));
     }
     return { success: true, session };
   }
@@ -75,6 +87,7 @@ export function loginClient(email: string, pass: string): { success: boolean; er
     if (typeof window !== "undefined") {
       localStorage.setItem(CLIENT_STORAGE_KEY, JSON.stringify(session));
       localStorage.removeItem(IMPERSONATION_KEY);
+      setCookie(CLIENT_STORAGE_KEY, JSON.stringify(session));
     }
     return { success: true, session };
   }
@@ -84,6 +97,7 @@ export function loginClient(email: string, pass: string): { success: boolean; er
 export function logoutAdmin(): void {
   if (typeof window !== "undefined") {
     localStorage.removeItem(ADMIN_STORAGE_KEY);
+    deleteCookie(ADMIN_STORAGE_KEY);
   }
 }
 
@@ -91,6 +105,7 @@ export function logoutClient(): void {
   if (typeof window !== "undefined") {
     localStorage.removeItem(CLIENT_STORAGE_KEY);
     localStorage.removeItem(IMPERSONATION_KEY);
+    deleteCookie(CLIENT_STORAGE_KEY);
   }
 }
 
@@ -114,6 +129,7 @@ export function impersonateCustomer(customer: Customer): UserSession {
 
   if (typeof window !== "undefined") {
     localStorage.setItem(CLIENT_STORAGE_KEY, JSON.stringify(session));
+    setCookie(CLIENT_STORAGE_KEY, JSON.stringify(session));
     localStorage.setItem(
       IMPERSONATION_KEY,
       JSON.stringify({
@@ -137,6 +153,7 @@ export function stopImpersonation(): void {
       token: "demo_client_jwt_" + Date.now(),
     };
     localStorage.setItem(CLIENT_STORAGE_KEY, JSON.stringify(defaultSession));
+    setCookie(CLIENT_STORAGE_KEY, JSON.stringify(defaultSession));
   }
 }
 

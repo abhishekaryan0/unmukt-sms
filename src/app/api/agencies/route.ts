@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/server-auth";
 
 export async function GET() {
   try {
@@ -47,6 +48,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const adminAuth = requireAdmin(request);
+    if (!adminAuth.authorized) {
+      return adminAuth.errorResponse || NextResponse.json({ success: false, error: "Super Admin authorization required" }, { status: 403 });
+    }
+
     const body = await request.json();
     const { agencyName, ownerName, email, mobile, phone, city, state, initialWallet, discount } = body;
 
@@ -59,9 +65,9 @@ export async function POST(request: Request) {
 
     const created = await prisma.agencyProfile.create({
       data: {
-        agencyName,
-        ownerName,
-        email,
+        agencyName: agencyName.trim(),
+        ownerName: ownerName.trim(),
+        email: email.trim().toLowerCase(),
         phone: mobile || phone || "9800000000",
         city: city || "Mumbai",
         state: state || "Maharashtra",
@@ -104,8 +110,13 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const adminAuth = requireAdmin(request);
+    if (!adminAuth.authorized) {
+      return adminAuth.errorResponse || NextResponse.json({ success: false, error: "Super Admin authorization required" }, { status: 403 });
+    }
+
     const body = await request.json();
-    const { id, accountStatus, walletAdjustment, note } = body;
+    const { id, accountStatus, walletAdjustment } = body;
 
     if (!id) {
       return NextResponse.json({ success: false, error: "Agency ID required" }, { status: 400 });

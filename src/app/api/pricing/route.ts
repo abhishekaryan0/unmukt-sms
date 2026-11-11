@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/server-auth";
+import { pricingConfigSchema } from "@/lib/validations";
 
 export async function GET() {
   try {
@@ -21,14 +23,19 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
-    const body = await request.json();
-    const { type, sellingPrice } = body;
-
-    if (!type || sellingPrice === undefined) {
-      return NextResponse.json({ success: false, error: "Type and selling price are required" }, { status: 400 });
+    const adminAuth = requireAdmin(request);
+    if (!adminAuth.authorized) {
+      return adminAuth.errorResponse || NextResponse.json({ success: false, error: "Super Admin authorization required" }, { status: 403 });
     }
 
-    const priceNum = parseFloat(sellingPrice);
+    const body = await request.json();
+    const parsed = pricingConfigSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ success: false, error: parsed.error.issues[0]?.message || "Invalid pricing data" }, { status: 400 });
+    }
+
+    const { type, sellingPrice } = parsed.data;
+    const priceNum = Number(sellingPrice);
 
     // Find existing config
     const existing = await prisma.pricingConfig.findFirst({

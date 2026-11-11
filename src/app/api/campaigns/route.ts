@@ -1,15 +1,27 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { CampaignStatus, TransactionType } from "@prisma/client";
+import { campaignSchema } from "@/lib/validations";
+import { resolveTenantId } from "@/lib/server-auth";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const customerId = searchParams.get("customerId");
+    const requestedCustomerId = searchParams.get("customerId");
     const channel = searchParams.get("channel");
 
+    // Enforce multi-tenant authorization
+    const { customerId, session } = resolveTenantId(request, requestedCustomerId);
+
     const where: any = {};
-    if (customerId && customerId !== "all") where.customerId = customerId;
+    if (session?.role === "super_admin") {
+      if (requestedCustomerId && requestedCustomerId !== "all") {
+        where.customerId = requestedCustomerId;
+      }
+    } else {
+      where.customerId = customerId;
+    }
+
     if (channel && channel !== "all") where.channel = channel;
 
     const campaigns = await prisma.campaign.findMany({
@@ -48,10 +60,18 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const rawBody = await request.json();
+    const parsed = campaignSchema.safeParse(rawBody);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: parsed.error.issues[0]?.message || "Invalid campaign payload" },
+        { status: 400 }
+      );
+    }
+
     const {
-      customerId,
-      customerName,
+      customerId: requestedId,
       campaignName,
       channel,
       messageType,
@@ -64,75 +84,94 @@ export async function POST(request: Request) {
       templateId,
       templateName,
       mediaUrl,
-    } = body;
+    } = parsed.data;
 
-    if (!campaignName || !channel || !totalRecipients || cost === undefined) {
-      return NextResponse.json(
-        { success: false, error: "Missing required campaign parameters" },
-        { status: 400 }
-      );
-    }
+    // Multi-tenant check
+    const { customerId: targetCustomerId } = resolveTenantId(request, requestedId);
 
-    const costNum = parseFloat(cost) || 0;
-    const recipientsNum = parseInt(totalRecipients, 10) || 1;
+    const costNum = Number(cost.toFixed(2));
+    const recipientsNum = totalRecipients;
 
-    // Find customer to check wallet balance
-    const targetCustomer = await prisma.customerProfile.findFirst({
-      where: customerId ? { id: customerId } : { id: "cust-01" },
+    // 1. Resolve Dynamic Carrier Supplier & Routing
+    const routingRule = await prisma.routingRule.findFirst({
+      where: {
+        channel,
+        status: "active",
+      },
+      orderBy: { priority: "asc" },
     });
 
-    if (!targetCustomer) {
-      return NextResponse.json({ success: false, error: "Customer profile not found" }, { status: 404 });
-    }
+    const selectedGateway =
+      routingRule?.primarySupplier || (channel === "sms" ? "EJOIN EIMS" : "Meta WhatsApp BSP");
 
-    const availableBal = Number(targetCustomer.walletBalance);
-    if (availableBal < costNum) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Insufficient wallet balance. Available: ₹${availableBal.toFixed(
-            2
-          )}, Required: ₹${costNum.toFixed(2)}. Please recharge your wallet.`,
-        },
-        { status: 400 }
-      );
-    }
+    const supplier = await prisma.supplier.findFirst({
+      where: { name: selectedGateway },
+    });
 
-    // Atomic execution via Prisma Transaction
+    const unitSupplierCost = supplier ? Number(supplier.costPerMessage) : channel === "sms" ? 0.09 : 0.65;
+    const totalSupplierExpense = Number((unitSupplierCost * recipientsNum).toFixed(4));
+
+    // 2. Atomic Transaction: Decrement Wallet with balance guarantee, create Ledger, create Campaign & CDR Logs
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Deduct wallet balance
-      const newBal = availableBal - costNum;
-      await tx.customerProfile.update({
-        where: { id: targetCustomer.id },
+      // Find customer inside transaction to read current balance for ledger
+      const cust = await tx.customerProfile.findUnique({
+        where: { id: targetCustomerId },
+      });
+
+      if (!cust) {
+        throw new Error("Customer profile not found");
+      }
+
+      const prevBal = Number(cust.walletBalance);
+      if (prevBal < costNum) {
+        throw new Error(
+          `Insufficient balance. Available: ₹${prevBal.toFixed(2)}, Required: ₹${costNum.toFixed(2)}.`
+        );
+      }
+
+      // Race-condition immune atomic decrement
+      const updated = await tx.customerProfile.updateMany({
+        where: {
+          id: targetCustomerId,
+          walletBalance: { gte: costNum },
+        },
         data: {
-          walletBalance: newBal,
+          walletBalance: { decrement: costNum },
           totalMessages: { increment: recipientsNum },
         },
       });
 
-      // 2. Record ledger transaction
+      if (updated.count === 0) {
+        throw new Error("Insufficient wallet balance or concurrent transaction conflict. Please retry.");
+      }
+
+      const newBal = Number((prevBal - costNum).toFixed(2));
+
+      // Create Ledger Entry
       const isSms = channel === "sms";
+      const txnRef = `CMP-${isSms ? "SMS" : "WA"}-${Date.now().toString().slice(-6)}`;
+
       await tx.walletTransaction.create({
         data: {
-          customerId: targetCustomer.id,
+          customerId: targetCustomerId,
           type: isSms ? TransactionType.SMS_DEDUCTION : TransactionType.WHATSAPP_DEDUCTION,
           amount: costNum,
-          previousBalance: availableBal,
+          previousBalance: prevBal,
           newBalance: newBal,
-          reference: `CMP-${isSms ? "SMS" : "WA"}-${Date.now().toString().slice(-6)}`,
-          description: `Broadcast charge for ${recipientsNum} ${channel.toUpperCase()} messages ("${campaignName}")`,
+          reference: txnRef,
+          description: `Broadcast charge for ${recipientsNum} ${channel.toUpperCase()} messages ("${campaignName}") via ${selectedGateway}`,
           channel,
         },
       });
 
-      // 3. Create Campaign
+      // Create Campaign Record
       const deliveredCount = status === "scheduled" ? 0 : Math.round(recipientsNum * 0.994);
       const failedCount = status === "scheduled" ? 0 : recipientsNum - deliveredCount;
 
       const campaign = await tx.campaign.create({
         data: {
-          customerId: targetCustomer.id,
-          customerName: customerName || targetCustomer.businessName,
+          customerId: targetCustomerId,
+          customerName: cust.businessName,
           campaignName,
           channel,
           messageType,
@@ -140,7 +179,7 @@ export async function POST(request: Request) {
           templateId,
           templateName,
           messageContent: messageContent || "",
-          mediaUrl,
+          mediaUrl: mediaUrl || null,
           totalRecipients: recipientsNum,
           delivered: deliveredCount,
           failed: failedCount,
@@ -151,12 +190,39 @@ export async function POST(request: Request) {
         },
       });
 
+      // Create CDR Message Log Entry
+      if (status !== "scheduled") {
+        await tx.messageLog.create({
+          data: {
+            customerId: targetCustomerId,
+            customerName: cust.businessName,
+            channel,
+            senderId: senderId || (channel === "sms" ? "SHRFSH" : "+91 80009 12345"),
+            recipient: `Batch: ${recipientsNum} recipients`,
+            route: `${selectedGateway} (Priority Rule #${routingRule?.priority || 1})`,
+            cost: costNum,
+            supplierCost: totalSupplierExpense,
+            status: "delivered",
+          },
+        });
+
+        // Update supplier stats
+        if (supplier) {
+          await tx.supplier.update({
+            where: { id: supplier.id },
+            data: {
+              totalMessages: { increment: recipientsNum },
+            },
+          });
+        }
+      }
+
       return { campaign, newBalance: newBal };
     });
 
     return NextResponse.json({
       success: true,
-      message: `Campaign "${campaignName}" dispatched successfully`,
+      message: `Campaign "${campaignName}" dispatched successfully via ${selectedGateway}`,
       data: {
         id: result.campaign.id,
         customerId: result.campaign.customerId,
@@ -178,6 +244,6 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     console.error("POST /api/campaigns error:", error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
   }
 }

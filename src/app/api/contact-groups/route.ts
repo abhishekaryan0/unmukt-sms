@@ -1,9 +1,26 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { resolveTenantId } from "@/lib/server-auth";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const requestedCustomer = searchParams.get("customerId");
+
+    const tenant = resolveTenantId(request, requestedCustomer);
+    if (!tenant.authorized) {
+      return tenant.errorResponse || NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const where: any = {};
+    if (tenant.session?.role === "client") {
+      where.customerId = tenant.customerId;
+    } else if (requestedCustomer && requestedCustomer !== "all") {
+      where.customerId = requestedCustomer;
+    }
+
     const groups = await prisma.contactGroup.findMany({
+      where,
       include: {
         _count: {
           select: { contacts: true },
@@ -30,7 +47,12 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, description, customerId = "cust-01" } = body;
+    const { name, description, customerId: reqCustomerId } = body;
+
+    const tenant = resolveTenantId(request, reqCustomerId);
+    if (!tenant.authorized) {
+      return tenant.errorResponse || NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
 
     if (!name || !name.trim()) {
       return NextResponse.json({ success: false, error: "Group name is required" }, { status: 400 });
@@ -38,7 +60,7 @@ export async function POST(request: Request) {
 
     const group = await prisma.contactGroup.create({
       data: {
-        customerId,
+        customerId: tenant.customerId,
         name: name.trim(),
         description: description?.trim() || null,
       },
@@ -70,7 +92,23 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: "Group ID is required" }, { status: 400 });
     }
 
-    // Unassign or delete group
+    const existingGroup = await prisma.contactGroup.findUnique({
+      where: { id },
+    });
+
+    if (!existingGroup) {
+      return NextResponse.json({ success: false, error: "Contact group not found" }, { status: 404 });
+    }
+
+    const tenant = resolveTenantId(request, existingGroup.customerId);
+    if (!tenant.authorized) {
+      return tenant.errorResponse || NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (tenant.session?.role === "client" && existingGroup.customerId !== tenant.customerId) {
+      return NextResponse.json({ success: false, error: "Unauthorized access to this group" }, { status: 403 });
+    }
+
     await prisma.contactGroup.delete({
       where: { id },
     });

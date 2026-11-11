@@ -1,14 +1,24 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { HeaderStatus } from "@prisma/client";
+import { resolveTenantId, requireAdmin } from "@/lib/server-auth";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const customerId = searchParams.get("customerId");
+    const requestedCustomer = searchParams.get("customerId");
+
+    const tenant = resolveTenantId(request, requestedCustomer);
+    if (!tenant.authorized) {
+      return tenant.errorResponse || NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
 
     const where: any = {};
-    if (customerId && customerId !== "all") where.customerId = customerId;
+    if (tenant.session?.role === "client") {
+      where.customerId = tenant.customerId;
+    } else if (requestedCustomer && requestedCustomer !== "all") {
+      where.customerId = requestedCustomer;
+    }
 
     const headers = await prisma.senderHeader.findMany({
       where,
@@ -38,7 +48,12 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { customerId, header, category, dltEntityId, dltOperator, description } = body;
+    const { customerId: reqCustomerId, header, category, dltEntityId, dltOperator, description } = body;
+
+    const tenant = resolveTenantId(request, reqCustomerId);
+    if (!tenant.authorized) {
+      return tenant.errorResponse || NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
 
     const cleanHeader = header?.trim().toUpperCase();
     if (!cleanHeader || cleanHeader.length !== 6 || !/^[A-Z0-9]{6}$/.test(cleanHeader)) {
@@ -48,8 +63,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const customer = await prisma.customerProfile.findFirst({
-      where: customerId ? { id: customerId } : { id: "cust-01" },
+    const customer = await prisma.customerProfile.findUnique({
+      where: { id: tenant.customerId },
     });
 
     if (!customer) {
@@ -104,6 +119,11 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const adminAuth = requireAdmin(request);
+    if (!adminAuth.authorized) {
+      return adminAuth.errorResponse || NextResponse.json({ success: false, error: "Super Admin authorization required" }, { status: 403 });
+    }
+
     const body = await request.json();
     const { id, status } = body;
 

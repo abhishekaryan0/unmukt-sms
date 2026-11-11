@@ -1,13 +1,23 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { resolveTenantId } from "@/lib/server-auth";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const customerId = searchParams.get("customerId");
+    const requestedCustomer = searchParams.get("customerId");
+
+    const tenant = resolveTenantId(request, requestedCustomer);
+    if (!tenant.authorized) {
+      return tenant.errorResponse || NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
 
     const where: any = {};
-    if (customerId && customerId !== "all") where.customerId = customerId;
+    if (tenant.session?.role === "client") {
+      where.customerId = tenant.customerId;
+    } else if (requestedCustomer && requestedCustomer !== "all") {
+      where.customerId = requestedCustomer;
+    }
 
     const invoices = await prisma.invoice.findMany({
       where,

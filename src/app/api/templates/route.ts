@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/server-auth";
 
 export async function GET(request: Request) {
   try {
@@ -105,6 +106,11 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const adminAuth = requireAdmin(request);
+    if (!adminAuth.authorized) {
+      return adminAuth.errorResponse || NextResponse.json({ success: false, error: "Super Admin authorization required" }, { status: 403 });
+    }
+
     const body = await request.json();
     const { id, status } = body;
 

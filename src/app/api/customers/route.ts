@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { AccountStatus, TransactionType } from "@prisma/client";
+import { hashPassword } from "@/lib/crypto";
+import { customerOnboardSchema } from "@/lib/validations";
 
 export async function GET(request: Request) {
   try {
@@ -70,6 +72,15 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const parsed = customerOnboardSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: parsed.error.issues[0]?.message || "Validation failed" },
+        { status: 400 }
+      );
+    }
+
     const {
       businessName,
       ownerName,
@@ -82,14 +93,7 @@ export async function POST(request: Request) {
       gstin,
       dltEntityId,
       initialWallet = 500,
-    } = body;
-
-    if (!businessName || !ownerName || !email || !mobile) {
-      return NextResponse.json(
-        { success: false, error: "Business name, owner name, email, and mobile are required" },
-        { status: 400 }
-      );
-    }
+    } = parsed.data;
 
     const cleanEmail = email.trim().toLowerCase();
     const cleanMobile = mobile.replace(/\D/g, "").slice(-10);
@@ -108,13 +112,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const passwordToUse =
+    const rawPassword =
       password && password.trim().length >= 6
         ? password.trim()
         : `Client@${Math.floor(100 + Math.random() * 900)}`;
 
+    const secureHashedPassword = hashPassword(rawPassword);
     const assignedDlt = dltEntityId?.trim() || `17011${Math.floor(1000000000 + Math.random() * 9000000000)}`;
-    const balanceNum = parseFloat(initialWallet) || 0;
+    const balanceNum = typeof initialWallet === "number" ? initialWallet : parseFloat(initialWallet) || 0;
 
     // Execute atomic transaction: create User + create CustomerProfile + initial wallet transaction
     const result = await prisma.$transaction(async (tx) => {
@@ -124,7 +129,7 @@ export async function POST(request: Request) {
         user = await tx.user.update({
           where: { id: user.id },
           data: {
-            passwordHash: passwordToUse,
+            passwordHash: secureHashedPassword,
             name: ownerName.trim(),
             role: "CLIENT",
           },
@@ -134,7 +139,7 @@ export async function POST(request: Request) {
           data: {
             email: cleanEmail,
             name: ownerName.trim(),
-            passwordHash: passwordToUse,
+            passwordHash: secureHashedPassword,
             role: "CLIENT",
           },
         });
@@ -183,7 +188,7 @@ export async function POST(request: Request) {
         },
       });
 
-      return { customer, user, password: passwordToUse };
+      return { customer, user, password: rawPassword };
     });
 
     return NextResponse.json({

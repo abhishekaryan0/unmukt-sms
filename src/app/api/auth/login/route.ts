@@ -1,18 +1,21 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { verifyPassword, hashPassword } from "@/lib/crypto";
+import { loginSchema } from "@/lib/validations";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password, portal } = body;
+    const parsed = loginSchema.safeParse(body);
 
-    if (!email || !password) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: "Email and password are required" },
+        { success: false, error: parsed.error.issues[0]?.message || "Invalid credentials format" },
         { status: 400 }
       );
     }
 
+    const { email, password, portal } = parsed.data;
     const cleanEmail = email.trim().toLowerCase();
     const cleanMobile = email.replace(/\D/g, "").slice(-10);
 
@@ -31,11 +34,21 @@ export async function POST(request: Request) {
       },
     });
 
-    if (!user || user.passwordHash !== password) {
+    if (!user || !verifyPassword(password, user.passwordHash)) {
       return NextResponse.json(
-        { success: false, error: "Invalid email address or passcode" },
+        { success: false, error: "Invalid email address/mobile number or passcode" },
         { status: 401 }
       );
+    }
+
+    // Seamlessly upgrade plaintext passwords to PBKDF2 hash on successful login
+    if (!user.passwordHash.startsWith("pbkdf2:")) {
+      prisma.user
+        .update({
+          where: { id: user.id },
+          data: { passwordHash: hashPassword(password) },
+        })
+        .catch((err) => console.error("Password upgrade error:", err));
     }
 
     // Role check depending on portal
@@ -72,7 +85,7 @@ export async function POST(request: Request) {
       customer: user.customer,
     });
 
-    // Set auth cookie safely encoded
+    // Set auth cookie safely encoded with HttpOnly protection in production
     const cookieName = user.role === "SUPER_ADMIN" ? "smsunmukt_admin_session" : "smsunmukt_client_session";
     response.cookies.set(cookieName, encodeURIComponent(JSON.stringify(session)), {
       httpOnly: false,

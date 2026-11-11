@@ -1,12 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { AccountStatus, TransactionType } from "@prisma/client";
+import { resolveTenantId, requireAdmin } from "@/lib/server-auth";
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
+    const tenant = resolveTenantId(request, params.id);
+    if (!tenant.authorized) {
+      return tenant.errorResponse || NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (tenant.session?.role === "client" && tenant.customerId !== params.id) {
+      return NextResponse.json({ success: false, error: "Unauthorized access to customer profile" }, { status: 403 });
+    }
+
     const customer = await prisma.customerProfile.findUnique({
       where: { id: params.id },
       include: {
@@ -48,6 +58,12 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Only Admin can adjust wallet or alter customer status
+    const adminAuth = requireAdmin(request);
+    if (!adminAuth.authorized) {
+      return adminAuth.errorResponse || NextResponse.json({ success: false, error: "Super Admin authorization required" }, { status: 403 });
+    }
+
     const body = await request.json();
     const { action, status, amount, type, note } = body;
 
@@ -80,7 +96,7 @@ export async function PATCH(
       });
     }
 
-    // Manual Wallet Credit / Debit
+    // Manual Wallet Credit / Debit (Atomic)
     if (action === "adjust_wallet") {
       const adjAmount = parseFloat(amount);
       if (!adjAmount || adjAmount <= 0) {
@@ -92,20 +108,30 @@ export async function PATCH(
 
       const prevBal = Number(customer.walletBalance);
       const isCredit = type === "credit";
-      const newBal = isCredit ? prevBal + adjAmount : prevBal - adjAmount;
 
-      if (!isCredit && newBal < 0) {
+      if (!isCredit && prevBal < adjAmount) {
         return NextResponse.json(
-          { success: false, error: `Insufficient customer balance. Available: ₹${prevBal}` },
+          { success: false, error: `Insufficient customer balance. Available: ₹${prevBal.toFixed(2)}` },
           { status: 400 }
         );
       }
 
       const updated = await prisma.$transaction(async (tx) => {
-        const c = await tx.customerProfile.update({
-          where: { id: customer.id },
-          data: { walletBalance: newBal },
-        });
+        // Atomic balance update
+        const c = isCredit
+          ? await tx.customerProfile.update({
+              where: { id: customer.id },
+              data: { walletBalance: { increment: adjAmount } },
+            })
+          : await tx.customerProfile.update({
+              where: {
+                id: customer.id,
+                walletBalance: { gte: adjAmount },
+              },
+              data: { walletBalance: { decrement: adjAmount } },
+            });
+
+        const newBal = Number(c.walletBalance);
 
         await tx.walletTransaction.create({
           data: {

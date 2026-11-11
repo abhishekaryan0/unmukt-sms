@@ -1,14 +1,26 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { resolveTenantId } from "@/lib/server-auth";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const profile = await prisma.whatsAppProfile.findFirst();
+    const { searchParams } = new URL(request.url);
+    const requestedCustomer = searchParams.get("customerId");
+
+    const tenant = resolveTenantId(request, requestedCustomer);
+    if (!tenant.authorized) {
+      return tenant.errorResponse || NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const profile = await prisma.whatsAppProfile.findFirst({
+      where: { customerId: tenant.customerId },
+    }) || await prisma.whatsAppProfile.findFirst();
+
     if (!profile) {
       return NextResponse.json({
         success: true,
         data: {
-          displayName: "Sharma Fashion Store",
+          displayName: "Official WhatsApp Channel",
           phoneNumber: "+91 80009 12345",
           qualityRating: "High",
           messagingTier: "Tier 2 (10,000 conversations / 24h)",
@@ -26,6 +38,7 @@ export async function GET() {
       success: true,
       data: {
         id: profile.id,
+        customerId: profile.customerId,
         displayName: profile.displayName,
         phoneNumber: profile.phoneNumber,
         qualityRating: profile.qualityRating,
@@ -47,28 +60,36 @@ export async function GET() {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    const { displayName, about, category, customerId = "cust-01" } = body;
+    const { displayName, about, category, customerId: reqCustomerId } = body;
 
-    const existing = await prisma.whatsAppProfile.findFirst();
+    const tenant = resolveTenantId(request, reqCustomerId);
+    if (!tenant.authorized) {
+      return tenant.errorResponse || NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const existing = await prisma.whatsAppProfile.findFirst({
+      where: { customerId: tenant.customerId },
+    });
+
     let updated;
 
     if (existing) {
       updated = await prisma.whatsAppProfile.update({
         where: { id: existing.id },
         data: {
-          ...(displayName && { displayName }),
-          ...(about !== undefined && { about }),
+          ...(displayName && { displayName: displayName.trim() }),
+          ...(about !== undefined && { about: about.trim() }),
           ...(category && { category }),
         },
       });
     } else {
       updated = await prisma.whatsAppProfile.create({
         data: {
-          customerId,
-          displayName: displayName || "Sharma Fashion Store",
+          customerId: tenant.customerId,
+          displayName: displayName?.trim() || "Official WhatsApp Channel",
           phoneNumber: "+91 80009 12345",
-          wabaId: "waba_781290348123",
-          about: about || "",
+          wabaId: `waba_${Date.now().toString().slice(-10)}`,
+          about: about?.trim() || "",
           category: category || "Retail",
         },
       });

@@ -1,13 +1,23 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { resolveTenantId } from "@/lib/server-auth";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const customerId = searchParams.get("customerId");
+    const requestedCustomer = searchParams.get("customerId");
+
+    const tenant = resolveTenantId(request, requestedCustomer);
+    if (!tenant.authorized) {
+      return tenant.errorResponse || NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
 
     const where: any = {};
-    if (customerId && customerId !== "all") where.customerId = customerId;
+    if (tenant.session?.role === "client") {
+      where.customerId = tenant.customerId;
+    } else if (requestedCustomer && requestedCustomer !== "all") {
+      where.customerId = requestedCustomer;
+    }
 
     const tickets = await prisma.supportTicket.findMany({
       where,
@@ -47,24 +57,29 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { customerId, customerName, subject, category, priority = "medium", message } = body;
+    const { customerId: reqCustomerId, customerName: reqCustomerName, subject, category, priority = "medium", message } = body;
+
+    const tenant = resolveTenantId(request, reqCustomerId);
+    if (!tenant.authorized) {
+      return tenant.errorResponse || NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
 
     if (!subject || !category || !message) {
       return NextResponse.json({ success: false, error: "Subject, category, and message are required" }, { status: 400 });
     }
 
-    const custId = customerId || "cust-01";
-    let custName = customerName;
-    if (!custName) {
+    const custId = tenant.customerId;
+    let custName = reqCustomerName;
+    if (!custName || tenant.session?.role === "client") {
       const cust = await prisma.customerProfile.findUnique({ where: { id: custId } });
-      custName = cust ? cust.businessName : "Valued Customer";
+      custName = cust ? cust.businessName : tenant.session?.name || "Valued Customer";
     }
 
     const ticket = await prisma.supportTicket.create({
       data: {
         customerId: custId,
         customerName: custName,
-        subject,
+        subject: subject.trim(),
         category,
         priority,
         status: "open",
@@ -72,7 +87,7 @@ export async function POST(request: Request) {
           create: {
             sender: "customer",
             senderName: custName,
-            message,
+            message: message.trim(),
           },
         },
       },
@@ -117,14 +132,35 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ success: false, error: "Ticket ID required" }, { status: 400 });
     }
 
+    const existingTicket = await prisma.supportTicket.findUnique({
+      where: { id: ticketId },
+    });
+
+    if (!existingTicket) {
+      return NextResponse.json({ success: false, error: "Ticket not found" }, { status: 404 });
+    }
+
+    const tenant = resolveTenantId(request, existingTicket.customerId);
+    if (!tenant.authorized) {
+      return tenant.errorResponse || NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Verify tenant ownership if client
+    if (tenant.session?.role === "client" && existingTicket.customerId !== tenant.customerId) {
+      return NextResponse.json({ success: false, error: "Unauthorized access to this ticket" }, { status: 403 });
+    }
+
+    const actualSender = tenant.session?.role === "super_admin" ? (sender === "support" ? "support" : "customer") : "customer";
+    const actualSenderName = tenant.session?.name || senderName || "User";
+
     const updated = await prisma.$transaction(async (tx) => {
       if (message) {
         await tx.ticketMessage.create({
           data: {
             ticketId,
-            sender,
-            senderName,
-            message,
+            sender: actualSender,
+            senderName: actualSenderName,
+            message: message.trim(),
           },
         });
       }

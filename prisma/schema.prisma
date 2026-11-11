@@ -307,6 +307,8 @@ model RoutingRule {
   status           String   @default("active")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
+  @@index([channel, messageType, status])
 }
 
 // Platform Pricing & Wholesale Unit Margin
@@ -368,4 +370,5 @@ model MessageLog {
   @@index([customerId, timestamp])
   @@index([channel])
   @@index([status])
+  @@index([recipient])
 }
