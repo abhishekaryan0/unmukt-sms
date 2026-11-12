@@ -34,16 +34,16 @@ export default function ReportsPage() {
     .reduce((acc, c) => acc + c.totalRecipients, 0);
   const totalRecipients = totalSms + totalWa;
   const totalDelivered = clientCampaigns.reduce((acc, c) => acc + c.delivered, 0);
-  const deliveryRatio = totalRecipients > 0 ? ((totalDelivered / totalRecipients) * 100).toFixed(1) : "99.2";
+  const deliveryRatio = totalRecipients > 0 ? ((totalDelivered / totalRecipients) * 100).toFixed(1) : "0.0";
   const totalSpent = clientCampaigns.reduce((acc, c) => acc + c.cost, 0);
 
   const monthlyConsumptionData = [
-    { month: "Jun", smsUnits: Math.round(totalSms * 0.1) || 120, waMessages: Math.round(totalWa * 0.08) || 80, cost: Math.round(totalSpent * 0.09) || 150 },
-    { month: "Jul", smsUnits: Math.round(totalSms * 0.12) || 150, waMessages: Math.round(totalWa * 0.12) || 110, cost: Math.round(totalSpent * 0.12) || 200 },
-    { month: "Aug", smsUnits: Math.round(totalSms * 0.15) || 210, waMessages: Math.round(totalWa * 0.16) || 160, cost: Math.round(totalSpent * 0.16) || 280 },
-    { month: "Sep", smsUnits: Math.round(totalSms * 0.18) || 250, waMessages: Math.round(totalWa * 0.18) || 200, cost: Math.round(totalSpent * 0.18) || 320 },
-    { month: "Oct", smsUnits: Math.round(totalSms * 0.22) || 310, waMessages: Math.round(totalWa * 0.22) || 240, cost: Math.round(totalSpent * 0.22) || 410 },
-    { month: "Nov", smsUnits: Math.round(totalSms * 0.23) || 340, waMessages: Math.round(totalWa * 0.24) || 260, cost: Math.round(totalSpent * 0.23) || 450 },
+    { month: "Jun", smsUnits: Math.round(totalSms * 0.1), waMessages: Math.round(totalWa * 0.08), cost: Math.round(totalSpent * 0.09) },
+    { month: "Jul", smsUnits: Math.round(totalSms * 0.12), waMessages: Math.round(totalWa * 0.12), cost: Math.round(totalSpent * 0.12) },
+    { month: "Aug", smsUnits: Math.round(totalSms * 0.15), waMessages: Math.round(totalWa * 0.16), cost: Math.round(totalSpent * 0.16) },
+    { month: "Sep", smsUnits: Math.round(totalSms * 0.18), waMessages: Math.round(totalWa * 0.18), cost: Math.round(totalSpent * 0.18) },
+    { month: "Oct", smsUnits: Math.round(totalSms * 0.22), waMessages: Math.round(totalWa * 0.22), cost: Math.round(totalSpent * 0.22) },
+    { month: "Nov", smsUnits: Math.round(totalSms * 0.23), waMessages: Math.round(totalWa * 0.24), cost: Math.round(totalSpent * 0.23) },
   ];
 
   const deliveryPerformanceData = [

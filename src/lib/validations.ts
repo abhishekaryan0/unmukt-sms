@@ -25,7 +25,7 @@ export const customerOnboardSchema = z.object({
   state: z.string().max(50).default("Maharashtra"),
   gstin: z.string().max(15).optional(),
   dltEntityId: z.string().max(30).optional(),
-  initialWallet: z.union([z.number(), z.string()]).transform((v) => Math.max(0, parseFloat(String(v)) || 0)),
+  initialWallet: z.union([z.number(), z.string()]).optional().default(100).transform((v) => Math.max(0, parseFloat(String(v)) || 100)),
 });
 
 export const campaignSchema = z.object({

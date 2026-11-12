@@ -611,6 +611,7 @@ export const INITIAL_TEMPLATES: Template[] = [
 export const INITIAL_CONTACT_GROUPS: ContactGroup[] = [
   {
     id: "grp-01",
+    customerId: "cust-01",
     name: "VIP Customers",
     contactCount: 340,
     description: "High-spending premium customers with billing above ₹10,000",
@@ -618,6 +619,7 @@ export const INITIAL_CONTACT_GROUPS: ContactGroup[] = [
   },
   {
     id: "grp-02",
+    customerId: "cust-01",
     name: "Festival Offers",
     contactCount: 1250,
     description: "Customers who opted in for festive seasonal discounts",
@@ -625,6 +627,7 @@ export const INITIAL_CONTACT_GROUPS: ContactGroup[] = [
   },
   {
     id: "grp-03",
+    customerId: "cust-01",
     name: "Regular Customers",
     contactCount: 890,
     description: "Frequent repeat shoppers visiting at least once a month",
@@ -632,6 +635,7 @@ export const INITIAL_CONTACT_GROUPS: ContactGroup[] = [
   },
   {
     id: "grp-04",
+    customerId: "cust-01",
     name: "New Walk-ins",
     contactCount: 420,
     description: "Recent first-time visitors registered in store POS",
@@ -642,6 +646,7 @@ export const INITIAL_CONTACT_GROUPS: ContactGroup[] = [
 export const INITIAL_CONTACTS: Contact[] = [
   {
     id: "cnt-01",
+    customerId: "cust-01",
     name: "Amitabh Mehra",
     mobile: "9810123456",
     email: "amitabh.mehra@gmail.com",
@@ -653,6 +658,7 @@ export const INITIAL_CONTACTS: Contact[] = [
   },
   {
     id: "cnt-02",
+    customerId: "cust-01",
     name: "Sunita Kapoor",
     mobile: "9811234567",
     email: "sunita.k@outlook.com",
@@ -664,6 +670,7 @@ export const INITIAL_CONTACTS: Contact[] = [
   },
   {
     id: "cnt-03",
+    customerId: "cust-01",
     name: "Vikas Singhal",
     mobile: "9876543210",
     email: "vikas.singhal@rediffmail.com",
@@ -675,6 +682,7 @@ export const INITIAL_CONTACTS: Contact[] = [
   },
   {
     id: "cnt-04",
+    customerId: "cust-01",
     name: "Priya Aggarwal",
     mobile: "9818812345",
     email: "priya.aggarwal@yahoo.in",
@@ -686,6 +694,7 @@ export const INITIAL_CONTACTS: Contact[] = [
   },
   {
     id: "cnt-05",
+    customerId: "cust-01",
     name: "Rohan Khanna",
     mobile: "9910098765",
     email: "rohan.khanna@gmail.com",
@@ -697,6 +706,7 @@ export const INITIAL_CONTACTS: Contact[] = [
   },
   {
     id: "cnt-06",
+    customerId: "cust-01",
     name: "Meenakshi Joshi",
     mobile: "9821102938",
     email: "meenakshi.j@gmail.com",
@@ -709,6 +719,7 @@ export const INITIAL_CONTACTS: Contact[] = [
   },
   {
     id: "cnt-07",
+    customerId: "cust-01",
     name: "Deepak Choudhary",
     mobile: "9810234509",
     email: "deepak.c@hotmail.com",
@@ -721,6 +732,7 @@ export const INITIAL_CONTACTS: Contact[] = [
   },
   {
     id: "cnt-08",
+    customerId: "cust-01",
     name: "Ananya Saxena",
     mobile: "9899012345",
     email: "ananya.saxena@gmail.com",

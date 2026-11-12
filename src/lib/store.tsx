@@ -135,30 +135,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [messageLogs, setMessageLogs] = useState<MessageLog[]>(INITIAL_MESSAGE_LOGS);
   const [senderHeaders, setSenderHeaders] = useState<SenderHeader[]>(INITIAL_SENDER_HEADERS);
   const [whatsappProfile, setWhatsappProfile] = useState<WhatsAppProfile>(INITIAL_WHATSAPP_PROFILE);
-  const [activeCustomerId, setActiveCustomerId] = useState<string>("cust-01");
+  const [activeCustomerId, setActiveCustomerId] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const session = getClientSession();
+      if (session?.id) return session.id;
+    }
+    return "cust-01";
+  });
 
   // Synchronize state from PostgreSQL mind-tree database
   const refreshFromDatabase = useCallback(async () => {
     try {
-      const res = await fetch("/api/bootstrap");
+      const session = getClientSession();
+      const queryParam = session?.id ? `?customerId=${encodeURIComponent(session.id)}` : "";
+      const res = await fetch(`/api/bootstrap${queryParam}`);
       if (!res.ok) throw new Error("Bootstrap endpoint responded with status " + res.status);
       const json = await res.json();
       if (json.success && json.data) {
         const d = json.data;
-        if (d.customers?.length) setCustomers(d.customers);
-        if (d.agencies?.length) setAgencies(d.agencies);
-        if (d.campaigns?.length) setCampaigns(d.campaigns);
-        if (d.suppliers?.length) setSuppliers(d.suppliers);
-        if (d.routingRules?.length) setRoutingRules(d.routingRules);
-        if (d.pricing?.length) setPricing(d.pricing);
-        if (d.transactions?.length) setTransactions(d.transactions);
-        if (d.templates?.length) setTemplates(d.templates);
-        if (d.contactGroups?.length) setContactGroups(d.contactGroups);
-        if (d.contacts?.length) setContacts(d.contacts);
-        if (d.supportTickets?.length) setSupportTickets(d.supportTickets);
-        if (d.invoices?.length) setInvoices(d.invoices);
-        if (d.messageLogs?.length) setMessageLogs(d.messageLogs);
-        if (d.senderHeaders?.length) setSenderHeaders(d.senderHeaders);
+        if (d.customers !== undefined) setCustomers(d.customers);
+        if (d.agencies !== undefined) setAgencies(d.agencies);
+        if (d.campaigns !== undefined) setCampaigns(d.campaigns);
+        if (d.suppliers !== undefined) setSuppliers(d.suppliers);
+        if (d.routingRules !== undefined) setRoutingRules(d.routingRules);
+        if (d.pricing !== undefined) setPricing(d.pricing);
+        if (d.transactions !== undefined) setTransactions(d.transactions);
+        if (d.templates !== undefined) setTemplates(d.templates);
+        if (d.contactGroups !== undefined) setContactGroups(d.contactGroups);
+        if (d.contacts !== undefined) setContacts(d.contacts);
+        if (d.supportTickets !== undefined) setSupportTickets(d.supportTickets);
+        if (d.invoices !== undefined) setInvoices(d.invoices);
+        if (d.messageLogs !== undefined) setMessageLogs(d.messageLogs);
+        if (d.senderHeaders !== undefined) setSenderHeaders(d.senderHeaders);
         if (d.whatsappProfile) setWhatsappProfile(d.whatsappProfile);
         setIsDbConnected(true);
       }
@@ -167,6 +175,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setIsDbConnected(false);
     }
   }, []);
+
+  // Listen for login/session change events dynamically
+  useEffect(() => {
+    const handleAuthChange = () => {
+      const session = getClientSession();
+      if (session?.id) {
+        setActiveCustomerId(session.id);
+        refreshFromDatabase();
+      }
+    };
+    window.addEventListener("storage", handleAuthChange);
+    window.addEventListener("smsunmukt_auth_changed", handleAuthChange);
+    return () => {
+      window.removeEventListener("storage", handleAuthChange);
+      window.removeEventListener("smsunmukt_auth_changed", handleAuthChange);
+    };
+  }, [refreshFromDatabase]);
 
   // Initial load: fast local storage hydration + background PostgreSQL synchronization
   useEffect(() => {
@@ -266,7 +291,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Active customer object
   const activeCustomer = useMemo(() => {
-    return customers.find((c) => c.id === activeCustomerId) || customers[0] || INITIAL_CUSTOMERS[0];
+    const found = customers.find((c) => c.id === activeCustomerId);
+    if (found) return found;
+
+    // Synthesize profile directly from authenticated client session immediately
+    const session = getClientSession();
+    if (session && (session.id === activeCustomerId || !activeCustomerId)) {
+      return {
+        id: session.id,
+        businessName: session.businessName || "Business Account",
+        ownerName: session.name || "Business Owner",
+        email: session.email || "",
+        mobile: session.phone || "",
+        businessCategory: session.category || "Enterprise",
+        city: "Mumbai",
+        state: "Maharashtra",
+        dltEntityId: "DLT-PENDING",
+        walletBalance: 100.0,
+        totalMessages: 0,
+        accountStatus: "active" as const,
+        registrationDate: new Date().toISOString(),
+      };
+    }
+
+    return customers[0] || INITIAL_CUSTOMERS[0];
   }, [customers, activeCustomerId]);
 
   const clientWalletBalance = activeCustomer.walletBalance;
@@ -571,6 +619,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const newContact: Contact = {
       ...contactData,
       id: `cnt-${Date.now().toString().slice(-5)}`,
+      customerId: activeCustomer.id,
       dateAdded: new Date().toISOString().split("T")[0],
     };
     setContacts((prev) => [newContact, ...prev]);
@@ -583,7 +632,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         customerId: activeCustomer.id,
-        contact: contactData,
+        contact: {
+          ...contactData,
+          customerId: activeCustomer.id,
+        },
       }),
     })
       .then((res) => res.json())
@@ -604,6 +656,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const createdContacts: Contact[] = newContactsData.map((c, idx) => ({
       ...c,
       id: `cnt-${Date.now().toString().slice(-4)}-${idx}`,
+      customerId: activeCustomer.id,
       dateAdded: today,
     }));
 
@@ -626,7 +679,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         customerId: activeCustomer.id,
-        contacts: newContactsData,
+        contacts: newContactsData.map((c) => ({
+          ...c,
+          customerId: activeCustomer.id,
+        })),
       }),
     })
       .then((res) => res.json())
@@ -651,7 +707,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         customerId: activeCustomer.id,
-        contact,
+        contact: {
+          ...contact,
+          customerId: activeCustomer.id,
+        },
       }),
     }).catch((e) => console.error("Update contact API error:", e));
   };
@@ -675,6 +734,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const newGroup: ContactGroup = {
       ...groupData,
       id: `grp-${Date.now().toString().slice(-4)}`,
+      customerId: activeCustomer.id,
       contactCount: 0,
       createdDate: new Date().toISOString().split("T")[0],
     };
@@ -683,7 +743,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     fetch("/api/contact-groups", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(groupData),
+      body: JSON.stringify({
+        ...groupData,
+        customerId: activeCustomer.id,
+      }),
     })
       .then((res) => res.json())
       .then((data) => {

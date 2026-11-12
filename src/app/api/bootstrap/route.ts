@@ -1,8 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { resolveTenantId } from "@/lib/server-auth";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const requestedCustomer = searchParams.get("customerId");
+
+    const tenant = resolveTenantId(request, requestedCustomer);
+
+    // If client session is active, strictly scope client-private collections
+    const isClient = tenant.session?.role === "client";
+    const clientFilter = isClient
+      ? { customerId: tenant.customerId }
+      : requestedCustomer && requestedCustomer !== "all"
+      ? { customerId: requestedCustomer }
+      : {};
+
     const [
       customers,
       agencies,
@@ -20,26 +34,64 @@ export async function GET() {
       senderHeaders,
       whatsappProfiles,
     ] = await Promise.all([
-      prisma.customerProfile.findMany({ orderBy: { createdAt: "desc" } }),
+      // Customers: If client, fetch their own profile; if admin, fetch all
+      prisma.customerProfile.findMany({
+        where: isClient ? { id: tenant.customerId } : requestedCustomer && requestedCustomer !== "all" ? { id: requestedCustomer } : {},
+        orderBy: { createdAt: "desc" },
+      }),
+      // Agencies: Admin only or public overview
       prisma.agencyProfile.findMany({ orderBy: { createdAt: "desc" } }),
-      prisma.campaign.findMany({ orderBy: { createdAt: "desc" } }),
+      // Campaigns: Filtered by tenant
+      prisma.campaign.findMany({
+        where: clientFilter,
+        orderBy: { createdAt: "desc" },
+      }),
       prisma.supplier.findMany({ orderBy: { createdAt: "desc" } }),
       prisma.routingRule.findMany({ orderBy: { priority: "asc" } }),
       prisma.pricingConfig.findMany({}),
-      prisma.walletTransaction.findMany({ orderBy: { createdAt: "desc" } }),
-      prisma.template.findMany({ orderBy: { createdAt: "desc" } }),
-      prisma.contactGroup.findMany({
-        include: { _count: { select: { contacts: true } } },
+      // Transactions: Filtered by tenant
+      prisma.walletTransaction.findMany({
+        where: clientFilter,
+        orderBy: { createdAt: "desc" },
       }),
-      prisma.contact.findMany({ orderBy: { createdAt: "desc" } }),
+      prisma.template.findMany({ orderBy: { createdAt: "desc" } }),
+      // Contact Groups: Filtered by tenant
+      prisma.contactGroup.findMany({
+        where: clientFilter,
+        include: { _count: { select: { contacts: true } } },
+        orderBy: { createdAt: "desc" },
+      }),
+      // Contacts: Filtered by tenant
+      prisma.contact.findMany({
+        where: clientFilter,
+        orderBy: { createdAt: "desc" },
+      }),
+      // Tickets: Filtered by tenant
       prisma.supportTicket.findMany({
+        where: clientFilter,
         include: { messages: { orderBy: { createdAt: "asc" } } },
         orderBy: { updatedAt: "desc" },
       }),
-      prisma.invoice.findMany({ orderBy: { createdAt: "desc" } }),
-      prisma.messageLog.findMany({ orderBy: { timestamp: "desc" } }),
-      prisma.senderHeader.findMany({ orderBy: { createdAt: "desc" } }),
-      prisma.whatsAppProfile.findMany({}),
+      // Invoices: Filtered by tenant
+      prisma.invoice.findMany({
+        where: clientFilter,
+        orderBy: { createdAt: "desc" },
+      }),
+      // Message Logs: Filtered by tenant
+      prisma.messageLog.findMany({
+        where: clientFilter,
+        orderBy: { timestamp: "desc" },
+        take: isClient ? 100 : 500,
+      }),
+      // Sender Headers: Filtered by tenant
+      prisma.senderHeader.findMany({
+        where: clientFilter,
+        orderBy: { createdAt: "desc" },
+      }),
+      // WhatsApp Profiles
+      prisma.whatsAppProfile.findMany({
+        where: clientFilter,
+      }),
     ]);
 
     const formattedCustomers = customers.map((c) => ({
@@ -103,8 +155,8 @@ export async function GET() {
       pending: c.pending,
       cost: Number(c.cost),
       status: c.status.toLowerCase() as any,
-      createdDate: c.createdAt.toISOString(),
-      scheduledDate: c.scheduledDate ? c.scheduledDate.toISOString() : undefined,
+      createdDate: c.createdAt.toISOString().split("T")[0],
+      scheduledDate: c.scheduledDate ? c.scheduledDate.toISOString().split("T")[0] : undefined,
     }));
 
     const formattedSuppliers = suppliers.map((s) => ({
@@ -115,7 +167,6 @@ export async function GET() {
       costPerMessage: Number(s.costPerMessage),
       totalMessages: s.totalMessages,
       successRate: Number(s.successRate),
-      failedMessages: s.failedCount,
       failedCount: s.failedCount,
       apiEndpoint: s.apiEndpoint,
     }));
@@ -137,18 +188,23 @@ export async function GET() {
       type: p.type,
       supplierCost: Number(p.supplierCost),
       sellingPrice: Number(p.sellingPrice),
-      grossMargin: Number(p.grossMargin),
+      grossContribution: Number(p.grossMargin),
+      marginPercent: Number(((Number(p.grossMargin) / (Number(p.sellingPrice) || 1)) * 100).toFixed(1)),
+      description: `${p.type.replace(/_/g, " ")} rate`,
     }));
 
     const formattedTransactions = transactions.map((t) => ({
       id: t.id,
       customerId: t.customerId,
+      customerName: customers.find((c) => c.id === t.customerId)?.businessName || "Customer",
       type: t.type.toLowerCase() as any,
       amount: Number(t.amount),
       previousBalance: Number(t.previousBalance),
       newBalance: Number(t.newBalance),
       reference: t.reference,
       date: t.createdAt.toISOString(),
+      channel: (t.channel as any) || undefined,
+      paymentMethod: (t.description?.includes("UPI") ? "UPI" : "Net Banking") as any,
     }));
 
     const formattedTemplates = templates.map((t) => ({
@@ -169,6 +225,7 @@ export async function GET() {
 
     const formattedGroups = contactGroups.map((g) => ({
       id: g.id,
+      customerId: g.customerId,
       name: g.name,
       contactCount: g._count.contacts,
       description: g.description || "",
@@ -177,6 +234,7 @@ export async function GET() {
 
     const formattedContacts = contacts.map((c) => ({
       id: c.id,
+      customerId: c.customerId,
       name: c.name,
       mobile: c.mobile,
       email: c.email || "",
@@ -251,19 +309,26 @@ export async function GET() {
       createdDate: h.createdAt.toISOString().split("T")[0],
     }));
 
-    const primaryWa = whatsappProfiles[0] || {
-      displayName: "Sharma Fashion Store",
-      phoneNumber: "+91 80009 12345",
-      qualityRating: "High" as const,
-      messagingTier: "Tier 2 (10,000 conversations / 24h)",
-      verifiedBadge: true,
-      webhookStatus: "active" as const,
-      about: "Official WhatsApp Business API Channel",
-      category: "Retail",
-    };
+    const activeProfile = whatsappProfiles[0] || null;
+    const formattedWaProfile = activeProfile
+      ? {
+          displayName: activeProfile.displayName,
+          phoneNumber: activeProfile.phoneNumber,
+          qualityRating: activeProfile.qualityRating,
+          messagingTier: activeProfile.messagingTier,
+          tierLimit: activeProfile.messagingTier,
+          wabaId: activeProfile.wabaId,
+          verifiedBadge: activeProfile.verifiedBadge,
+          webhookStatus: activeProfile.webhookStatus,
+          about: activeProfile.about || "",
+          category: activeProfile.category || "",
+        }
+      : null;
 
     return NextResponse.json({
       success: true,
+      activeCustomerId: tenant.session?.role === "client" ? tenant.customerId : undefined,
+      activeCustomer: formattedCustomers.find((c) => c.id === tenant.customerId) || (isClient ? formattedCustomers[0] : undefined),
       data: {
         customers: formattedCustomers,
         agencies: formattedAgencies,
@@ -279,22 +344,11 @@ export async function GET() {
         invoices: formattedInvoices,
         messageLogs: formattedLogs,
         senderHeaders: formattedHeaders,
-        whatsappProfile: {
-          displayName: primaryWa.displayName,
-          phoneNumber: primaryWa.phoneNumber,
-          qualityRating: primaryWa.qualityRating as any,
-          messagingTier: primaryWa.messagingTier,
-          tierLimit: primaryWa.messagingTier,
-          wabaId: (primaryWa as any).wabaId || "waba_781290348123",
-          verifiedBadge: primaryWa.verifiedBadge,
-          webhookStatus: primaryWa.webhookStatus as any,
-          about: primaryWa.about || "",
-          category: primaryWa.category || "",
-        },
+        whatsappProfile: formattedWaProfile,
       },
     });
   } catch (error: any) {
-    console.error("GET /api/bootstrap error:", error);
+    console.error("Bootstrap API Error:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

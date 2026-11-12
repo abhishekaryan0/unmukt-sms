@@ -176,6 +176,7 @@ export interface Template {
 
 export interface Contact {
   id: string;
+  customerId?: string;
   name: string;
   mobile: string;
   email: string;
@@ -189,6 +190,7 @@ export interface Contact {
 
 export interface ContactGroup {
   id: string;
+  customerId?: string;
   name: string;
   contactCount: number;
   description: string;

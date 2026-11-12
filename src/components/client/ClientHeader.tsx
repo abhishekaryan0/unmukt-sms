@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { logoutClient, DEMO_CLIENT } from "@/lib/auth";
+import { logoutClient, getClientSession } from "@/lib/auth";
 import { useAppStore } from "@/lib/store";
 import { formatINR } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
@@ -17,7 +17,6 @@ import {
   Bell,
   LogOut,
   User,
-  ExternalLink,
   Store,
 } from "lucide-react";
 
@@ -31,22 +30,25 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
   const [showRecharge, setShowRecharge] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
+  const session = typeof window !== "undefined" ? getClientSession() : null;
+
   const handleLogout = () => {
     logoutClient();
     router.push("/login");
   };
 
-  const businessDisplayName = activeCustomer?.businessName || DEMO_CLIENT.user.businessName;
-  const businessCategory = activeCustomer?.businessCategory || DEMO_CLIENT.user.category;
-  const businessCity = activeCustomer?.city || "Delhi";
-  const ownerName = activeCustomer?.ownerName || DEMO_CLIENT.user.name;
-  const ownerEmail = activeCustomer?.email || DEMO_CLIENT.email;
+  const businessDisplayName = activeCustomer?.businessName || session?.businessName || "My Business";
+  const businessCategory = activeCustomer?.businessCategory || session?.category || "Business Account";
+  const businessCity = activeCustomer?.city || "";
+  const ownerName = activeCustomer?.ownerName || session?.name || "Client";
+  const ownerEmail = activeCustomer?.email || session?.email || "";
   const ownerInitials = ownerName
     .split(" ")
+    .filter(Boolean)
     .map((n) => n[0])
     .slice(0, 2)
     .join("")
-    .toUpperCase();
+    .toUpperCase() || "CL";
 
   return (
     <>
@@ -61,15 +63,15 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
           </button>
 
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700">
-              <Store className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 font-bold">
+              <Store className="w-4 h-4 text-blue-600" />
             </div>
             <div>
               <div className="text-xs font-bold text-slate-900 leading-tight">
                 {businessDisplayName}
               </div>
               <div className="text-[10px] text-slate-500 font-medium">
-                {businessCategory} • {businessCity}
+                {businessCategory}{businessCity ? ` • ${businessCity}` : ""}
               </div>
             </div>
           </div>
@@ -112,16 +114,6 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
           >
             <Send className="w-3.5 h-3.5 text-slate-600" />
             <span>Send SMS</span>
-          </Link>
-
-          {/* Super Admin Switch link (for demo convenience) */}
-          <Link
-            href="/admin/dashboard"
-            target="_blank"
-            className="hidden xl:inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-slate-800 px-2 py-1 rounded bg-slate-50 border border-slate-200"
-          >
-            <span>Admin Portal</span>
-            <ExternalLink className="w-3 h-3" />
           </Link>
 
           {/* Notifications */}

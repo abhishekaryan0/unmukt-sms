@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 
 export default function ContactsPage() {
-  const { contacts, contactGroups, addContact, updateContact, deleteContact, importContacts } =
+  const { contacts, contactGroups, activeCustomer, addContact, updateContact, deleteContact, importContacts } =
     useAppStore();
   const { toast } = useToast();
 
@@ -44,11 +44,15 @@ export default function ContactsPage() {
   const [viewingContact, setViewingContact] = useState<Contact | null>(null);
   const [deletingContactId, setDeletingContactId] = useState<string | null>(null);
 
+  // Scope contacts and contact groups strictly to active client
+  const clientContacts = contacts.filter((c) => c.customerId === activeCustomer.id);
+  const clientGroups = contactGroups.filter((g) => g.customerId === activeCustomer.id);
+
   // Form State
   const [formName, setFormName] = useState("");
   const [formMobile, setFormMobile] = useState("");
   const [formEmail, setFormEmail] = useState("");
-  const [formGroup, setFormGroup] = useState("Regular Customers");
+  const [formGroup, setFormGroup] = useState(clientGroups[0]?.name || "General Customers");
   const [formTags, setFormTags] = useState("");
   const [formSmsConsent, setFormSmsConsent] = useState(true);
   const [formWaConsent, setFormWaConsent] = useState(true);
@@ -62,21 +66,21 @@ export default function ContactsPage() {
   } | null>(null);
 
   // Filtered contacts
-  const filteredContacts = contacts.filter((c) => {
+  const filteredContacts = clientContacts.filter((c) => {
     if (selectedGroup !== "all" && c.group !== selectedGroup) return false;
     if (dndFilter === "clean" && c.isDnd) return false;
     if (dndFilter === "dnd" && !c.isDnd) return false;
     return true;
   });
 
-  const dndCount = contacts.filter((c) => c.isDnd).length;
+  const dndCount = clientContacts.filter((c) => c.isDnd).length;
 
   const handleOpenAdd = () => {
     setEditingContact(null);
     setFormName("");
     setFormMobile("");
     setFormEmail("");
-    setFormGroup(contactGroups[0]?.name || "Regular Customers");
+    setFormGroup(clientGroups[0]?.name || "General Customers");
     setFormTags("");
     setFormSmsConsent(true);
     setFormWaConsent(true);
@@ -275,7 +279,7 @@ export default function ContactsPage() {
   const handleScrubDnd = () => {
     toast({
       title: "TRAI NDNC Scrub Completed",
-      message: `Scrubbed ${contacts.length} contacts against the National Do Not Disturb registry. ${dndCount} contact(s) are active on DND.`,
+      message: `Scrubbed ${clientContacts.length} contacts against the National Do Not Disturb registry. ${dndCount} contact(s) are active on DND.`,
       type: "success",
     });
   };
@@ -464,8 +468,8 @@ export default function ContactsPage() {
               onChange={(e) => setSelectedGroup(e.target.value)}
               className="h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-900"
             >
-              <option value="all">All Contact Groups ({contacts.length})</option>
-              {contactGroups.map((g) => (
+              <option value="all">All Contact Groups ({clientContacts.length})</option>
+              {clientGroups.map((g) => (
                 <option key={g.id} value={g.name}>
                   {g.name} ({g.contactCount})
                 </option>
@@ -543,7 +547,7 @@ export default function ContactsPage() {
                 onChange={(e) => setFormGroup(e.target.value)}
                 className="w-full h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-900"
               >
-                {contactGroups.map((g) => (
+                {clientGroups.map((g) => (
                   <option key={g.id} value={g.name}>
                     {g.name}
                   </option>
