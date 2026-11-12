@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { contactSchema } from "@/lib/validations";
 import { resolveTenantId } from "@/lib/server-auth";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);

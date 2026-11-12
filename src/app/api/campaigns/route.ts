@@ -4,6 +4,8 @@ import { CampaignStatus, TransactionType } from "@prisma/client";
 import { campaignSchema } from "@/lib/validations";
 import { resolveTenantId } from "@/lib/server-auth";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
