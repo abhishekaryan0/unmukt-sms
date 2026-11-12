@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { loginClient, DEMO_CLIENT } from "@/lib/auth";
+import { loginClient } from "@/lib/auth";
 import { useToast } from "@/components/ui/ToastContext";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -13,7 +13,6 @@ import {
   Mail,
   ArrowRight,
   ShieldCheck,
-  KeyRound,
   Eye,
   EyeOff,
   Sparkles,
@@ -100,12 +99,6 @@ export default function ClientLoginPage() {
     }
   };
 
-  const handleFillDemo = () => {
-    setEmailOrPhone(DEMO_CLIENT.email);
-    setPassword(DEMO_CLIENT.password);
-    setError("");
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between text-slate-900 selection:bg-blue-100">
       {/* Top Navbar */}
@@ -159,7 +152,7 @@ export default function ClientLoginPage() {
               </label>
               <Input
                 type="text"
-                placeholder="e.g. demo@messagehub.in or 9811234567"
+                placeholder="name@yourcompany.com or 10-digit mobile"
                 value={emailOrPhone}
                 onChange={(e) => setEmailOrPhone(e.target.value)}
                 leftIcon={<Mail className="w-4 h-4 text-slate-400" />}
@@ -219,31 +212,6 @@ export default function ClientLoginPage() {
               <ArrowRight className="w-4 h-4 ml-1.5" />
             </Button>
           </form>
-
-          {/* Quick Demo Helper */}
-          <div className="mt-6 pt-5 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                <KeyRound className="w-3.5 h-3.5 text-blue-600" />
-                Customer Demo Account
-              </span>
-              <button
-                type="button"
-                onClick={handleFillDemo}
-                className="text-xs text-blue-600 hover:text-blue-700 font-semibold underline"
-              >
-                1-Click Auto-fill
-              </button>
-            </div>
-            <div className="bg-slate-50 rounded-xl p-3 border border-slate-200 text-xs font-mono space-y-1">
-              <div className="text-slate-600">
-                Login: <span className="text-slate-900 font-bold">{DEMO_CLIENT.email}</span> (or <span className="text-slate-900 font-bold">9811234567</span>)
-              </div>
-              <div className="text-slate-600">
-                Password: <span className="text-slate-900 font-bold">{DEMO_CLIENT.password}</span>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Register Prompt */}

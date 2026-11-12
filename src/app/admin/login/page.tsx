@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { loginAdmin, DEMO_ADMIN } from "@/lib/auth";
+import { loginAdmin } from "@/lib/auth";
 import { useToast } from "@/components/ui/ToastContext";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Shield, Lock, Mail, ArrowRight, Server, KeyRound } from "lucide-react";
+import { Shield, Lock, Mail, ArrowRight, Server } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminLoginPage() {
@@ -69,12 +69,6 @@ export default function AdminLoginPage() {
     }
   };
 
-  const handleFillDemo = () => {
-    setEmail(DEMO_ADMIN.email);
-    setPassword(DEMO_ADMIN.password);
-    setError("");
-  };
-
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 sm:p-6 text-slate-100">
       <div className="w-full max-w-md">
@@ -106,7 +100,7 @@ export default function AdminLoginPage() {
               </label>
               <Input
                 type="email"
-                placeholder="admin@messagehub.in"
+                placeholder="admin@yourdomain.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 leftIcon={<Mail className="w-4 h-4 text-slate-500" />}
@@ -139,31 +133,6 @@ export default function AdminLoginPage() {
               <ArrowRight className="w-4 h-4 ml-1.5" />
             </Button>
           </form>
-
-          {/* Demo Credentials Section */}
-          <div className="mt-6 pt-5 border-t border-slate-800/80">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                <KeyRound className="w-3.5 h-3.5 text-blue-400" />
-                Demo Credentials
-              </span>
-              <button
-                type="button"
-                onClick={handleFillDemo}
-                className="text-xs text-blue-400 hover:text-blue-300 font-medium underline"
-              >
-                Auto-fill
-              </button>
-            </div>
-            <div className="bg-slate-950/90 rounded-lg p-3 border border-slate-800 text-xs font-mono space-y-1">
-              <div className="text-slate-400">
-                Email: <span className="text-slate-200">{DEMO_ADMIN.email}</span>
-              </div>
-              <div className="text-slate-400">
-                Password: <span className="text-slate-200">{DEMO_ADMIN.password}</span>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Footer Links */}

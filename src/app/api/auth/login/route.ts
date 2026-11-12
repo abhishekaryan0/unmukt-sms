@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const cleanMobile = email.replace(/\D/g, "").slice(-10);
 
     // Query user by email OR registered customer mobile number
-    const user = await prisma.user.findFirst({
+    let user = await prisma.user.findFirst({
       where: {
         OR: [
           { email: cleanEmail },
@@ -33,6 +33,30 @@ export async function POST(request: Request) {
         agency: true,
       },
     });
+
+    // Auto-bootstrap super administrator if no admin user exists in DB yet (e.g. freshly deployed production DB)
+    if (!user && portal === "admin") {
+      const superAdminCount = await prisma.user.count({ where: { role: "SUPER_ADMIN" } });
+      if (superAdminCount === 0) {
+        const defaultAdminEmail = (process.env.ADMIN_EMAIL || "admin@messagehub.in").toLowerCase().trim();
+        const defaultAdminPass = process.env.ADMIN_PASSWORD || "Admin@123";
+
+        if (cleanEmail === defaultAdminEmail && password === defaultAdminPass) {
+          user = await prisma.user.create({
+            data: {
+              email: defaultAdminEmail,
+              passwordHash: hashPassword(defaultAdminPass),
+              name: "Super Administrator",
+              role: "SUPER_ADMIN",
+            },
+            include: {
+              customer: true,
+              agency: true,
+            },
+          });
+        }
+      }
+    }
 
     if (!user || !verifyPassword(password, user.passwordHash)) {
       return NextResponse.json(
