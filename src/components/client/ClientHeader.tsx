@@ -67,14 +67,14 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
           </button>
 
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 font-bold">
-              <Store className="w-4 h-4 text-blue-600" />
+            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-slate-800 border border-blue-200 dark:border-slate-700 flex items-center justify-center text-blue-700 dark:text-blue-400 font-bold shrink-0">
+              <Store className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
-            <div>
-              <div className="text-xs font-bold text-slate-900 leading-tight">
+            <div className="min-w-0">
+              <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight truncate">
                 {businessDisplayName}
               </div>
-              <div className="text-[10px] text-slate-500 font-medium">
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">
                 {businessCategory}{businessCity ? ` • ${businessCity}` : ""}
               </div>
             </div>
@@ -86,7 +86,7 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
           {/* Subscription Tier Pill */}
           <Link
             href="/subscription"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-900/60 bg-blue-50/70 dark:bg-blue-950/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/50 transition-colors shadow-subtle group"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-slate-700 bg-blue-50 dark:bg-slate-800 hover:bg-blue-100/80 dark:hover:bg-slate-700/80 transition-colors shadow-subtle group"
           >
             <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
             <div className="text-left">

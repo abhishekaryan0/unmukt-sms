@@ -131,20 +131,20 @@ export default function TeamMembersPage() {
         </div>
 
         {/* Team Members List Table / Cards */}
-        <div className="bg-white rounded-xl border border-slate-200/90 shadow-subtle overflow-hidden">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-slate-900">Team Roster</h3>
-            <span className="text-xs text-slate-400">{teamMembers.length} Members</span>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 shadow-subtle overflow-hidden">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Team Roster</h3>
+            <span className="text-xs text-slate-400 dark:text-slate-500">{teamMembers.length} Members</span>
           </div>
 
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {teamMembers.map((member) => (
               <div
                 key={member.id}
-                className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-slate-50/60 dark:hover:bg-slate-800/60 transition-colors"
+                className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-slate-50/80 dark:hover:bg-slate-800/70 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold ring-2 ring-slate-100">
+                  <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold ring-2 ring-slate-100 dark:ring-slate-800">
                     {member.name
                       .split(" ")
                       .map((n) => n[0])
@@ -155,12 +155,12 @@ export default function TeamMembersPage() {
 
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-bold text-slate-900">{member.name}</h4>
-                      <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">{member.name}</h4>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700">
                         {member.role}
                       </span>
                     </div>
-                    <div className="text-xs text-slate-500 font-mono mt-0.5">{member.email}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">{member.email}</div>
                   </div>
                 </div>
 
@@ -173,7 +173,7 @@ export default function TeamMembersPage() {
                   </div>
 
                   {/* Active Chats */}
-                  <div className="text-xs font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg">
+                  <div className="text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 px-2.5 py-1 rounded-lg">
                     {member.activeChats} Active Chats
                   </div>
 
@@ -186,15 +186,15 @@ export default function TeamMembersPage() {
                       }
                       className={`text-xs font-semibold rounded-lg px-2.5 py-1 border transition-colors cursor-pointer ${
                         member.status === "online"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
                           : member.status === "away"
-                          ? "bg-amber-50 text-amber-700 border-amber-200"
-                          : "bg-slate-100 text-slate-600 border-slate-200"
+                          ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700"
                       }`}
                     >
-                      <option value="online">Online</option>
-                      <option value="away">Away</option>
-                      <option value="offline">Offline</option>
+                      <option value="online" className="dark:bg-slate-900 dark:text-white">Online</option>
+                      <option value="away" className="dark:bg-slate-900 dark:text-white">Away</option>
+                      <option value="offline" className="dark:bg-slate-900 dark:text-white">Offline</option>
                     </select>
                   </div>
                 </div>

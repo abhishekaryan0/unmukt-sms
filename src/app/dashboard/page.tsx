@@ -401,18 +401,18 @@ export default function ClientDashboardPage() {
         {/* Lower Row: Recent Incoming Inquiries & Agent Performance */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Recent Inquiries List */}
-          <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/90 shadow-subtle p-5">
+          <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 shadow-subtle p-5">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-sm font-bold text-slate-900">Recent Customer Inquiries</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Recent Customer Inquiries</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Latest incoming chats from WhatsApp, Instagram, Messenger, and Telegram
                 </p>
               </div>
 
               <Link
                 href="/inbox"
-                className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
               >
                 <span>View all in Inbox</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -423,10 +423,10 @@ export default function ClientDashboardPage() {
               {conversations.slice(0, 5).map((conv) => (
                 <div
                   key={conv.id}
-                  className="py-3 flex items-center justify-between gap-3 hover:bg-slate-50/70 dark:hover:bg-slate-800/60 rounded-lg px-2 transition-colors"
+                  className="py-3 flex items-center justify-between gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-800/70 rounded-lg px-2 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0 ring-1 ring-slate-200 dark:ring-slate-800">
                       {conv.customerName
                         .split(" ")
                         .map((n) => n[0])
@@ -437,27 +437,27 @@ export default function ClientDashboardPage() {
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-900 truncate">
+                        <span className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
                           {conv.customerName}
                         </span>
                         <ChannelBadge channelType={conv.channelType} showLabel={false} size="sm" />
                       </div>
-                      <p className="text-xs text-slate-500 truncate mt-0.5">{conv.lastMessage}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{conv.lastMessage}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3 shrink-0">
                     <div className="text-right">
-                      <div className="text-[11px] text-slate-400 font-medium">
+                      <div className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
                         {conv.lastMessageTime}
                       </div>
-                      <span className="text-[10px] text-slate-500 font-medium">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
                         {conv.assignedToName || "Unassigned"}
                       </span>
                     </div>
 
                     <Link href={`/inbox`}>
-                      <button className="px-2.5 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50 rounded-lg border border-blue-200 transition-colors">
+                      <button className="px-2.5 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded-lg border border-blue-200 dark:border-blue-800/70 transition-colors">
                         Reply
                       </button>
                     </Link>

@@ -255,11 +255,11 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
         <div>
           <Link
             href={`/admin/customers/${row.id}`}
-            className="font-bold text-slate-900 hover:text-blue-600 hover:underline"
+            className="font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
           >
             {row.businessName}
           </Link>
-          <div className="text-[11px] text-slate-500">
+          <div className="text-[11px] text-slate-500 dark:text-slate-400">
             {row.city}, {row.state}
           </div>
         </div>
@@ -271,8 +271,8 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
       className: "min-w-[160px]",
       cell: (row) => (
         <div>
-          <div className="font-medium text-slate-900">{row.ownerName}</div>
-          <div className="text-[11px] text-slate-500">{row.email}</div>
+          <div className="font-medium text-slate-900 dark:text-white">{row.ownerName}</div>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400">{row.email}</div>
         </div>
       ),
     },
@@ -281,7 +281,7 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
       accessorKey: "mobile",
       className: "whitespace-nowrap",
       cell: (row) => (
-        <span className="font-mono text-slate-800 text-xs">
+        <span className="font-mono text-slate-800 dark:text-slate-200 text-xs">
           {formatIndianMobile(row.mobile)}
         </span>
       ),
@@ -291,7 +291,7 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
       accessorKey: "businessCategory",
       className: "whitespace-nowrap",
       cell: (row) => (
-        <span className="text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+        <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
           {row.businessCategory}
         </span>
       ),
@@ -302,10 +302,10 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
       className: "whitespace-nowrap",
       cell: (row) => (
         <div className="flex items-center gap-1.5">
-          <span className="font-bold text-slate-900">{formatINR(row.walletBalance)}</span>
+          <span className="font-bold text-slate-900 dark:text-white">{formatINR(row.walletBalance)}</span>
           <button
             onClick={() => setWalletCust(row)}
-            className="p-1 rounded text-blue-600 hover:bg-blue-50 transition-colors"
+            className="p-1 rounded text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors"
             title="Adjust Wallet Balance"
           >
             <Wallet className="w-3.5 h-3.5" />
@@ -385,12 +385,12 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
 
   return (
     <AdminLayout>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             Customer Directory
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Manage Indian business accounts, prepaid balances, TRAI DLT verification, and switch workspaces
           </p>
         </div>
@@ -410,27 +410,27 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-900"
+              className="h-9 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-900"
             >
-              <option value="all">All Categories</option>
-              <option value="Retail & Apparel">Retail & Apparel</option>
-              <option value="Consumer Electronics">Consumer Electronics</option>
-              <option value="Education & Coaching">Education & Coaching</option>
-              <option value="Hospitality & Dining">Hospitality & Dining</option>
-              <option value="Real Estate">Real Estate</option>
-              <option value="Digital Marketing Agency">Digital Marketing Agency</option>
-              <option value="Healthcare & Labs">Healthcare & Labs</option>
-              <option value="F&B & Retail">F&B & Retail</option>
+              <option value="all" className="dark:bg-slate-900 dark:text-white">All Categories</option>
+              <option value="Retail & Apparel" className="dark:bg-slate-900 dark:text-white">Retail & Apparel</option>
+              <option value="Consumer Electronics" className="dark:bg-slate-900 dark:text-white">Consumer Electronics</option>
+              <option value="Education & Coaching" className="dark:bg-slate-900 dark:text-white">Education & Coaching</option>
+              <option value="Hospitality & Dining" className="dark:bg-slate-900 dark:text-white">Hospitality & Dining</option>
+              <option value="Real Estate" className="dark:bg-slate-900 dark:text-white">Real Estate</option>
+              <option value="Digital Marketing Agency" className="dark:bg-slate-900 dark:text-white">Digital Marketing Agency</option>
+              <option value="Healthcare & Labs" className="dark:bg-slate-900 dark:text-white">Healthcare & Labs</option>
+              <option value="F&B & Retail" className="dark:bg-slate-900 dark:text-white">F&B & Retail</option>
             </select>
 
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-900"
+              className="h-9 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-900"
             >
-              <option value="all">All Status</option>
-              <option value="active">Active Only</option>
-              <option value="suspended">Suspended Only</option>
+              <option value="all" className="dark:bg-slate-900 dark:text-white">All Status</option>
+              <option value="active" className="dark:bg-slate-900 dark:text-white">Active Only</option>
+              <option value="suspended" className="dark:bg-slate-900 dark:text-white">Suspended Only</option>
             </select>
           </div>
         }
