@@ -5,6 +5,7 @@ import { ClientLayout } from "@/components/client/ClientLayout";
 import { useAppStore } from "@/lib/store";
 import { useToast } from "@/components/ui/ToastContext";
 import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 import { SocialChannelType } from "@/types";
 import {
   WhatsAppIcon,
@@ -154,9 +155,9 @@ export default function UnifiedInboxPage() {
   return (
     <ClientLayout>
       {/* Container: Full workspace card with clean borders */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-subtle overflow-hidden flex flex-col h-[calc(100vh-5rem)]">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-subtle overflow-hidden flex flex-col h-full min-h-[calc(100vh-5.5rem)]">
         {/* Top Control Bar: Channel Switcher Pills */}
-        <div className="h-13 px-4 border-b border-slate-200/80 bg-slate-50/70 flex items-center justify-between gap-3 shrink-0">
+        <div className="h-13 px-4 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-1.5 overflow-x-auto py-1.5 no-scrollbar">
             <button
               onClick={() => setSelectedChannel("all")}
@@ -259,7 +260,7 @@ export default function UnifiedInboxPage() {
           {/* ============================================================== */}
           {/* 1. LEFT PANE: Conversation List, Search, Filters               */}
           {/* ============================================================== */}
-          <div className="w-72 sm:w-80 border-r border-slate-200/90 flex flex-col shrink-0 bg-white">
+          <div className="w-72 lg:w-80 border-r border-slate-200/90 dark:border-slate-800 flex flex-col shrink-0 bg-white dark:bg-slate-900">
             {/* Search Input */}
             <div className="p-3 border-b border-slate-100">
               <div className="relative">
@@ -415,15 +416,15 @@ export default function UnifiedInboxPage() {
           {/* ============================================================== */}
           {/* 2. MIDDLE PANE: Active Chat Thread & Rich Composer             */}
           {/* ============================================================== */}
-          <div className="flex-1 flex flex-col bg-slate-50/50 overflow-hidden">
+          <div className="flex-1 min-w-0 flex flex-col bg-slate-50/50 dark:bg-slate-950/40 overflow-hidden">
             {activeConversation ? (
               <>
-                {/* Chat Header: High-End, Spacious, Perfectly Aligned */}
-                <div className="h-16 px-4 sm:px-6 border-b border-slate-200/90 bg-white flex items-center justify-between gap-4 shrink-0">
+                {/* Chat Header: High-End, Spacious, Overlap-Proof & Perfectly Aligned */}
+                <div className="h-16 px-4 sm:px-5 border-b border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between gap-3 shrink-0">
                   {/* Left Identity: Customer Avatar, Name & Channel Info */}
-                  <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="relative shrink-0">
-                      <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+                      <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold ring-2 ring-slate-100 dark:ring-slate-800 shadow-sm">
                         {activeConversation.customerName
                           .split(" ")
                           .map((n) => n[0])
@@ -431,37 +432,50 @@ export default function UnifiedInboxPage() {
                           .join("")
                           .toUpperCase()}
                       </div>
-                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" />
                     </div>
 
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h2 className="text-sm font-bold text-slate-900 truncate">
+                        <h2 className="text-sm font-bold text-slate-900 dark:text-white truncate">
                           {activeConversation.customerName}
                         </h2>
+                        {activeConversation.status === "resolved" ? (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shrink-0">
+                            Resolved
+                          </span>
+                        ) : activeConversation.status === "unread" || activeConversation.unreadCount > 0 ? (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 shrink-0">
+                            Unread
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 shrink-0">
+                            Open
+                          </span>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
+                      <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500 dark:text-slate-400 overflow-hidden">
                         {/* Channel Badge Pill */}
                         {activeConversation.channelType === "whatsapp" && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#075E54] bg-[#E8F8EE] px-1.5 py-0.2 rounded border border-[#b5e7c8] shrink-0">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#075E54] bg-[#E8F8EE] dark:bg-emerald-950/50 dark:text-emerald-300 px-1.5 py-0.5 rounded border border-[#b5e7c8] dark:border-emerald-800 shrink-0">
                             <WhatsAppIcon className="w-3 h-3 text-[#25D366]" />
                             <span>WhatsApp</span>
                           </span>
                         )}
                         {activeConversation.channelType === "instagram" && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-pink-700 bg-pink-50 px-1.5 py-0.2 rounded border border-pink-200 shrink-0">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-pink-700 bg-pink-50 dark:bg-pink-950/50 dark:text-pink-300 px-1.5 py-0.5 rounded border border-pink-200 dark:border-pink-800 shrink-0">
                             <InstagramIcon className="w-3 h-3 text-pink-600" />
                             <span>Instagram</span>
                           </span>
                         )}
                         {activeConversation.channelType === "messenger" && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200 shrink-0">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 dark:bg-blue-950/50 dark:text-blue-300 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800 shrink-0">
                             <MessengerIcon className="w-3 h-3 text-[#0084FF]" />
                             <span>Messenger</span>
                           </span>
                         )}
                         {activeConversation.channelType === "telegram" && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-700 bg-sky-50 px-1.5 py-0.2 rounded border border-sky-200 shrink-0">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-700 bg-sky-50 dark:bg-sky-950/50 dark:text-sky-300 px-1.5 py-0.5 rounded border border-sky-200 dark:border-sky-800 shrink-0">
                             <TelegramIcon className="w-3 h-3 text-[#0088cc]" />
                             <span>Telegram</span>
                           </span>
@@ -475,22 +489,23 @@ export default function UnifiedInboxPage() {
                   </div>
 
                   {/* Right Header Actions: Agent Assignment & Resolve Button */}
-                  <div className="flex items-center gap-2.5 shrink-0">
-                    {/* Custom Styled Agent Dropdown */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {/* Compact Agent Assignment Dropdown */}
                     <div className="relative">
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 shadow-subtle hover:bg-slate-100 transition-colors">
-                        <UserCheck className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors shadow-subtle">
+                        <UserCheck className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
                         <select
                           value={activeConversation.assignedToName || ""}
                           onChange={(e) =>
                             assignConversation(activeConversation.id, e.target.value)
                           }
-                          className="bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer pr-1"
+                          className="bg-transparent text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer max-w-[95px] sm:max-w-[130px] truncate pr-1"
+                          title={`Assigned agent: ${activeConversation.assignedToName || "Unassigned"}`}
                         >
                           <option value="">Unassigned</option>
                           {teamMembers.map((m) => (
                             <option key={m.id} value={m.name}>
-                              {m.name} ({m.status})
+                              {m.name}
                             </option>
                           ))}
                         </select>
@@ -503,22 +518,41 @@ export default function UnifiedInboxPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => markConversationStatus(activeConversation.id, "open")}
-                        className="text-xs gap-1.5 border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-semibold"
+                        className="h-8 text-xs gap-1.5 px-2.5 sm:px-3 border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 font-semibold shrink-0"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Resolved (Reopen)</span>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <span>Resolved</span>
+                        <span className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80 font-normal underline hidden sm:inline">(Reopen)</span>
                       </Button>
                     ) : (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => markConversationStatus(activeConversation.id, "resolved")}
-                        className="text-xs gap-1.5 border-slate-200 hover:bg-slate-50 font-semibold text-slate-700"
+                        className="h-8 text-xs gap-1.5 px-2.5 sm:px-3 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold text-slate-700 dark:text-slate-200 shrink-0"
                       >
                         <Check className="w-3.5 h-3.5 text-slate-500" />
                         <span>Mark Resolved</span>
                       </Button>
                     )}
+
+                    {/* Toggle Details Panel Button */}
+                    <button
+                      onClick={() => setShowRightPanel(!showRightPanel)}
+                      className={cn(
+                        "p-1.5 rounded-lg border transition-colors shrink-0",
+                        showRightPanel
+                          ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:border-blue-800 dark:text-blue-300"
+                          : "bg-slate-50 text-slate-500 border-slate-200 hover:text-slate-900 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
+                      )}
+                      title={showRightPanel ? "Hide Details Panel" : "Show Details Panel"}
+                    >
+                      {showRightPanel ? (
+                        <PanelRightClose className="w-4 h-4" />
+                      ) : (
+                        <PanelRightOpen className="w-4 h-4" />
+                      )}
+                    </button>
                   </div>
                 </div>
 
@@ -846,7 +880,7 @@ export default function UnifiedInboxPage() {
           {/* 3. RIGHT PANE: Customer Details, Tags, Assignment & Notes      */}
           {/* ============================================================== */}
           {showRightPanel && activeConversation && (
-            <div className="w-72 sm:w-80 border-l border-slate-200/90 flex flex-col shrink-0 bg-white overflow-y-auto">
+            <div className="w-72 lg:w-80 border-l border-slate-200/90 dark:border-slate-800 flex flex-col shrink-0 bg-white dark:bg-slate-900 overflow-y-auto">
               <div className="p-5 border-b border-slate-100 text-center">
                 <div className="w-16 h-16 rounded-full bg-slate-900 text-white flex items-center justify-center text-lg font-bold mx-auto mb-3 shadow-subtle">
                   {activeConversation.customerName

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { logoutAdmin, DEMO_ADMIN } from "@/lib/auth";
 import { DateRangePicker, DateFilterOption } from "@/components/shared/DateRangePicker";
 import { Button } from "@/components/ui/Button";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { Menu, LogOut, Bell, Shield, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
@@ -63,6 +64,9 @@ export function AdminHeader({
           <span>Client App</span>
           <ExternalLink className="w-3 h-3 text-slate-500" />
         </Link>
+
+        {/* Theme Switcher Toggle */}
+        <ThemeToggle />
 
         {/* Notification Bell */}
         <div className="relative">

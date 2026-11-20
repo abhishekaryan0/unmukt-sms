@@ -132,24 +132,24 @@ export default function AdminBillingPage() {
                   fontSize: "12px",
                 }}
               />
-              <Bar dataKey="gross" name="Recharge Revenue" fill="#2563eb" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="expenses" name="Carrier Cost" fill="#94a3b8" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="profit" name="Platform Margin" fill="#10b981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="gross" name="Subscription Revenue" fill="#2563eb" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="expenses" name="Cloud API & Infra Cost" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="profit" name="SaaS Gross Margin" fill="#10b981" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex items-center justify-center gap-6 mt-3 text-xs text-slate-600">
+        <div className="flex items-center justify-center gap-6 mt-3 text-xs text-slate-600 dark:text-slate-400">
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm bg-blue-600" />
-            Recharge Revenue
+            Subscription Revenue
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm bg-slate-400" />
-            Carrier Cost
+            Cloud API & Infra Cost
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm bg-emerald-500" />
-            Platform Margin
+            SaaS Gross Margin
           </span>
         </div>
       </ChartCard>

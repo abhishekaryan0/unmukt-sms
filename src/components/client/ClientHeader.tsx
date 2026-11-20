@@ -8,6 +8,7 @@ import { useAppStore } from "@/lib/store";
 import { formatINR } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { RechargeModal } from "./RechargeModal";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import {
   Menu,
   Sparkles,
@@ -121,6 +122,9 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
               </span>
             )}
           </Link>
+
+          {/* Theme Switcher Toggle */}
+          <ThemeToggle />
 
           {/* Notifications */}
           <button className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors relative">
