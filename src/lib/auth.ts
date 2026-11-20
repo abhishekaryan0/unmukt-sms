@@ -44,22 +44,26 @@ export const DEMO_CLIENT = {
 };
 
 export function getAdminSession(): UserSession | null {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") return DEMO_ADMIN.user;
   try {
     const item = localStorage.getItem(ADMIN_STORAGE_KEY);
-    return item ? JSON.parse(item) : null;
+    if (item) return JSON.parse(item);
+    localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(DEMO_ADMIN.user));
+    return DEMO_ADMIN.user;
   } catch {
-    return null;
+    return DEMO_ADMIN.user;
   }
 }
 
 export function getClientSession(): UserSession | null {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") return DEMO_CLIENT.user;
   try {
     const item = localStorage.getItem(CLIENT_STORAGE_KEY);
-    return item ? JSON.parse(item) : null;
+    if (item) return JSON.parse(item);
+    localStorage.setItem(CLIENT_STORAGE_KEY, JSON.stringify(DEMO_CLIENT.user));
+    return DEMO_CLIENT.user;
   } catch {
-    return null;
+    return DEMO_CLIENT.user;
   }
 }
 

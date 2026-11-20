@@ -121,14 +121,6 @@ export default function ClientDashboardPage() {
     ];
   }, [timeRange]);
 
-  if (!mounted) {
-    return (
-      <ClientLayout>
-        <div className="p-8 text-center text-slate-400 text-xs">Loading dashboard...</div>
-      </ClientLayout>
-    );
-  }
-
   return (
     <ClientLayout>
       <div className="space-y-6">

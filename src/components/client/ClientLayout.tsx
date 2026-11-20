@@ -11,15 +11,13 @@ import { ShieldAlert, ArrowLeft } from "lucide-react";
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { customers, activeCustomerId, switchActiveCustomer, exitImpersonation } = useAppStore();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isImpersonating, setIsImpersonating] = useState(false);
 
   useEffect(() => {
     const session = getClientSession();
-    if (!session || session.role !== "client") {
-      router.replace("/login");
-    } else {
+    if (session && session.role === "client") {
       setIsAuthenticated(true);
       const imp = getImpersonationState();
       setIsImpersonating(imp.active);
@@ -30,14 +28,6 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     exitImpersonation();
     router.push("/admin/customers");
   };
-
-  if (isAuthenticated === null) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-600 text-xs">
-        Loading SMS Unmukt portal...
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50/60 flex flex-col">
