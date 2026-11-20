@@ -13,7 +13,7 @@ import {
   Users,
   Briefcase,
   TrendingUp,
-  Smartphone,
+  Radio,
   MessageSquare,
   DollarSign,
   ArrowUpRight,
@@ -76,36 +76,36 @@ export default function AdminDashboardPage() {
 
   // Daily message volume data derived dynamically
   const dailyVolumeData = [
-    { day: "05 Nov", sms: Math.round(smsMessages * 0.12), wa: Math.round(waMessages * 0.12) },
-    { day: "06 Nov", sms: Math.round(smsMessages * 0.1), wa: Math.round(waMessages * 0.1) },
-    { day: "07 Nov", sms: Math.round(smsMessages * 0.15), wa: Math.round(waMessages * 0.14) },
-    { day: "08 Nov", sms: Math.round(smsMessages * 0.18), wa: Math.round(waMessages * 0.18) },
-    { day: "09 Nov", sms: Math.round(smsMessages * 0.17), wa: Math.round(waMessages * 0.16) },
-    { day: "10 Nov", sms: Math.round(smsMessages * 0.14), wa: Math.round(waMessages * 0.15) },
-    { day: "11 Nov", sms: Math.round(smsMessages * 0.14), wa: Math.round(waMessages * 0.15) },
+    { day: "05 Nov", whatsapp: 4200, instagram: 2400, messenger: 1500 },
+    { day: "06 Nov", whatsapp: 4500, instagram: 2600, messenger: 1650 },
+    { day: "07 Nov", whatsapp: 5100, instagram: 3100, messenger: 1900 },
+    { day: "08 Nov", whatsapp: 5800, instagram: 3400, messenger: 2100 },
+    { day: "09 Nov", whatsapp: 5400, instagram: 3200, messenger: 2000 },
+    { day: "10 Nov", whatsapp: 4900, instagram: 2900, messenger: 1800 },
+    { day: "11 Nov", whatsapp: 6200, instagram: 3800, messenger: 2300 },
   ];
 
-  // Channel usage distribution derived dynamically
+  // Channel usage distribution across social channels
   const channelData = [
     {
-      name: "Promotional SMS",
-      value: campaigns.filter((c) => c.channel === "sms" && c.messageType === "promotional").reduce((acc, c) => acc + c.totalRecipients, 0) || Math.round(smsMessages * 0.7),
-      color: "#2563eb",
-    },
-    {
-      name: "Transactional SMS",
-      value: campaigns.filter((c) => c.channel === "sms" && c.messageType === "transactional").reduce((acc, c) => acc + c.totalRecipients, 0) || Math.round(smsMessages * 0.3),
-      color: "#60a5fa",
-    },
-    {
-      name: "WhatsApp Marketing",
-      value: campaigns.filter((c) => c.channel === "whatsapp" && (c.messageType === "marketing" || !c.messageType)).reduce((acc, c) => acc + c.totalRecipients, 0) || Math.round(waMessages * 0.75),
+      name: "WhatsApp Business",
+      value: Math.round(totalMessagesSent * 0.48),
       color: "#25D366",
     },
     {
-      name: "WhatsApp Utility",
-      value: campaigns.filter((c) => c.channel === "whatsapp" && c.messageType === "utility").reduce((acc, c) => acc + c.totalRecipients, 0) || Math.round(waMessages * 0.25),
-      color: "#10b981",
+      name: "Instagram Direct",
+      value: Math.round(totalMessagesSent * 0.26),
+      color: "#E1306C",
+    },
+    {
+      name: "Facebook Messenger",
+      value: Math.round(totalMessagesSent * 0.16),
+      color: "#0084FF",
+    },
+    {
+      name: "Telegram Bot",
+      value: Math.round(totalMessagesSent * 0.1),
+      color: "#0088cc",
     },
   ];
 
@@ -115,10 +115,10 @@ export default function AdminDashboardPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
-            Platform Overview & Carrier Switch
+            Platform Overview & Operations Switch
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Real-time telemetry, routing gateway performance, and revenue analytics
+            Real-time social messaging telemetry, cross-tenant connected channels, and billing analytics
           </p>
         </div>
 
@@ -170,31 +170,31 @@ export default function AdminDashboardPage() {
           iconBg="bg-blue-50 text-blue-600"
         />
 
-        {/* Total Messages */}
+        {/* Total Conversations */}
         <StatCard
-          title="Total Messages Dispatched"
+          title="Conversations Handled"
           value={formatNumber(totalMessagesSent)}
-          change="+12.0%"
+          change="+18.4%"
           trend="up"
-          subtitle="Across all carriers"
-          icon={<Smartphone className="w-4 h-4 text-slate-700" />}
+          subtitle="Across all tenants"
+          icon={<MessageSquare className="w-4 h-4 text-slate-700" />}
         />
 
-        {/* SMS Volume */}
+        {/* Connected Channels */}
         <StatCard
-          title="SMS Messages"
-          value={formatNumber(smsMessages)}
-          change="+9.5%"
+          title="Connected Channels"
+          value="14 Active"
+          change="+4 new"
           trend="up"
-          subtitle="Promotional & Transactional"
-          icon={<Smartphone className="w-4 h-4 text-blue-600" />}
+          subtitle="Cross-tenant endpoints"
+          icon={<Radio className="w-4 h-4 text-blue-600" />}
           iconBg="bg-blue-50 text-blue-600"
         />
 
         {/* WhatsApp Volume */}
         <StatCard
-          title="WhatsApp Messages"
-          value={formatNumber(waMessages)}
+          title="WhatsApp WABA Volume"
+          value={formatNumber(Math.round(totalMessagesSent * 0.48))}
           change="+34.8%"
           trend="up"
           subtitle="Meta Cloud API Cloud"
@@ -202,12 +202,12 @@ export default function AdminDashboardPage() {
           iconBg="bg-[#E8F8EE] text-[#25D366]"
         />
 
-        {/* Carrier Failed Rate */}
+        {/* Platform Uptime Rate */}
         <StatCard
-          title="Platform Delivery Rate"
-          value={`${(100 - parseFloat(failureRate)).toFixed(1)}%`}
+          title="Gateway Uptime"
+          value="99.98%"
           trend="up"
-          subtitle={`${failureRate}% failed (DND / Unreachable)`}
+          subtitle="0.02% latency threshold"
           icon={<CheckCircle2 className="w-4 h-4 text-emerald-600" />}
           iconBg="bg-emerald-50 text-emerald-600"
         />
@@ -349,8 +349,8 @@ export default function AdminDashboardPage() {
 
       {/* Daily Volume Bar Chart */}
       <ChartCard
-        title="Daily Telecom Switch Volume (Last 7 Days)"
-        description="Real-time message traffic delivered through carrier SMS banks and Meta WhatsApp Cloud"
+        title="Daily Social Messaging Traffic (Last 7 Days)"
+        description="Real-time multi-channel conversation volume delivered across WhatsApp, Instagram, and Messenger"
       >
         <div className="h-60 w-full">
           {mounted ? (
@@ -373,8 +373,9 @@ export default function AdminDashboardPage() {
                     fontSize: "12px",
                   }}
                 />
-                <Bar dataKey="sms" name="SMS Volume" fill="#2563eb" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="wa" name="WhatsApp Volume" fill="#25D366" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="whatsapp" name="WhatsApp Volume" fill="#25D366" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="instagram" name="Instagram Direct" fill="#E1306C" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="messenger" name="Facebook Messenger" fill="#0084FF" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (

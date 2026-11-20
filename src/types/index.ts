@@ -258,3 +258,101 @@ export interface WhatsAppProfile {
   about: string;
   category: string;
 }
+
+// -------------------------------------------------------------
+// Social Media Messaging Platform Types
+// -------------------------------------------------------------
+
+export type SocialChannelType = "whatsapp" | "messenger" | "instagram" | "telegram";
+
+export type ChannelConnectionStatus = "connected" | "disconnected" | "reconnect_required" | "syncing";
+
+export interface ConnectedChannel {
+  id: string;
+  customerId?: string;
+  channelType: SocialChannelType;
+  name: string;
+  identifier: string; // Phone number, handle, or page name
+  status: ChannelConnectionStatus;
+  connectedAt: string;
+  lastSyncAt: string;
+  avatarUrl?: string;
+  unreadCount: number;
+  totalConversations: number;
+  webhookStatus: "healthy" | "delayed" | "failing";
+  autoReplyEnabled?: boolean;
+}
+
+export interface ChatAttachment {
+  type: "image" | "file";
+  url: string;
+  name: string;
+  size?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  conversationId: string;
+  sender: "customer" | "agent" | "system";
+  senderName: string;
+  senderAvatar?: string;
+  content: string;
+  timestamp: string;
+  status?: "sent" | "delivered" | "read" | "failed";
+  channelType: SocialChannelType;
+  isInternalNote?: boolean;
+  attachments?: ChatAttachment[];
+}
+
+export interface ConversationInternalNote {
+  id: string;
+  author: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface Conversation {
+  id: string;
+  customerId?: string;
+  channelType: SocialChannelType;
+  channelId: string;
+  customerName: string;
+  customerAvatar?: string;
+  customerIdentifier: string; // e.g. "+91 98112 34567" or "@rohan_v"
+  customerEmail?: string;
+  customerCity?: string;
+  status: "open" | "unread" | "resolved";
+  priority: "low" | "medium" | "high";
+  assignedTo?: string; // Team member ID
+  assignedToName?: string; // Team member Name
+  tags: string[];
+  lastMessage: string;
+  lastMessageTime: string;
+  lastMessageSender: "customer" | "agent" | "system";
+  unreadCount: number;
+  internalNotes?: ConversationInternalNote[];
+  messages: ChatMessage[];
+  createdAt: string;
+}
+
+export interface SavedReply {
+  id: string;
+  customerId?: string;
+  title: string;
+  shortcut: string; // e.g. "/greet", "/hours"
+  content: string;
+  category: "Greeting" | "Support" | "Billing" | "Sales" | "FAQ";
+}
+
+export interface TeamMember {
+  id: string;
+  customerId?: string;
+  name: string;
+  email: string;
+  role: "admin" | "manager" | "agent";
+  status: "online" | "away" | "offline";
+  avatar?: string;
+  activeChats: number;
+  channels: SocialChannelType[];
+}
+

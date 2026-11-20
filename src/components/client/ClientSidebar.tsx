@@ -5,11 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  Send,
-  MessageCircle,
+  Inbox,
+  Radio,
   Users,
   FolderTree,
   History,
+  MessageSquareQuote,
+  UserCheck,
   FileText,
   Wallet,
   Receipt,
@@ -20,6 +22,7 @@ import {
   ChevronRight,
   PlusCircle,
   Plus,
+  MessageSquare,
 } from "lucide-react";
 import { cn, formatINR } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
@@ -32,26 +35,44 @@ interface ClientSidebarProps {
 
 export function ClientSidebar({ isOpen, onClose }: ClientSidebarProps) {
   const pathname = usePathname();
-  const { clientWalletBalance } = useAppStore();
+  const { clientWalletBalance, conversations, connectedChannels } = useAppStore();
   const [showRecharge, setShowRecharge] = useState(false);
+
+  const unreadConversationsCount = conversations.filter(
+    (c) => c.status === "unread" || c.unreadCount > 0
+  ).length;
+
+  const activeChannelsCount = connectedChannels.filter((c) => c.status === "connected").length;
 
   const mainNavigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Send SMS", href: "/send-sms", icon: Send },
-    { name: "WhatsApp Campaigns", href: "/whatsapp", icon: MessageCircle, badge: "Popular" },
+    {
+      name: "Unified Inbox",
+      href: "/inbox",
+      icon: Inbox,
+      badge: unreadConversationsCount > 0 ? `${unreadConversationsCount} New` : undefined,
+      highlight: true,
+    },
+    {
+      name: "Connected Channels",
+      href: "/channels",
+      icon: Radio,
+      badge: `${activeChannelsCount} Active`,
+    },
     { name: "Contacts", href: "/contacts", icon: Users },
     { name: "Contact Groups", href: "/groups", icon: FolderTree },
-    { name: "Campaign History", href: "/campaigns", icon: History },
-    { name: "Templates", href: "/templates", icon: FileText },
+    { name: "Conversation History", href: "/campaigns", icon: History },
+    { name: "Saved Replies", href: "/saved-replies", icon: MessageSquareQuote },
+    { name: "Team Members", href: "/team", icon: UserCheck },
   ];
 
   const financeNavigation = [
     { name: "Wallet & Recharge", href: "/wallet", icon: Wallet },
     { name: "Transactions", href: "/transactions", icon: Receipt },
     { name: "Invoices", href: "/invoices", icon: FileCheck2 },
-    { name: "Reports", href: "/reports", icon: BarChart2 },
-    { name: "Support", href: "/support", icon: HelpCircle },
-    { name: "Profile & Settings", href: "/settings", icon: Settings },
+    { name: "Reports & Analytics", href: "/reports", icon: BarChart2 },
+    { name: "Support Tickets", href: "/support", icon: HelpCircle },
+    { name: "Settings", href: "/settings", icon: Settings },
   ];
 
   return (
@@ -65,36 +86,43 @@ export function ClientSidebar({ isOpen, onClose }: ClientSidebarProps) {
         {/* Brand Header */}
         <div className="h-16 flex items-center justify-between px-5 border-b border-slate-100 bg-white">
           <Link href="/dashboard" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white font-bold text-sm shadow-subtle">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-subtle">
               U
             </div>
             <div>
               <div className="font-bold text-slate-900 tracking-tight text-sm">
-                SMS<span className="text-blue-600">UNMUKT</span>
+                UNMUKT<span className="text-blue-600">.SOCIAL</span>
               </div>
-              <div className="text-[10px] text-slate-500 font-medium">Marketing Platform</div>
+              <div className="text-[10px] text-slate-500 font-medium">Social Messaging Platform</div>
             </div>
           </Link>
         </div>
 
-        {/* Quick Campaign Action Button */}
+        {/* Quick Launch Inbox Button */}
         <div className="px-4 pt-4 pb-2">
           <Link
-            href="/send-sms"
+            href="/inbox"
             onClick={onClose}
-            className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-subtle transition-colors"
+            className="flex items-center justify-between w-full py-2.5 px-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-subtle transition-colors group"
           >
-            <PlusCircle className="w-3.5 h-3.5" />
-            <span>Create Campaign</span>
+            <div className="flex items-center gap-2">
+              <Inbox className="w-4 h-4" />
+              <span>Open Unified Inbox</span>
+            </div>
+            {unreadConversationsCount > 0 && (
+              <span className="bg-white/20 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                {unreadConversationsCount}
+              </span>
+            )}
           </Link>
         </div>
 
         {/* Nav lists */}
         <div className="flex-1 overflow-y-auto px-3 py-2 space-y-5">
-          {/* Main Campaigning */}
+          {/* Main Messaging & Channels */}
           <div className="space-y-1">
             <div className="px-2.5 pb-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
-              Campaigns & Audience
+              Messaging & Channels
             </div>
             {mainNavigation.map((item) => {
               const isActive = pathname === item.href;
@@ -106,27 +134,28 @@ export function ClientSidebar({ isOpen, onClose }: ClientSidebarProps) {
                   className={cn(
                     "flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-colors group",
                     isActive
-                      ? "bg-slate-100 text-slate-900 font-semibold"
+                      ? "bg-blue-50 text-blue-700 font-semibold"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                   )}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex items-center gap-2.5">
                     <item.icon
                       className={cn(
-                        "w-4 h-4 shrink-0 transition-colors",
-                        isActive
-                          ? item.href === "/whatsapp"
-                            ? "text-[#25D366]"
-                            : "text-slate-900"
-                          : item.href === "/whatsapp"
-                          ? "text-[#25D366]"
-                          : "text-slate-400 group-hover:text-slate-600"
+                        "w-4 h-4 transition-colors",
+                        isActive ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
                       )}
                     />
-                    <span className="truncate">{item.name}</span>
+                    <span>{item.name}</span>
                   </div>
                   {item.badge && (
-                    <span className="text-[10px] font-semibold bg-[#E8F8EE] text-[#075E54] px-1.5 py-0.2 rounded-full">
+                    <span
+                      className={cn(
+                        "text-[10px] px-1.5 py-0.5 rounded font-medium",
+                        isActive
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-slate-100 text-slate-600 group-hover:bg-slate-200"
+                      )}
+                    >
                       {item.badge}
                     </span>
                   )}

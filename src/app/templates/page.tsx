@@ -186,10 +186,10 @@ export default function TemplatesPage() {
 
                 {tpl.approvalStatus === "approved" && (
                   <Link
-                    href={tpl.channel === "sms" ? "/send-sms" : "/whatsapp"}
+                    href={tpl.channel === "sms" ? "/inbox" : "/whatsapp"}
                     className="font-semibold text-slate-900 hover:text-blue-600 ml-1"
                   >
-                    Use in Campaign →
+                    Use in Messaging →
                   </Link>
                 )}
               </div>

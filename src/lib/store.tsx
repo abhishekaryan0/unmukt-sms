@@ -17,6 +17,12 @@ import {
   MessageLog,
   SenderHeader,
   WhatsAppProfile,
+  ConnectedChannel,
+  Conversation,
+  ChatMessage,
+  SavedReply,
+  TeamMember,
+  SocialChannelType,
 } from "@/types";
 import {
   INITIAL_CUSTOMERS,
@@ -34,6 +40,10 @@ import {
   INITIAL_MESSAGE_LOGS,
   INITIAL_SENDER_HEADERS,
   INITIAL_WHATSAPP_PROFILE,
+  INITIAL_CONNECTED_CHANNELS,
+  INITIAL_CONVERSATIONS,
+  INITIAL_SAVED_REPLIES,
+  INITIAL_TEAM_MEMBERS,
 } from "./mock-data";
 import { getClientSession, impersonateCustomer, stopImpersonation } from "./auth";
 import { useToast } from "@/components/ui/ToastContext";
@@ -54,6 +64,32 @@ interface AppContextType {
   messageLogs: MessageLog[];
   senderHeaders: SenderHeader[];
   whatsappProfile: WhatsAppProfile;
+
+  // Social Media Messaging Platform State
+  connectedChannels: ConnectedChannel[];
+  conversations: Conversation[];
+  savedReplies: SavedReply[];
+  teamMembers: TeamMember[];
+
+  // Social Messaging Actions
+  connectChannel: (channel: Omit<ConnectedChannel, "id" | "connectedAt" | "lastSyncAt" | "unreadCount" | "totalConversations">) => ConnectedChannel;
+  disconnectChannel: (channelId: string) => void;
+  reconnectChannel: (channelId: string) => void;
+  sendConversationMessage: (
+    conversationId: string,
+    content: string,
+    isInternalNote?: boolean,
+    attachments?: { type: "image" | "file"; url: string; name: string }[]
+  ) => ChatMessage;
+  markConversationStatus: (conversationId: string, status: "open" | "resolved") => void;
+  assignConversation: (conversationId: string, agentName: string, agentId?: string) => void;
+  addTagToConversation: (conversationId: string, tag: string) => void;
+  removeTagFromConversation: (conversationId: string, tag: string) => void;
+  addInternalNote: (conversationId: string, note: string, author?: string) => void;
+  addSavedReply: (reply: Omit<SavedReply, "id">) => SavedReply;
+  deleteSavedReply: (id: string) => void;
+  addTeamMember: (member: Omit<TeamMember, "id" | "activeChats">) => TeamMember;
+  updateTeamMemberStatus: (id: string, status: TeamMember["status"]) => void;
 
   // Active client context (supports Super Admin impersonation)
   activeCustomerId: string;
@@ -135,6 +171,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [messageLogs, setMessageLogs] = useState<MessageLog[]>(INITIAL_MESSAGE_LOGS);
   const [senderHeaders, setSenderHeaders] = useState<SenderHeader[]>(INITIAL_SENDER_HEADERS);
   const [whatsappProfile, setWhatsappProfile] = useState<WhatsAppProfile>(INITIAL_WHATSAPP_PROFILE);
+  const [connectedChannels, setConnectedChannels] = useState<ConnectedChannel[]>(INITIAL_CONNECTED_CHANNELS);
+  const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
+  const [savedReplies, setSavedReplies] = useState<SavedReply[]>(INITIAL_SAVED_REPLIES);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(INITIAL_TEAM_MEMBERS);
   const [activeCustomerId, setActiveCustomerId] = useState<string>(() => {
     if (typeof window !== "undefined") {
       const session = getClientSession();
@@ -238,6 +278,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const storedWaProfile = localStorage.getItem("smsunmukt_wa_profile");
       if (storedWaProfile) setWhatsappProfile(JSON.parse(storedWaProfile));
 
+      const storedChannels = localStorage.getItem("smsunmukt_connected_channels");
+      if (storedChannels) setConnectedChannels(JSON.parse(storedChannels));
+
+      const storedConvs = localStorage.getItem("smsunmukt_conversations");
+      if (storedConvs) setConversations(JSON.parse(storedConvs));
+
+      const storedReplies = localStorage.getItem("smsunmukt_saved_replies");
+      if (storedReplies) setSavedReplies(JSON.parse(storedReplies));
+
+      const storedTeam = localStorage.getItem("smsunmukt_team_members");
+      if (storedTeam) setTeamMembers(JSON.parse(storedTeam));
+
       const clientSession = getClientSession();
       if (clientSession && clientSession.id) {
         setActiveCustomerId(clientSession.id);
@@ -268,6 +320,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("smsunmukt_message_logs", JSON.stringify(messageLogs));
       localStorage.setItem("smsunmukt_sender_headers", JSON.stringify(senderHeaders));
       localStorage.setItem("smsunmukt_wa_profile", JSON.stringify(whatsappProfile));
+      localStorage.setItem("smsunmukt_connected_channels", JSON.stringify(connectedChannels));
+      localStorage.setItem("smsunmukt_conversations", JSON.stringify(conversations));
+      localStorage.setItem("smsunmukt_saved_replies", JSON.stringify(savedReplies));
+      localStorage.setItem("smsunmukt_team_members", JSON.stringify(teamMembers));
     } catch (e) {
       console.error("Failed to save to localStorage", e);
     }
@@ -287,6 +343,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     messageLogs,
     senderHeaders,
     whatsappProfile,
+    connectedChannels,
+    conversations,
+    savedReplies,
+    teamMembers,
   ]);
 
   // Active customer object
@@ -1215,6 +1275,255 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
   };
 
+  // Social Messaging Actions
+  const connectChannel = useCallback(
+    (channel: Omit<ConnectedChannel, "id" | "connectedAt" | "lastSyncAt" | "unreadCount" | "totalConversations">): ConnectedChannel => {
+      const newChan: ConnectedChannel = {
+        ...channel,
+        id: `chan-${Date.now()}`,
+        customerId: channel.customerId || activeCustomerId,
+        status: "connected",
+        connectedAt: new Date().toISOString().split("T")[0],
+        lastSyncAt: "Just now",
+        unreadCount: 0,
+        totalConversations: 0,
+        webhookStatus: "healthy",
+      };
+      setConnectedChannels((prev) => [newChan, ...prev]);
+      toast({
+        title: "Channel Connected",
+        message: `${newChan.name} (${newChan.identifier}) is now active.`,
+        type: "success",
+      });
+      return newChan;
+    },
+    [activeCustomerId, toast]
+  );
+
+  const disconnectChannel = useCallback(
+    (channelId: string) => {
+      setConnectedChannels((prev) =>
+        prev.map((c) => (c.id === channelId ? { ...c, status: "disconnected" } : c))
+      );
+      toast({
+        title: "Channel Disconnected",
+        message: "Channel has been paused. Inbound webhooks will be ignored.",
+        type: "info",
+      });
+    },
+    [toast]
+  );
+
+  const reconnectChannel = useCallback(
+    (channelId: string) => {
+      setConnectedChannels((prev) =>
+        prev.map((c) =>
+          c.id === channelId
+            ? { ...c, status: "connected", lastSyncAt: "Just now", webhookStatus: "healthy" }
+            : c
+        )
+      );
+      toast({
+        title: "Channel Reconnected",
+        message: "Credentials verified and webhook sync restored successfully.",
+        type: "success",
+      });
+    },
+    [toast]
+  );
+
+  const sendConversationMessage = useCallback(
+    (
+      conversationId: string,
+      content: string,
+      isInternalNote: boolean = false,
+      attachments?: { type: "image" | "file"; url: string; name: string }[]
+    ): ChatMessage => {
+      const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const newMsg: ChatMessage = {
+        id: `msg-${Date.now()}`,
+        conversationId,
+        sender: "agent",
+        senderName: activeCustomer.ownerName || "Support Agent",
+        content,
+        timestamp: timeStr,
+        status: "sent",
+        channelType: "whatsapp",
+        isInternalNote,
+        attachments,
+      };
+
+      setConversations((prev) =>
+        prev.map((conv) => {
+          if (conv.id !== conversationId) return conv;
+          newMsg.channelType = conv.channelType;
+
+          if (isInternalNote) {
+            const noteObj = {
+              id: `note-${Date.now()}`,
+              author: activeCustomer.ownerName || "Support Agent",
+              content,
+              createdAt: timeStr,
+            };
+            return {
+              ...conv,
+              internalNotes: [...(conv.internalNotes || []), noteObj],
+            };
+          }
+
+          return {
+            ...conv,
+            lastMessage: content,
+            lastMessageTime: timeStr,
+            lastMessageSender: "agent",
+            unreadCount: 0,
+            messages: [...conv.messages, newMsg],
+          };
+        })
+      );
+
+      return newMsg;
+    },
+    [activeCustomer.ownerName]
+  );
+
+  const markConversationStatus = useCallback(
+    (conversationId: string, status: "open" | "resolved") => {
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === conversationId
+            ? { ...c, status, unreadCount: status === "resolved" ? 0 : c.unreadCount }
+            : c
+        )
+      );
+      toast({
+        title: status === "resolved" ? "Conversation Resolved" : "Conversation Reopened",
+        message: `Conversation marked as ${status}.`,
+        type: "info",
+      });
+    },
+    [toast]
+  );
+
+  const assignConversation = useCallback(
+    (conversationId: string, agentName: string, agentId?: string) => {
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === conversationId ? { ...c, assignedToName: agentName, assignedTo: agentId || c.assignedTo } : c
+        )
+      );
+      toast({
+        title: "Conversation Assigned",
+        message: `Assigned to ${agentName}.`,
+        type: "success",
+      });
+    },
+    [toast]
+  );
+
+  const addTagToConversation = useCallback((conversationId: string, tag: string) => {
+    const trimmed = tag.trim();
+    if (!trimmed) return;
+    setConversations((prev) =>
+      prev.map((c) => {
+        if (c.id !== conversationId) return c;
+        if (c.tags.includes(trimmed)) return c;
+        return { ...c, tags: [...c.tags, trimmed] };
+      })
+    );
+  }, []);
+
+  const removeTagFromConversation = useCallback((conversationId: string, tag: string) => {
+    setConversations((prev) =>
+      prev.map((c) => {
+        if (c.id !== conversationId) return c;
+        return { ...c, tags: c.tags.filter((t) => t !== tag) };
+      })
+    );
+  }, []);
+
+  const addInternalNote = useCallback(
+    (conversationId: string, note: string, author?: string) => {
+      const trimmed = note.trim();
+      if (!trimmed) return;
+      const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const noteObj = {
+        id: `note-${Date.now()}`,
+        author: author || activeCustomer.ownerName || "Support Team",
+        content: trimmed,
+        createdAt: timeStr,
+      };
+      setConversations((prev) =>
+        prev.map((c) => {
+          if (c.id !== conversationId) return c;
+          return {
+            ...c,
+            internalNotes: [...(c.internalNotes || []), noteObj],
+          };
+        })
+      );
+      toast({
+        title: "Note Added",
+        message: "Internal note saved to conversation.",
+        type: "success",
+      });
+    },
+    [activeCustomer.ownerName, toast]
+  );
+
+  const addSavedReply = useCallback(
+    (reply: Omit<SavedReply, "id">): SavedReply => {
+      const newReply: SavedReply = {
+        ...reply,
+        id: `reply-${Date.now()}`,
+        customerId: reply.customerId || activeCustomerId,
+      };
+      setSavedReplies((prev) => [newReply, ...prev]);
+      toast({
+        title: "Saved Reply Added",
+        message: `Shortcut "${newReply.shortcut}" is ready to use.`,
+        type: "success",
+      });
+      return newReply;
+    },
+    [activeCustomerId, toast]
+  );
+
+  const deleteSavedReply = useCallback(
+    (id: string) => {
+      setSavedReplies((prev) => prev.filter((r) => r.id !== id));
+      toast({
+        title: "Reply Deleted",
+        message: "Saved response removed.",
+        type: "info",
+      });
+    },
+    [toast]
+  );
+
+  const addTeamMember = useCallback(
+    (member: Omit<TeamMember, "id" | "activeChats">): TeamMember => {
+      const newMember: TeamMember = {
+        ...member,
+        id: `team-${Date.now()}`,
+        customerId: member.customerId || activeCustomerId,
+        activeChats: 0,
+      };
+      setTeamMembers((prev) => [...prev, newMember]);
+      toast({
+        title: "Team Member Added",
+        message: `${newMember.name} has been added.`,
+        type: "success",
+      });
+      return newMember;
+    },
+    [activeCustomerId, toast]
+  );
+
+  const updateTeamMemberStatus = useCallback((id: string, status: TeamMember["status"]) => {
+    setTeamMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status } : m)));
+  }, []);
+
   const resetAllData = () => {
     localStorage.clear();
     setCustomers(INITIAL_CUSTOMERS);
@@ -1232,6 +1541,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setMessageLogs(INITIAL_MESSAGE_LOGS);
     setSenderHeaders(INITIAL_SENDER_HEADERS);
     setWhatsappProfile(INITIAL_WHATSAPP_PROFILE);
+    setConnectedChannels(INITIAL_CONNECTED_CHANNELS);
+    setConversations(INITIAL_CONVERSATIONS);
+    setSavedReplies(INITIAL_SAVED_REPLIES);
+    setTeamMembers(INITIAL_TEAM_MEMBERS);
     setActiveCustomerId("cust-01");
     refreshFromDatabase();
     toast({
@@ -1259,6 +1572,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         messageLogs,
         senderHeaders,
         whatsappProfile,
+        connectedChannels,
+        conversations,
+        savedReplies,
+        teamMembers,
+        connectChannel,
+        disconnectChannel,
+        reconnectChannel,
+        sendConversationMessage,
+        markConversationStatus,
+        assignConversation,
+        addTagToConversation,
+        removeTagFromConversation,
+        addInternalNote,
+        addSavedReply,
+        deleteSavedReply,
+        addTeamMember,
+        updateTeamMemberStatus,
         activeCustomerId,
         activeCustomer,
         clientWalletBalance,

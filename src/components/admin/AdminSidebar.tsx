@@ -8,8 +8,8 @@ import {
   Users,
   Briefcase,
   Megaphone,
+  Radio,
   MessageSquare,
-  Smartphone,
   Truck,
   GitFork,
   Wallet,
@@ -36,10 +36,10 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Customers", href: "/admin/customers", icon: Users },
     { name: "Agencies", href: "/admin/agencies", icon: Briefcase },
-    { name: "Campaigns", href: "/admin/campaigns", icon: Megaphone },
-    { name: "SMS Management", href: "/admin/sms", icon: Smartphone },
+    { name: "Connected Channels", href: "/admin/channels", icon: Radio },
     { name: "WhatsApp Management", href: "/admin/whatsapp", icon: MessageSquare },
-    { name: "Suppliers", href: "/admin/suppliers", icon: Truck },
+    { name: "Campaigns", href: "/admin/campaigns", icon: Megaphone },
+    { name: "Suppliers & Gateways", href: "/admin/suppliers", icon: Truck },
     { name: "Routing Management", href: "/admin/routing", icon: GitFork },
     { name: "Wallet & Transactions", href: "/admin/wallet", icon: Wallet },
     { name: "Pricing Management", href: "/admin/pricing", icon: Tag },
@@ -65,12 +65,12 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-white tracking-tight text-sm">SMS UNMUKT</span>
+              <span className="font-bold text-white tracking-tight text-sm">UNMUKT</span>
               <span className="text-[10px] font-bold bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30">
                 ADMIN
               </span>
             </div>
-            <div className="text-[10px] text-slate-400">Carrier Gateway Cloud</div>
+            <div className="text-[10px] text-slate-400">Social Messaging Cloud</div>
           </div>
         </Link>
       </div>

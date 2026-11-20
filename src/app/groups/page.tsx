@@ -14,7 +14,7 @@ import {
   FolderTree,
   Plus,
   Users,
-  Send,
+  Inbox,
   MessageCircle,
   Trash2,
   ArrowRight,
@@ -147,10 +147,10 @@ export default function ContactGroupsPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
-                    <Link href={`/send-sms?group=${g.id}`} className="block">
-                      <button className="w-full py-1.5 px-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-semibold flex items-center justify-center gap-1 transition-colors">
-                        <Send className="w-3 h-3 text-slate-600" />
-                        <span>SMS</span>
+                    <Link href={`/inbox`} className="block">
+                      <button className="w-full py-1.5 px-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-semibold flex items-center justify-center gap-1 transition-colors border border-blue-200">
+                        <Inbox className="w-3 h-3 text-blue-600" />
+                        <span>Inbox</span>
                       </button>
                     </Link>
                     <Link href={`/whatsapp?group=${g.id}`} className="block">

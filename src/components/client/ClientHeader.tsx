@@ -12,8 +12,8 @@ import {
   Menu,
   Wallet,
   Plus,
-  Send,
-  MessageCircle,
+  Inbox,
+  Radio,
   Bell,
   LogOut,
   User,
@@ -26,9 +26,12 @@ interface ClientHeaderProps {
 
 export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
   const router = useRouter();
-  const { clientWalletBalance, activeCustomer } = useAppStore();
+  const { clientWalletBalance, activeCustomer, conversations, connectedChannels } = useAppStore();
   const [showRecharge, setShowRecharge] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  const unreadCount = conversations.filter((c) => c.status === "unread" || c.unreadCount > 0).length;
+  const connectedCount = connectedChannels.filter((c) => c.status === "connected").length;
 
   const session = typeof window !== "undefined" ? getClientSession() : null;
 
@@ -98,22 +101,27 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
             </span>
           </button>
 
-          {/* Quick Send WhatsApp Pill */}
+          {/* Connected Channels Pill */}
           <Link
-            href="/whatsapp"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E8F8EE] text-[#075E54] hover:bg-[#d8f3e2] text-xs font-semibold border border-[#b8e8c8] transition-colors"
+            href="/channels"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 transition-colors shadow-subtle"
           >
-            <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
-            <span>WhatsApp</span>
+            <Radio className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Channels ({connectedCount})</span>
           </Link>
 
-          {/* Quick Send SMS Pill */}
+          {/* Unified Inbox Pill */}
           <Link
-            href="/send-sms"
-            className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition-colors border border-slate-200"
+            href="/inbox"
+            className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors shadow-subtle"
           >
-            <Send className="w-3.5 h-3.5 text-slate-600" />
-            <span>Send SMS</span>
+            <Inbox className="w-3.5 h-3.5" />
+            <span>Inbox</span>
+            {unreadCount > 0 && (
+              <span className="bg-white/20 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+                {unreadCount}
+              </span>
+            )}
           </Link>
 
           {/* Notifications */}
@@ -139,7 +147,7 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
                   <div className="font-semibold text-slate-900">{ownerName}</div>
                   <div className="text-slate-500 text-[11px] truncate">{ownerEmail}</div>
                   <div className="text-[10px] text-emerald-600 font-medium mt-0.5">
-                    DLT Entity ID: {activeCustomer?.dltEntityId || "1701159820000034"}
+                    Channels: {connectedCount} Connected (Healthy)
                   </div>
                 </div>
 

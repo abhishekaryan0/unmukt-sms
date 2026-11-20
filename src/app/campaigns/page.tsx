@@ -141,10 +141,9 @@ export default function CampaignHistoryPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link href="/send-sms">
-            <Button size="sm" className="bg-slate-900 text-white gap-1.5">
-              <Plus className="w-3.5 h-3.5" />
-              <span>New Campaign</span>
+          <Link href="/inbox">
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5">
+              <span>Open Inbox</span>
             </Button>
           </Link>
         </div>
