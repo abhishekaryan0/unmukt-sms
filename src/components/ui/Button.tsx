@@ -15,18 +15,19 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants = {
       primary:
-        "bg-slate-900 text-white hover:bg-slate-800 active:bg-slate-950 focus-visible:ring-slate-950 shadow-subtle",
+        "bg-slate-900 dark:bg-blue-600 text-white hover:bg-slate-800 dark:hover:bg-blue-700 active:bg-slate-950 dark:active:bg-blue-800 focus-visible:ring-slate-950 shadow-subtle",
       secondary:
-        "bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-300 focus-visible:ring-slate-400 border border-slate-200/60",
+        "bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-300 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 focus-visible:ring-slate-400 border border-slate-200/60 dark:border-slate-700",
       outline:
-        "border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 hover:text-slate-900 focus-visible:ring-slate-400 shadow-subtle",
-      ghost: "text-slate-700 hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-slate-400",
+        "border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white focus-visible:ring-slate-400 shadow-subtle",
+      ghost:
+        "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white focus-visible:ring-slate-400",
       destructive:
         "bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800 focus-visible:ring-rose-500 shadow-subtle",
       whatsapp:
         "bg-[#25D366] text-white hover:bg-[#1ebd5b] active:bg-[#128C7E] focus-visible:ring-[#25D366] shadow-subtle font-semibold",
       white:
-        "bg-white text-slate-900 hover:bg-slate-50 border border-slate-200 shadow-subtle",
+        "bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-subtle",
     };
 
     const sizes = {

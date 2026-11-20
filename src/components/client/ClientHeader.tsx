@@ -86,14 +86,14 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
           {/* Subscription Tier Pill */}
           <Link
             href="/subscription"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-blue-200 bg-blue-50/70 hover:bg-blue-100/70 transition-colors shadow-subtle group"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-900/60 bg-blue-50/70 dark:bg-blue-950/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/50 transition-colors shadow-subtle group"
           >
-            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+            <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
             <div className="text-left">
-              <span className="text-[10px] text-blue-600 uppercase tracking-wider block font-bold leading-none">
+              <span className="text-[10px] text-blue-600 dark:text-blue-400 uppercase tracking-wider block font-bold leading-none">
                 Plan
               </span>
-              <span className="text-xs font-bold text-slate-900 leading-none">
+              <span className="text-xs font-bold text-slate-900 dark:text-white leading-none">
                 Pro Tier
               </span>
             </div>
@@ -103,9 +103,9 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
           {/* Connected Channels Pill */}
           <Link
             href="/channels"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 transition-colors shadow-subtle"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700 transition-colors shadow-subtle"
           >
-            <Radio className="w-3.5 h-3.5 text-emerald-600" />
+            <Radio className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>Channels ({connectedCount})</span>
           </Link>
 
@@ -127,7 +127,7 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
           <ThemeToggle />
 
           {/* Notifications */}
-          <button className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors relative">
+          <button className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors relative">
             <Bell className="w-4 h-4" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-600" />
           </button>
@@ -136,7 +136,7 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
           <div className="relative">
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-100 transition-colors"
+              className="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-bold ring-2 ring-slate-100">
                 {ownerInitials}

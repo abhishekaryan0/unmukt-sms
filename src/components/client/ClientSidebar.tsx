@@ -78,21 +78,21 @@ export function ClientSidebar({ isOpen, onClose }: ClientSidebarProps) {
     <>
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 w-64 bg-white text-slate-700 flex flex-col border-r border-slate-200/90 shadow-sm transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 flex flex-col border-r border-slate-200/90 dark:border-slate-800 shadow-sm transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-5 border-b border-slate-100 bg-white">
+        <div className="h-16 flex items-center justify-between px-5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950">
           <Link href="/dashboard" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-subtle">
               U
             </div>
             <div>
-              <div className="font-bold text-slate-900 tracking-tight text-sm">
+              <div className="font-bold text-slate-900 dark:text-white tracking-tight text-sm">
                 UNMUKT<span className="text-blue-600">.SOCIAL</span>
               </div>
-              <div className="text-[10px] text-slate-500 font-medium">Social Messaging Platform</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Social Messaging Platform</div>
             </div>
           </Link>
         </div>
@@ -133,15 +133,15 @@ export function ClientSidebar({ isOpen, onClose }: ClientSidebarProps) {
                   className={cn(
                     "flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-colors group",
                     isActive
-                      ? "bg-blue-50 text-blue-700 font-semibold"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                      ? "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 font-semibold"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60"
                   )}
                 >
                   <div className="flex items-center gap-2.5">
                     <item.icon
                       className={cn(
                         "w-4 h-4 transition-colors",
-                        isActive ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
+                        isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200"
                       )}
                     />
                     <span>{item.name}</span>
@@ -151,8 +151,8 @@ export function ClientSidebar({ isOpen, onClose }: ClientSidebarProps) {
                       className={cn(
                         "text-[10px] px-1.5 py-0.5 rounded font-medium",
                         isActive
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-slate-100 text-slate-600 group-hover:bg-slate-200"
+                          ? "bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-slate-200 dark:group-hover:bg-slate-700"
                       )}
                     >
                       {item.badge}
@@ -178,15 +178,15 @@ export function ClientSidebar({ isOpen, onClose }: ClientSidebarProps) {
                   className={cn(
                     "flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-colors group",
                     isActive
-                      ? "bg-slate-100 text-slate-900 font-semibold"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                      ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60"
                   )}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <item.icon
                       className={cn(
                         "w-4 h-4 shrink-0 transition-colors",
-                        isActive ? "text-slate-900" : "text-slate-400 group-hover:text-slate-600"
+                        isActive ? "text-slate-900 dark:text-white" : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200"
                       )}
                     />
                     <span className="truncate">{item.name}</span>
@@ -198,26 +198,26 @@ export function ClientSidebar({ isOpen, onClose }: ClientSidebarProps) {
         </div>
 
         {/* Subscription Plan Card in Sidebar Footer */}
-        <div className="p-3 border-t border-slate-100 bg-slate-50/70">
-          <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-subtle">
+        <div className="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60">
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-3 shadow-subtle">
             <div className="flex items-center justify-between text-[11px] mb-1">
-              <span className="font-bold text-slate-900 flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+              <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 <span>Pro Plan</span>
               </span>
-              <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-800">
                 Active
               </span>
             </div>
-            <div className="text-[11px] text-slate-500">
+            <div className="text-[11px] text-slate-500 dark:text-slate-400">
               Renews 12 Dec 2026
             </div>
-            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+            <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
               <span className="text-[10px] text-slate-400 font-medium">{activeChannelsCount} / 5 Channels</span>
               <Link
                 href="/subscription"
                 onClick={onClose}
-                className="text-[11px] text-blue-600 hover:text-blue-700 font-semibold"
+                className="text-[11px] text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold"
               >
                 Manage Plan →
               </Link>

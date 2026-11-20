@@ -93,7 +93,7 @@ export function DataTable<T extends Record<string, any>>({
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left border-collapse", tableClassName || "min-w-full")}>
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50/75 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/75 dark:bg-slate-900 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {columns.map((col, idx) => (
                   <th key={idx} className={`py-3 px-4 ${col.className || ""}`}>
                     {col.header}
@@ -101,12 +101,12 @@ export function DataTable<T extends Record<string, any>>({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs text-slate-700 dark:text-slate-300">
               {paginatedData.length > 0 ? (
                 paginatedData.map((row, rowIdx) => (
                   <tr
                     key={row.id || rowIdx}
-                    className="hover:bg-slate-50/75 transition-colors group"
+                    className="hover:bg-slate-50/75 dark:hover:bg-slate-800/60 transition-colors group"
                   >
                     {columns.map((col, colIdx) => (
                       <td key={colIdx} className={`py-3.5 px-4 ${col.className || ""}`}>

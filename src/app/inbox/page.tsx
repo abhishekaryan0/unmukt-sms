@@ -325,8 +325,8 @@ export default function UnifiedInboxPage() {
                       }}
                       className={`p-3.5 cursor-pointer transition-all border-l-[3px] ${
                         isSelected
-                          ? "bg-blue-50/70 border-blue-600"
-                          : "hover:bg-slate-50/80 border-transparent"
+                          ? "bg-blue-50/70 dark:bg-blue-950/40 border-blue-600"
+                          : "hover:bg-slate-50/80 dark:hover:bg-slate-800/60 border-transparent"
                       }`}
                     >
                       <div className="flex items-start gap-3">

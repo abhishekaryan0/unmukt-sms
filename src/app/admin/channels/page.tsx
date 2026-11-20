@@ -365,11 +365,11 @@ export default function AdminChannelsPage() {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {filteredChannels.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
+                  <tr key={c.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
                     <td className="py-3.5 px-4">
-                      <div className="font-bold text-slate-900">{c.customerName}</div>
+                      <div className="font-bold text-slate-900 dark:text-white">{c.customerName}</div>
                       <div className="text-[10px] text-slate-400 font-mono">{c.customerId}</div>
                     </td>
 
@@ -377,31 +377,31 @@ export default function AdminChannelsPage() {
                       <div className="flex items-center gap-2">
                         <ChannelBadge channelType={c.channelType} size="sm" />
                       </div>
-                      <div className="text-[11px] text-slate-600 font-medium mt-1">{c.name}</div>
+                      <div className="text-[11px] text-slate-600 dark:text-slate-300 font-medium mt-1">{c.name}</div>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <div className="font-mono text-slate-700">{c.identifier}</div>
+                      <div className="font-mono text-slate-700 dark:text-slate-300">{c.identifier}</div>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                      <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
                         {c.apiTier}
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 font-semibold text-slate-900">
+                    <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
                       {c.dailyMessages.toLocaleString()} msgs
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="text-emerald-600 font-mono font-semibold">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-mono font-semibold">
                         {c.latencyMs}ms
                       </span>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         <span>Healthy</span>
                       </span>
@@ -410,9 +410,9 @@ export default function AdminChannelsPage() {
                     <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={() => handlePingWebhook(c.name)}
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-md border border-blue-200 transition-colors"
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 px-2.5 py-1 rounded-md border border-blue-200 dark:border-blue-800 transition-colors"
                       >
-                        <RefreshCw className="w-3 h-3 text-blue-600" />
+                        <RefreshCw className="w-3 h-3 text-blue-600 dark:text-blue-400" />
                         <span>Ping</span>
                       </button>
                     </td>

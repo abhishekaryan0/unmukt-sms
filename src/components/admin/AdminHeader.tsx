@@ -59,10 +59,10 @@ export function AdminHeader({
         <Link
           href="/dashboard"
           target="_blank"
-          className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors"
+          className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-colors"
         >
           <span>Client App</span>
-          <ExternalLink className="w-3 h-3 text-slate-500" />
+          <ExternalLink className="w-3 h-3 text-slate-500 dark:text-slate-400" />
         </Link>
 
         {/* Theme Switcher Toggle */}
@@ -70,7 +70,7 @@ export function AdminHeader({
 
         {/* Notification Bell */}
         <div className="relative">
-          <button className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors relative">
+          <button className="p-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors relative">
             <Bell className="w-4 h-4" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500" />
           </button>
@@ -80,14 +80,14 @@ export function AdminHeader({
         <div className="relative">
           <button
             onClick={() => setShowDropdown(!showDropdown)}
-            className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+            className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
-            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs ring-2 ring-slate-200">
+            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs ring-2 ring-slate-200 dark:ring-slate-700">
               VM
             </div>
             <div className="hidden lg:block text-left">
-              <div className="text-xs font-semibold text-slate-900">{DEMO_ADMIN.user.name}</div>
-              <div className="text-[10px] text-slate-500">Super Admin</div>
+              <div className="text-xs font-semibold text-slate-900 dark:text-white">{DEMO_ADMIN.user.name}</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">Super Admin</div>
             </div>
           </button>
 

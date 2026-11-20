@@ -450,18 +450,18 @@ export default function AdminDashboardPage() {
             </Link>
           </div>
 
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {customers.slice(0, 5).map((c) => (
-              <div key={c.id} className="p-3.5 flex items-center justify-between text-xs">
+              <div key={c.id} className="p-3.5 flex items-center justify-between text-xs hover:bg-slate-50/70 dark:hover:bg-slate-800/60 transition-colors">
                 <div>
-                  <div className="font-bold text-slate-900">{c.businessName}</div>
-                  <div className="text-[11px] text-slate-500">
+                  <div className="font-bold text-slate-900 dark:text-white">{c.businessName}</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
                     {c.ownerName} • {c.city}, {c.state} • {c.businessCategory}
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <div className="font-bold text-slate-900">{formatINR(c.walletBalance)}</div>
+                  <div className="font-bold text-slate-900 dark:text-white">{formatINR(c.walletBalance)}</div>
                   <StatusBadge status={c.accountStatus} />
                 </div>
               </div>
@@ -471,24 +471,24 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Tenant Social Broadcasts Activity Monitoring */}
-      <div className="bg-white rounded-xl border border-slate-200/80 shadow-card overflow-hidden">
-        <div className="flex items-center justify-between p-4 border-b border-slate-100">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-card overflow-hidden">
+        <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
           <div>
-            <h3 className="text-sm font-bold text-slate-900">Tenant Multi-Channel Broadcast Activity</h3>
-            <p className="text-xs text-slate-500">Live multi-channel broadcast throughput and telemetry across clients</p>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Tenant Multi-Channel Broadcast Activity</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Live multi-channel broadcast throughput and telemetry across clients</p>
           </div>
           <Link
             href="/admin/campaigns"
-            className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1"
+            className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
           >
             <span>Monitor All Broadcasts</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-slate-100 dark:divide-slate-800">
           {broadcastCampaigns.slice(0, 4).map((camp) => (
-            <div key={camp.id} className="p-4 flex items-center justify-between text-xs">
+            <div key={camp.id} className="p-4 flex items-center justify-between text-xs hover:bg-slate-50/70 dark:hover:bg-slate-800/60 transition-colors">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-slate-900">{camp.campaignName}</span>

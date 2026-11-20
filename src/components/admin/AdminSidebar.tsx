@@ -87,7 +87,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                 "flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-colors group",
                 isActive
                   ? "bg-blue-600 text-white font-semibold shadow-sm"
-                  : "text-slate-400 hover:text-slate-100 hover:bg-slate-900"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/70"
               )}
             >
               <div className="flex items-center gap-2.5 min-w-0">
