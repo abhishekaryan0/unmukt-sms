@@ -194,92 +194,92 @@ export default function AdminChannelsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-blue-600 text-white">
+              <span className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
                 <Radio className="w-5 h-5" />
               </span>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
                 Connected Channels & Gateway Monitoring
               </h1>
             </div>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Cross-tenant monitoring of customer social messaging channel connections, Meta Cloud webhooks, and gateway latencies.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>All Webhook Nodes Operational</span>
             </span>
           </div>
         </div>
 
-        {/* Aggregate KPI Cards */}
+        {/* Aggregate KPI Cards in Clean Light Theme */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          <div className="bg-white border border-slate-200/90 p-4 rounded-xl shadow-subtle">
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
               Connected Channels
             </div>
-            <div className="mt-1 text-2xl font-bold text-white">{totalConnected}</div>
-            <div className="text-[11px] text-emerald-400 font-medium mt-1">Across 8 Tenants</div>
+            <div className="mt-1 text-2xl font-bold text-slate-900">{totalConnected}</div>
+            <div className="text-[11px] text-emerald-600 font-medium mt-1">Across 8 Tenants</div>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+          <div className="bg-white border border-slate-200/90 p-4 rounded-xl shadow-subtle">
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
               <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366]" />
               <span>WhatsApp WABA</span>
             </div>
-            <div className="mt-1 text-2xl font-bold text-emerald-400">{whatsappCount}</div>
-            <div className="text-[11px] text-slate-400 font-medium mt-1">Meta Cloud API</div>
+            <div className="mt-1 text-2xl font-bold text-[#075E54]">{whatsappCount}</div>
+            <div className="text-[11px] text-slate-500 font-medium mt-1">Meta Cloud API</div>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <InstagramIcon className="w-3.5 h-3.5 text-pink-400" />
+          <div className="bg-white border border-slate-200/90 p-4 rounded-xl shadow-subtle">
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              <InstagramIcon className="w-3.5 h-3.5 text-pink-600" />
               <span>Instagram Direct</span>
             </div>
-            <div className="mt-1 text-2xl font-bold text-pink-400">{instagramCount}</div>
-            <div className="text-[11px] text-slate-400 font-medium mt-1">Business Messaging</div>
+            <div className="mt-1 text-2xl font-bold text-pink-700">{instagramCount}</div>
+            <div className="text-[11px] text-slate-500 font-medium mt-1">Business Messaging</div>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <MessengerIcon className="w-3.5 h-3.5 text-blue-400" />
+          <div className="bg-white border border-slate-200/90 p-4 rounded-xl shadow-subtle">
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              <MessengerIcon className="w-3.5 h-3.5 text-[#0084FF]" />
               <span>Messenger Pages</span>
             </div>
-            <div className="mt-1 text-2xl font-bold text-blue-400">{messengerCount}</div>
-            <div className="text-[11px] text-slate-400 font-medium mt-1">Meta Graph Pages</div>
+            <div className="mt-1 text-2xl font-bold text-blue-700">{messengerCount}</div>
+            <div className="text-[11px] text-slate-500 font-medium mt-1">Meta Graph Pages</div>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <TelegramIcon className="w-3.5 h-3.5 text-sky-400" />
+          <div className="bg-white border border-slate-200/90 p-4 rounded-xl shadow-subtle">
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              <TelegramIcon className="w-3.5 h-3.5 text-[#0088cc]" />
               <span>Telegram Bots</span>
             </div>
-            <div className="mt-1 text-2xl font-bold text-sky-400">{telegramCount}</div>
-            <div className="text-[11px] text-slate-400 font-medium mt-1">Bot Webhooks</div>
+            <div className="mt-1 text-2xl font-bold text-sky-700">{telegramCount}</div>
+            <div className="text-[11px] text-slate-500 font-medium mt-1">Bot Webhooks</div>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          <div className="bg-white border border-slate-200/90 p-4 rounded-xl shadow-subtle">
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
               Daily Msg Volume
             </div>
-            <div className="mt-1 text-2xl font-bold text-white">
+            <div className="mt-1 text-2xl font-bold text-slate-900">
               {totalDailyTraffic.toLocaleString()}
             </div>
-            <div className="text-[11px] text-emerald-400 font-medium mt-1">Handled Today</div>
+            <div className="text-[11px] text-emerald-600 font-medium mt-1">Handled Today</div>
           </div>
         </div>
 
-        {/* Filters & Search */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-900 p-3.5 rounded-xl border border-slate-800">
+        {/* Filters & Search in Light Theme */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200/90 shadow-subtle">
           <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
             <button
               onClick={() => setChannelFilter("all")}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                 channelFilter === "all"
-                  ? "bg-blue-600 text-white"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
               All Platforms
@@ -289,7 +289,7 @@ export default function AdminChannelsPage() {
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
                 channelFilter === "whatsapp"
                   ? "bg-[#25D366] text-white"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200"
               }`}
             >
               <WhatsAppIcon className="w-3.5 h-3.5" />
@@ -300,7 +300,7 @@ export default function AdminChannelsPage() {
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
                 channelFilter === "instagram"
                   ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200"
               }`}
             >
               <InstagramIcon className="w-3.5 h-3.5" />
@@ -311,7 +311,7 @@ export default function AdminChannelsPage() {
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
                 channelFilter === "messenger"
                   ? "bg-[#0084FF] text-white"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200"
               }`}
             >
               <MessengerIcon className="w-3.5 h-3.5" />
@@ -322,7 +322,7 @@ export default function AdminChannelsPage() {
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
                 channelFilter === "telegram"
                   ? "bg-[#0088cc] text-white"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200"
               }`}
             >
               <TelegramIcon className="w-3.5 h-3.5" />
@@ -331,28 +331,30 @@ export default function AdminChannelsPage() {
           </div>
 
           <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter by tenant or channel..."
-              className="w-full pl-9 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white"
             />
           </div>
         </div>
 
-        {/* Cross-Tenant Channels Table */}
-        <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden shadow-sm">
-          <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white">Active Tenant Channel Handshakes</h3>
-            <span className="text-xs text-slate-400">{filteredChannels.length} Monitored Endpoints</span>
+        {/* Cross-Tenant Channels Table in Light Theme */}
+        <div className="bg-white rounded-xl border border-slate-200/90 shadow-subtle overflow-hidden">
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-slate-900">Active Tenant Channel Handshakes</h3>
+            <span className="text-xs text-slate-500 font-medium">
+              {filteredChannels.length} Monitored Endpoints
+            </span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-950/60">
+                <tr className="border-b border-slate-200 text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-slate-50/80">
                   <th className="py-3 px-4">Client Tenant</th>
                   <th className="py-3 px-4">Channel & Platform</th>
                   <th className="py-3 px-4">Account Identifier</th>
@@ -363,11 +365,11 @@ export default function AdminChannelsPage() {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/80">
+              <tbody className="divide-y divide-slate-100">
                 {filteredChannels.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-800/40 transition-colors">
+                  <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-3.5 px-4">
-                      <div className="font-bold text-white">{c.customerName}</div>
+                      <div className="font-bold text-slate-900">{c.customerName}</div>
                       <div className="text-[10px] text-slate-400 font-mono">{c.customerId}</div>
                     </td>
 
@@ -375,32 +377,32 @@ export default function AdminChannelsPage() {
                       <div className="flex items-center gap-2">
                         <ChannelBadge channelType={c.channelType} size="sm" />
                       </div>
-                      <div className="text-[11px] text-slate-300 font-medium mt-1">{c.name}</div>
+                      <div className="text-[11px] text-slate-600 font-medium mt-1">{c.name}</div>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <div className="font-mono text-slate-200">{c.identifier}</div>
+                      <div className="font-mono text-slate-700">{c.identifier}</div>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="text-[11px] font-semibold text-slate-300 bg-slate-800 px-2 py-0.5 rounded">
+                      <span className="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
                         {c.apiTier}
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 font-semibold text-white">
+                    <td className="py-3.5 px-4 font-semibold text-slate-900">
                       {c.dailyMessages.toLocaleString()} msgs
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="text-emerald-400 font-mono font-semibold">
+                      <span className="text-emerald-600 font-mono font-semibold">
                         {c.latencyMs}ms
                       </span>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         <span>Healthy</span>
                       </span>
                     </td>
@@ -408,9 +410,9 @@ export default function AdminChannelsPage() {
                     <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={() => handlePingWebhook(c.name)}
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-2.5 py-1 rounded-md border border-blue-500/20 transition-colors"
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-md border border-blue-200 transition-colors"
                       >
-                        <RefreshCw className="w-3 h-3" />
+                        <RefreshCw className="w-3 h-3 text-blue-600" />
                         <span>Ping</span>
                       </button>
                     </td>

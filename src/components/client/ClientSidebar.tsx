@@ -12,8 +12,8 @@ import {
   History,
   MessageSquareQuote,
   UserCheck,
-  FileText,
-  Wallet,
+  CreditCard,
+  Sparkles,
   Receipt,
   FileCheck2,
   BarChart2,
@@ -26,7 +26,6 @@ import {
 } from "lucide-react";
 import { cn, formatINR } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
-import { RechargeModal } from "./RechargeModal";
 
 interface ClientSidebarProps {
   isOpen?: boolean;
@@ -35,8 +34,7 @@ interface ClientSidebarProps {
 
 export function ClientSidebar({ isOpen, onClose }: ClientSidebarProps) {
   const pathname = usePathname();
-  const { clientWalletBalance, conversations, connectedChannels } = useAppStore();
-  const [showRecharge, setShowRecharge] = useState(false);
+  const { conversations, connectedChannels } = useAppStore();
 
   const unreadConversationsCount = conversations.filter(
     (c) => c.status === "unread" || c.unreadCount > 0
@@ -67,9 +65,8 @@ export function ClientSidebar({ isOpen, onClose }: ClientSidebarProps) {
   ];
 
   const financeNavigation = [
-    { name: "Wallet & Recharge", href: "/wallet", icon: Wallet },
-    { name: "Transactions", href: "/transactions", icon: Receipt },
-    { name: "Invoices", href: "/invoices", icon: FileCheck2 },
+    { name: "Subscription & Plans", href: "/subscription", icon: CreditCard, badge: "Pro" },
+    { name: "Invoices & Billing", href: "/invoices", icon: FileCheck2 },
     { name: "Reports & Analytics", href: "/reports", icon: BarChart2 },
     { name: "Support Tickets", href: "/support", icon: HelpCircle },
     { name: "Settings", href: "/settings", icon: Settings },
@@ -79,7 +76,7 @@ export function ClientSidebar({ isOpen, onClose }: ClientSidebarProps) {
     <>
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 w-64 bg-white text-slate-700 flex flex-col border-r border-slate-200/90 shadow-sm transition-transform duration-200 ease-in-out lg:static lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 w-64 bg-white text-slate-700 flex flex-col border-r border-slate-200/90 shadow-sm transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -198,28 +195,34 @@ export function ClientSidebar({ isOpen, onClose }: ClientSidebarProps) {
           </div>
         </div>
 
-        {/* Wallet Mini-Widget in Sidebar Footer */}
+        {/* Subscription Plan Card in Sidebar Footer */}
         <div className="p-3 border-t border-slate-100 bg-slate-50/70">
           <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-subtle">
-            <div className="flex items-center justify-between text-[11px] text-slate-500">
-              <span className="font-medium">Wallet Balance</span>
-              <button
-                onClick={() => setShowRecharge(true)}
-                className="text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-0.5 text-[11px]"
-              >
-                <Plus className="w-3 h-3" />
-                Add Money
-              </button>
+            <div className="flex items-center justify-between text-[11px] mb-1">
+              <span className="font-bold text-slate-900 flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                <span>Pro Plan</span>
+              </span>
+              <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                Active
+              </span>
             </div>
-            <div className="text-base font-bold text-slate-900 mt-1">
-              {formatINR(clientWalletBalance)}
+            <div className="text-[11px] text-slate-500">
+              Renews 12 Dec 2026
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span className="text-[10px] text-slate-400 font-medium">{activeChannelsCount} / 5 Channels</span>
+              <Link
+                href="/subscription"
+                onClick={onClose}
+                className="text-[11px] text-blue-600 hover:text-blue-700 font-semibold"
+              >
+                Manage Plan →
+              </Link>
             </div>
           </div>
         </div>
       </aside>
-
-      {/* Recharge Modal */}
-      <RechargeModal isOpen={showRecharge} onClose={() => setShowRecharge(false)} />
     </>
   );
 }

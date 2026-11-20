@@ -10,9 +10,7 @@ import {
   Megaphone,
   Radio,
   MessageSquare,
-  Truck,
-  GitFork,
-  Wallet,
+  CreditCard,
   Tag,
   Receipt,
   BarChart3,
@@ -39,11 +37,8 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
     { name: "Connected Channels", href: "/admin/channels", icon: Radio },
     { name: "WhatsApp Management", href: "/admin/whatsapp", icon: MessageSquare },
     { name: "Campaigns", href: "/admin/campaigns", icon: Megaphone },
-    { name: "Suppliers & Gateways", href: "/admin/suppliers", icon: Truck },
-    { name: "Routing Management", href: "/admin/routing", icon: GitFork },
-    { name: "Wallet & Transactions", href: "/admin/wallet", icon: Wallet },
-    { name: "Pricing Management", href: "/admin/pricing", icon: Tag },
-    { name: "Revenue & Billing", href: "/admin/billing", icon: Receipt },
+    { name: "Subscriptions & Billing", href: "/admin/billing", icon: CreditCard },
+    { name: "Plan Pricing", href: "/admin/pricing", icon: Tag },
     { name: "Reports & Analytics", href: "/admin/reports", icon: BarChart3 },
     { name: "Templates", href: "/admin/templates", icon: FileCode2 },
     { name: "Support Tickets", href: "/admin/support", icon: Headphones },
@@ -53,7 +48,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-40 w-64 bg-slate-950 text-slate-300 flex flex-col border-r border-slate-800/80 transition-transform duration-200 ease-in-out lg:static lg:translate-x-0",
+        "fixed inset-y-0 left-0 z-40 w-64 bg-slate-950 text-slate-300 flex flex-col border-r border-slate-800/80 transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}
     >

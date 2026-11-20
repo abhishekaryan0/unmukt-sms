@@ -53,10 +53,10 @@ export default function AdminBillingPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
-            Revenue & Billing Ledgers
+            Subscription Revenue & Billing
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Platform P&L statement, wholesale carrier cost reconciliations, and 18% GST tax summary
+            Platform MRR, tenant subscription tiers, gross contribution margins, and GST tax ledgers
           </p>
         </div>
 
@@ -72,19 +72,19 @@ export default function AdminBillingPage() {
       {/* Top 4 Financial Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Total Recharge Revenue"
+          title="Monthly Recurring Revenue"
           value={formatINR(totalRechargeRevenue, false)}
           change="+18.4%"
           trend="up"
-          subtitle="Prepaid client top-ups"
+          subtitle="Tenant SaaS subscriptions"
           icon={<DollarSign className="w-4 h-4 text-emerald-600" />}
           iconBg="bg-emerald-50 text-emerald-600"
         />
 
         <StatCard
-          title="Carrier Wholesales (Expenses)"
+          title="Cloud Gateway Expenses"
           value={formatINR(supplierExpenses, false)}
-          subtitle="EJOIN, RouteMobile, Meta"
+          subtitle="Meta Cloud API & Server costs"
           icon={<Receipt className="w-4 h-4 text-slate-700" />}
         />
 
@@ -93,7 +93,7 @@ export default function AdminBillingPage() {
           value={formatINR(grossContribution, false)}
           change="+21.2%"
           trend="up"
-          subtitle="36.8% platform margin"
+          subtitle="38.5% platform gross margin"
           icon={<TrendingUp className="w-4 h-4 text-blue-600" />}
           iconBg="bg-blue-50 text-blue-600"
         />

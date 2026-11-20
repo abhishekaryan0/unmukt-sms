@@ -386,47 +386,51 @@ export default function AdminDashboardPage() {
         </div>
       </ChartCard>
 
-      {/* Two Column Section: Supplier Performance & Recent Customer Signups */}
+      {/* Two Column Section: Channel Health & Recent Customer Signups */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Supplier Performance */}
+        {/* Tenant Connected Channels Health */}
         <div className="bg-white rounded-xl border border-slate-200/80 shadow-card overflow-hidden">
           <div className="flex items-center justify-between p-4 border-b border-slate-100">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Carrier Gateway Suppliers</h3>
-              <p className="text-xs text-slate-500">Live health, volume, and unit costs</p>
+              <h3 className="text-sm font-bold text-slate-900">Tenant Messaging Channels</h3>
+              <p className="text-xs text-slate-500">Live webhook health and message throughput</p>
             </div>
             <Link
-              href="/admin/suppliers"
+              href="/admin/channels"
               className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1"
             >
-              <span>Manage Suppliers</span>
+              <span>View All Channels</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           <div className="divide-y divide-slate-100">
-            {suppliers.map((s) => (
-              <div key={s.id} className="p-4 flex items-center justify-between text-xs">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-900">{s.name}</span>
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                      ● {s.connectionStatus}
-                    </span>
+            {customers.slice(0, 4).map((cust, idx) => {
+              const channelNames = ["WhatsApp WABA", "Instagram Direct", "Facebook Messenger", "Telegram Bot"];
+              const channelType = channelNames[idx % channelNames.length];
+              return (
+                <div key={cust.id} className="p-4 flex items-center justify-between text-xs">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-900">{cust.businessName}</span>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        ● 200 OK
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-500 mt-1">
+                      {channelType} • {cust.city}, {cust.state}
+                    </div>
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-1">
-                    Channel: {s.channel.toUpperCase()} • TPS Capacity: {s.tps} msg/sec
-                  </div>
-                </div>
 
-                <div className="text-right">
-                  <div className="font-bold text-slate-900">{s.successRate}% Success</div>
-                  <div className="text-[11px] text-slate-500">
-                    Vol: {formatNumber(s.messageVolume)}
+                  <div className="text-right">
+                    <div className="font-bold text-emerald-600 font-mono">75ms Latency</div>
+                    <div className="text-[11px] text-slate-500">
+                      {formatNumber(cust.totalMessages)} msgs
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

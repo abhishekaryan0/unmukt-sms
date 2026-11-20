@@ -10,14 +10,14 @@ import { Button } from "@/components/ui/Button";
 import { RechargeModal } from "./RechargeModal";
 import {
   Menu,
-  Wallet,
-  Plus,
+  Sparkles,
   Inbox,
   Radio,
   Bell,
   LogOut,
   User,
   Store,
+  CreditCard,
 } from "lucide-react";
 
 interface ClientHeaderProps {
@@ -82,24 +82,22 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
 
         {/* Right Side: Wallet pill, Quick send, Profile */}
         <div className="flex items-center gap-2.5 sm:gap-3">
-          {/* Wallet Balance Pill */}
-          <button
-            onClick={() => setShowRecharge(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors shadow-subtle group"
+          {/* Subscription Tier Pill */}
+          <Link
+            href="/subscription"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-blue-200 bg-blue-50/70 hover:bg-blue-100/70 transition-colors shadow-subtle group"
           >
-            <Wallet className="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-700" />
+            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
             <div className="text-left">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold leading-none">
-                Wallet
+              <span className="text-[10px] text-blue-600 uppercase tracking-wider block font-bold leading-none">
+                Plan
               </span>
               <span className="text-xs font-bold text-slate-900 leading-none">
-                {formatINR(clientWalletBalance)}
+                Pro Tier
               </span>
             </div>
-            <span className="w-4 h-4 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px] ml-1">
-              <Plus className="w-3 h-3" />
-            </span>
-          </button>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-0.5" />
+          </Link>
 
           {/* Connected Channels Pill */}
           <Link
@@ -161,12 +159,21 @@ export function ClientHeader({ onToggleSidebar }: ClientHeaderProps) {
                 </Link>
 
                 <Link
+                  href="/subscription"
+                  onClick={() => setShowProfileMenu(false)}
+                  className="flex items-center gap-2 px-3 py-2 text-slate-700 hover:bg-slate-50"
+                >
+                  <CreditCard className="w-4 h-4 text-slate-500" />
+                  <span>Subscription & Plans</span>
+                </Link>
+
+                <Link
                   href="/invoices"
                   onClick={() => setShowProfileMenu(false)}
                   className="flex items-center gap-2 px-3 py-2 text-slate-700 hover:bg-slate-50"
                 >
-                  <Wallet className="w-4 h-4 text-slate-500" />
-                  <span>Invoices & GST</span>
+                  <CreditCard className="w-4 h-4 text-slate-500" />
+                  <span>Invoices & Billing</span>
                 </Link>
 
                 <button

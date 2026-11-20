@@ -5,31 +5,24 @@ import { ClientLayout } from "@/components/client/ClientLayout";
 import { useAppStore } from "@/lib/store";
 import { useToast } from "@/components/ui/ToastContext";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { SocialChannelType, Conversation, ChatMessage, TeamMember } from "@/types";
+import { SocialChannelType } from "@/types";
 import {
   WhatsAppIcon,
   MessengerIcon,
   InstagramIcon,
   TelegramIcon,
-  ChannelBadge,
 } from "@/components/shared/ChannelIcons";
 import {
   Search,
   CheckCircle2,
-  Clock,
-  User,
-  Tag,
   Paperclip,
   Smile,
   Send,
   Lock,
   MessageSquare,
-  ChevronRight,
-  MoreVertical,
+  ChevronDown,
   Check,
   CheckCheck,
-  Plus,
   X,
   FileText,
   UserCheck,
@@ -38,12 +31,9 @@ import {
   Mail,
   MapPin,
   Calendar,
-  AlertCircle,
-  CornerDownRight,
-  Filter,
-  Eye,
   PanelRightClose,
   PanelRightOpen,
+  ArrowRight,
 } from "lucide-react";
 
 export default function UnifiedInboxPage() {
@@ -58,12 +48,11 @@ export default function UnifiedInboxPage() {
     addTagToConversation,
     removeTagFromConversation,
     addInternalNote,
-    activeCustomer,
   } = useAppStore();
 
   const { toast } = useToast();
 
-  // Filters & Selection
+  // Filters & Active Selection
   const [selectedChannel, setSelectedChannel] = useState<SocialChannelType | "all">("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "unread" | "resolved">("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -76,16 +65,18 @@ export default function UnifiedInboxPage() {
   const [inputText, setInputText] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showSavedReplies, setShowSavedReplies] = useState(false);
-  const [attachedFiles, setAttachedFiles] = useState<{ name: string; size: string; type: "image" | "file"; url: string }[]>([]);
+  const [attachedFiles, setAttachedFiles] = useState<
+    { name: string; size: string; type: "image" | "file"; url: string }[]
+  >([]);
 
-  // Right Panel toggling
+  // Right Panel & Metadata Inputs
   const [showRightPanel, setShowRightPanel] = useState(true);
   const [newTagInput, setNewTagInput] = useState("");
   const [newNoteInput, setNewNoteInput] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom of chat thread when conversation or messages change
+  // Auto-scroll chat stream to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -97,21 +88,13 @@ export default function UnifiedInboxPage() {
   // Filter conversations
   const filteredConversations = useMemo(() => {
     return conversations.filter((conv) => {
-      // Channel filter
-      if (selectedChannel !== "all" && conv.channelType !== selectedChannel) {
+      if (selectedChannel !== "all" && conv.channelType !== selectedChannel) return false;
+      if (statusFilter === "open" && conv.status !== "open" && conv.status !== "unread")
         return false;
-      }
-      // Status filter
-      if (statusFilter === "open" && conv.status !== "open" && conv.status !== "unread") {
+      if (statusFilter === "unread" && conv.status !== "unread" && conv.unreadCount === 0)
         return false;
-      }
-      if (statusFilter === "unread" && conv.status !== "unread" && conv.unreadCount === 0) {
-        return false;
-      }
-      if (statusFilter === "resolved" && conv.status !== "resolved") {
-        return false;
-      }
-      // Search query
+      if (statusFilter === "resolved" && conv.status !== "resolved") return false;
+
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchesName = conv.customerName.toLowerCase().includes(q);
@@ -126,7 +109,7 @@ export default function UnifiedInboxPage() {
     });
   }, [conversations, selectedChannel, statusFilter, searchQuery]);
 
-  // Active selected conversation
+  // Active Selected Conversation
   const activeConversation = useMemo(() => {
     return (
       conversations.find((c) => c.id === selectedConvId) ||
@@ -166,100 +149,117 @@ export default function UnifiedInboxPage() {
   };
 
   const quickEmojis = ["👍", "🙏", "❤️", "😊", "🎉", "📦", "✨", "🔥"];
-
-  const popularTags = ["VIP Client", "Order Inquiry", "Urgent", "Exchange", "Follow-up", "Billing"];
+  const popularTags = ["VIP Client", "Order Inquiry", "Urgent", "Exchange", "Billing"];
 
   return (
     <ClientLayout>
-      {/* Salesmartly-Inspired Unified Inbox Workspace */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-6rem)]">
-        {/* Top Control Bar: Channels Switcher Tabs */}
-        <div className="h-14 px-4 border-b border-slate-200/90 bg-slate-50/70 flex items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-1.5 overflow-x-auto py-1">
+      {/* Container: Full workspace card with clean borders */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-subtle overflow-hidden flex flex-col h-[calc(100vh-5rem)]">
+        {/* Top Control Bar: Channel Switcher Pills */}
+        <div className="h-13 px-4 border-b border-slate-200/80 bg-slate-50/70 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 overflow-x-auto py-1.5 no-scrollbar">
             <button
               onClick={() => setSelectedChannel("all")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
                 selectedChannel === "all"
                   ? "bg-slate-900 text-white shadow-subtle"
                   : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200"
               }`}
             >
               <span>All Channels</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-700">
+              <span
+                className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                  selectedChannel === "all" ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
+                }`}
+              >
                 {conversations.length}
               </span>
             </button>
 
             <button
               onClick={() => setSelectedChannel("whatsapp")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
                 selectedChannel === "whatsapp"
                   ? "bg-[#25D366] text-white shadow-subtle"
                   : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200"
               }`}
             >
-              <WhatsAppIcon className={`w-3.5 h-3.5 ${selectedChannel === "whatsapp" ? "text-white" : "text-[#25D366]"}`} />
+              <WhatsAppIcon
+                className={`w-3.5 h-3.5 ${
+                  selectedChannel === "whatsapp" ? "text-white" : "text-[#25D366]"
+                }`}
+              />
               <span>WhatsApp</span>
             </button>
 
             <button
               onClick={() => setSelectedChannel("instagram")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
                 selectedChannel === "instagram"
                   ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-subtle"
                   : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200"
               }`}
             >
-              <InstagramIcon className={`w-3.5 h-3.5 ${selectedChannel === "instagram" ? "text-white" : "text-pink-600"}`} />
+              <InstagramIcon
+                className={`w-3.5 h-3.5 ${
+                  selectedChannel === "instagram" ? "text-white" : "text-pink-600"
+                }`}
+              />
               <span>Instagram</span>
             </button>
 
             <button
               onClick={() => setSelectedChannel("messenger")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
                 selectedChannel === "messenger"
                   ? "bg-[#0084FF] text-white shadow-subtle"
                   : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200"
               }`}
             >
-              <MessengerIcon className={`w-3.5 h-3.5 ${selectedChannel === "messenger" ? "text-white" : "text-[#0084FF]"}`} />
+              <MessengerIcon
+                className={`w-3.5 h-3.5 ${
+                  selectedChannel === "messenger" ? "text-white" : "text-[#0084FF]"
+                }`}
+              />
               <span>Messenger</span>
             </button>
 
             <button
               onClick={() => setSelectedChannel("telegram")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
                 selectedChannel === "telegram"
                   ? "bg-[#0088cc] text-white shadow-subtle"
                   : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200"
               }`}
             >
-              <TelegramIcon className={`w-3.5 h-3.5 ${selectedChannel === "telegram" ? "text-white" : "text-[#0088cc]"}`} />
+              <TelegramIcon
+                className={`w-3.5 h-3.5 ${
+                  selectedChannel === "telegram" ? "text-white" : "text-[#0088cc]"
+                }`}
+              />
               <span>Telegram</span>
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowRightPanel(!showRightPanel)}
-              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200/80 transition-colors"
-              title={showRightPanel ? "Hide Details Sidebar" : "Show Details Sidebar"}
-            >
-              {showRightPanel ? (
-                <PanelRightClose className="w-4 h-4" />
-              ) : (
-                <PanelRightOpen className="w-4 h-4" />
-              )}
-            </button>
-          </div>
+          <button
+            onClick={() => setShowRightPanel(!showRightPanel)}
+            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200/70 transition-colors"
+            title={showRightPanel ? "Hide Details Sidebar" : "Show Details Sidebar"}
+          >
+            {showRightPanel ? (
+              <PanelRightClose className="w-4 h-4" />
+            ) : (
+              <PanelRightOpen className="w-4 h-4" />
+            )}
+          </button>
         </div>
 
-        {/* 3-Pane Body */}
+        {/* 3-Pane Workspace Body */}
         <div className="flex-1 flex overflow-hidden">
           {/* ============================================================== */}
-          {/* LEFT PANEL: Conversation List, Search & Status Filters         */}
+          {/* 1. LEFT PANE: Conversation List, Search, Filters               */}
           {/* ============================================================== */}
-          <div className="w-80 md:w-88 border-r border-slate-200/90 flex flex-col shrink-0 bg-white">
+          <div className="w-72 sm:w-80 border-r border-slate-200/90 flex flex-col shrink-0 bg-white">
             {/* Search Input */}
             <div className="p-3 border-b border-slate-100">
               <div className="relative">
@@ -281,18 +281,18 @@ export default function UnifiedInboxPage() {
                 )}
               </div>
 
-              {/* Status Filter Pills */}
-              <div className="flex items-center gap-1 mt-2.5 text-[11px]">
+              {/* Status Segment Tabs */}
+              <div className="grid grid-cols-4 gap-1 mt-2.5 bg-slate-100 p-0.5 rounded-lg text-[11px]">
                 {(["all", "open", "unread", "resolved"] as const).map((filter) => {
                   const isActive = statusFilter === filter;
                   return (
                     <button
                       key={filter}
                       onClick={() => setStatusFilter(filter)}
-                      className={`flex-1 py-1 rounded-md font-semibold capitalize text-center transition-colors ${
+                      className={`py-1 rounded-md font-semibold capitalize text-center transition-all ${
                         isActive
-                          ? "bg-blue-50 text-blue-700 border border-blue-200"
-                          : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                          ? "bg-white text-blue-700 shadow-subtle"
+                          : "text-slate-500 hover:text-slate-900"
                       }`}
                     >
                       {filter}
@@ -307,7 +307,7 @@ export default function UnifiedInboxPage() {
               {filteredConversations.length === 0 ? (
                 <div className="p-8 text-center text-xs text-slate-400">
                   <MessageSquare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                  <p>No conversations match your filter criteria.</p>
+                  <p>No conversations found.</p>
                 </div>
               ) : (
                 filteredConversations.map((conv) => {
@@ -320,19 +320,16 @@ export default function UnifiedInboxPage() {
                       key={conv.id}
                       onClick={() => {
                         setSelectedConvId(conv.id);
-                        if (isUnread) {
-                          // Auto mark as read on select
-                          markConversationStatus(conv.id, "open");
-                        }
+                        if (isUnread) markConversationStatus(conv.id, "open");
                       }}
-                      className={`p-3.5 cursor-pointer transition-all border-l-2 relative ${
+                      className={`p-3.5 cursor-pointer transition-all border-l-[3px] ${
                         isSelected
                           ? "bg-blue-50/70 border-blue-600"
                           : "hover:bg-slate-50/80 border-transparent"
                       }`}
                     >
                       <div className="flex items-start gap-3">
-                        {/* Avatar with Channel Overlay Badge */}
+                        {/* Avatar + Channel Logo Badge */}
                         <div className="relative shrink-0">
                           <div className="w-10 h-10 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">
                             {conv.customerName
@@ -342,7 +339,7 @@ export default function UnifiedInboxPage() {
                               .join("")
                               .toUpperCase()}
                           </div>
-                          {/* Channel Badge Overlay */}
+
                           <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white flex items-center justify-center shadow-subtle border border-slate-200">
                             {conv.channelType === "whatsapp" && (
                               <WhatsAppIcon className="w-3 h-3 text-[#25D366]" />
@@ -364,7 +361,9 @@ export default function UnifiedInboxPage() {
                           <div className="flex items-center justify-between gap-1">
                             <span
                               className={`text-xs truncate ${
-                                isUnread ? "font-bold text-slate-900" : "font-semibold text-slate-800"
+                                isUnread
+                                  ? "font-bold text-slate-900"
+                                  : "font-semibold text-slate-800"
                               }`}
                             >
                               {conv.customerName}
@@ -382,7 +381,6 @@ export default function UnifiedInboxPage() {
                             {conv.lastMessage}
                           </p>
 
-                          {/* Tags & Badges */}
                           <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                             {conv.tags.slice(0, 2).map((tag) => (
                               <span
@@ -415,13 +413,14 @@ export default function UnifiedInboxPage() {
           </div>
 
           {/* ============================================================== */}
-          {/* MIDDLE PANEL: Active Chat Conversation Thread & Composer       */}
+          {/* 2. MIDDLE PANE: Active Chat Thread & Rich Composer             */}
           {/* ============================================================== */}
-          <div className="flex-1 flex flex-col bg-slate-50/40 overflow-hidden">
+          <div className="flex-1 flex flex-col bg-slate-50/50 overflow-hidden">
             {activeConversation ? (
               <>
-                {/* Chat Header */}
-                <div className="h-16 px-5 border-b border-slate-200/90 bg-white flex items-center justify-between gap-3 shrink-0">
+                {/* Chat Header: High-End, Spacious, Perfectly Aligned */}
+                <div className="h-16 px-4 sm:px-6 border-b border-slate-200/90 bg-white flex items-center justify-between gap-4 shrink-0">
+                  {/* Left Identity: Customer Avatar, Name & Channel Info */}
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="relative shrink-0">
                       <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
@@ -440,32 +439,62 @@ export default function UnifiedInboxPage() {
                         <h2 className="text-sm font-bold text-slate-900 truncate">
                           {activeConversation.customerName}
                         </h2>
-                        <ChannelBadge channelType={activeConversation.channelType} size="sm" />
                       </div>
-                      <div className="text-xs text-slate-500 truncate">
-                        {activeConversation.customerIdentifier}
-                        {activeConversation.customerCity ? ` • ${activeConversation.customerCity}` : ""}
+                      <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
+                        {/* Channel Badge Pill */}
+                        {activeConversation.channelType === "whatsapp" && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#075E54] bg-[#E8F8EE] px-1.5 py-0.2 rounded border border-[#b5e7c8] shrink-0">
+                            <WhatsAppIcon className="w-3 h-3 text-[#25D366]" />
+                            <span>WhatsApp</span>
+                          </span>
+                        )}
+                        {activeConversation.channelType === "instagram" && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-pink-700 bg-pink-50 px-1.5 py-0.2 rounded border border-pink-200 shrink-0">
+                            <InstagramIcon className="w-3 h-3 text-pink-600" />
+                            <span>Instagram</span>
+                          </span>
+                        )}
+                        {activeConversation.channelType === "messenger" && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200 shrink-0">
+                            <MessengerIcon className="w-3 h-3 text-[#0084FF]" />
+                            <span>Messenger</span>
+                          </span>
+                        )}
+                        {activeConversation.channelType === "telegram" && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-700 bg-sky-50 px-1.5 py-0.2 rounded border border-sky-200 shrink-0">
+                            <TelegramIcon className="w-3 h-3 text-[#0088cc]" />
+                            <span>Telegram</span>
+                          </span>
+                        )}
+
+                        <span className="truncate font-mono text-[11px]">
+                          {activeConversation.customerIdentifier}
+                        </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Header Actions: Assigned agent & Resolve */}
+                  {/* Right Header Actions: Agent Assignment & Resolve Button */}
                   <div className="flex items-center gap-2.5 shrink-0">
-                    {/* Agent Assignment Dropdown */}
-                    <div className="flex items-center gap-1.5 text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
-                      <UserCheck className="w-3.5 h-3.5 text-slate-400" />
-                      <select
-                        value={activeConversation.assignedToName || ""}
-                        onChange={(e) => assignConversation(activeConversation.id, e.target.value)}
-                        className="bg-transparent text-xs font-medium text-slate-800 focus:outline-none cursor-pointer"
-                      >
-                        <option value="">Unassigned</option>
-                        {teamMembers.map((m) => (
-                          <option key={m.id} value={m.name}>
-                            {m.name} ({m.status})
-                          </option>
-                        ))}
-                      </select>
+                    {/* Custom Styled Agent Dropdown */}
+                    <div className="relative">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 shadow-subtle hover:bg-slate-100 transition-colors">
+                        <UserCheck className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                        <select
+                          value={activeConversation.assignedToName || ""}
+                          onChange={(e) =>
+                            assignConversation(activeConversation.id, e.target.value)
+                          }
+                          className="bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer pr-1"
+                        >
+                          <option value="">Unassigned</option>
+                          {teamMembers.map((m) => (
+                            <option key={m.id} value={m.name}>
+                              {m.name} ({m.status})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
 
                     {/* Resolve Toggle Button */}
@@ -474,7 +503,7 @@ export default function UnifiedInboxPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => markConversationStatus(activeConversation.id, "open")}
-                        className="text-xs gap-1.5 border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+                        className="text-xs gap-1.5 border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-semibold"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>Resolved (Reopen)</span>
@@ -484,7 +513,7 @@ export default function UnifiedInboxPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => markConversationStatus(activeConversation.id, "resolved")}
-                        className="text-xs gap-1.5 border-slate-200 hover:bg-slate-50"
+                        className="text-xs gap-1.5 border-slate-200 hover:bg-slate-50 font-semibold text-slate-700"
                       >
                         <Check className="w-3.5 h-3.5 text-slate-500" />
                         <span>Mark Resolved</span>
@@ -494,10 +523,10 @@ export default function UnifiedInboxPage() {
                 </div>
 
                 {/* Messages Stream Scroll Area */}
-                <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
                   {/* Date separator */}
-                  <div className="flex items-center justify-center my-3">
-                    <span className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase bg-slate-100 px-3 py-1 rounded-full">
+                  <div className="flex items-center justify-center my-2">
+                    <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase bg-slate-100 px-3 py-1 rounded-full border border-slate-200/60">
                       Today • Encrypted Cloud Gateway
                     </span>
                   </div>
@@ -514,7 +543,7 @@ export default function UnifiedInboxPage() {
                           className="bg-amber-50/90 border border-amber-200 rounded-xl p-3.5 my-3 max-w-lg mx-auto shadow-subtle"
                         >
                           <div className="flex items-center gap-1.5 text-xs font-bold text-amber-800 mb-1">
-                            <Lock className="w-3.5 h-3.5" />
+                            <Lock className="w-3.5 h-3.5 text-amber-600" />
                             <span>Internal Team Note (Private)</span>
                             <span className="text-[10px] text-amber-600 font-normal ml-auto">
                               {msg.timestamp}
@@ -541,15 +570,15 @@ export default function UnifiedInboxPage() {
                           </div>
                         )}
 
-                        <div className="max-w-[75%] sm:max-w-[65%] space-y-1">
+                        <div className="max-w-[80%] sm:max-w-[70%] space-y-1">
                           <div
-                            className={`rounded-2xl px-4 py-2.5 text-xs shadow-subtle ${
+                            className={`rounded-2xl px-4 py-2.5 text-xs leading-relaxed shadow-subtle ${
                               isAgent
                                 ? "bg-blue-600 text-white rounded-br-none"
                                 : "bg-white text-slate-900 border border-slate-200/90 rounded-bl-none"
                             }`}
                           >
-                            <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                            <p className="whitespace-pre-wrap">{msg.content}</p>
 
                             {/* Attachments */}
                             {msg.attachments && msg.attachments.length > 0 && (
@@ -558,7 +587,9 @@ export default function UnifiedInboxPage() {
                                   <div
                                     key={idx}
                                     className={`flex items-center gap-2 p-1.5 rounded-lg text-[11px] ${
-                                      isAgent ? "bg-blue-700/60 text-white" : "bg-slate-100 text-slate-700"
+                                      isAgent
+                                        ? "bg-blue-700/60 text-white"
+                                        : "bg-slate-100 text-slate-700"
                                     }`}
                                   >
                                     <FileText className="w-3.5 h-3.5" />
@@ -576,9 +607,7 @@ export default function UnifiedInboxPage() {
                             }`}
                           >
                             <span>{msg.timestamp}</span>
-                            {isAgent && (
-                              <CheckCheck className="w-3.5 h-3.5 text-blue-600" />
-                            )}
+                            {isAgent && <CheckCheck className="w-3.5 h-3.5 text-blue-600" />}
                           </div>
                         </div>
                       </div>
@@ -620,16 +649,15 @@ export default function UnifiedInboxPage() {
                       </button>
                     </div>
 
-                    {/* Channel Indicator Badge */}
-                    <div className="text-[11px] text-slate-500 flex items-center gap-1">
-                      <span>Replying via</span>
-                      <strong className="text-slate-700 capitalize font-semibold">
+                    <div className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
+                      <span>Via</span>
+                      <strong className="text-slate-800 capitalize font-bold">
                         {activeConversation.channelType}
                       </strong>
                     </div>
                   </div>
 
-                  {/* Attachment Pill Previews */}
+                  {/* Attached Files Previews */}
                   {attachedFiles.length > 0 && (
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                       {attachedFiles.map((file, idx) => (
@@ -653,7 +681,7 @@ export default function UnifiedInboxPage() {
                     </div>
                   )}
 
-                  {/* Input Box */}
+                  {/* Textarea Box */}
                   <div
                     className={`rounded-xl border transition-all ${
                       composerMode === "note"
@@ -668,16 +696,16 @@ export default function UnifiedInboxPage() {
                       rows={2}
                       placeholder={
                         composerMode === "note"
-                          ? "Write an internal team note (only visible to support agents)..."
-                          : `Type a response to ${activeConversation.customerName}... (Press Enter to send)`
+                          ? "Write a private team note (only visible to support agents)..."
+                          : `Type a reply to ${activeConversation.customerName}... (Press Enter to send)`
                       }
                       className="w-full p-3 text-xs text-slate-900 bg-transparent resize-none focus:outline-none placeholder:text-slate-400"
                     />
 
-                    {/* Composer Toolbar */}
+                    {/* Toolbar */}
                     <div className="px-3 pb-2.5 flex items-center justify-between">
                       <div className="flex items-center gap-2 relative">
-                        {/* Emoji Trigger */}
+                        {/* Emoji Picker */}
                         <div className="relative">
                           <button
                             type="button"
@@ -707,14 +735,16 @@ export default function UnifiedInboxPage() {
                           )}
                         </div>
 
-                        {/* Attachments Trigger */}
+                        {/* Attachments */}
                         <button
                           type="button"
                           onClick={() => {
                             setAttachedFiles((prev) => [
                               ...prev,
                               {
-                                name: `Catalog_Order_${Math.floor(1000 + Math.random() * 9000)}.pdf`,
+                                name: `Invoice_Receipt_${Math.floor(
+                                  1000 + Math.random() * 9000
+                                )}.pdf`,
                                 size: "142 KB",
                                 type: "file",
                                 url: "#",
@@ -722,7 +752,7 @@ export default function UnifiedInboxPage() {
                             ]);
                             toast({
                               title: "File Attached",
-                              message: "Mock document added to message payload.",
+                              message: "Mock receipt attached to reply.",
                               type: "info",
                             });
                           }}
@@ -732,7 +762,7 @@ export default function UnifiedInboxPage() {
                           <Paperclip className="w-4 h-4" />
                         </button>
 
-                        {/* Saved Replies Trigger */}
+                        {/* Saved Replies Shortcut */}
                         <div className="relative">
                           <button
                             type="button"
@@ -806,17 +836,17 @@ export default function UnifiedInboxPage() {
                 <MessageSquare className="w-12 h-12 text-slate-300 mb-3" />
                 <h3 className="text-sm font-bold text-slate-800">Select a Conversation</h3>
                 <p className="max-w-xs mt-1">
-                  Choose an active chat thread from the left panel to review messages and reply.
+                  Choose an active chat from the left panel to review messages and reply.
                 </p>
               </div>
             )}
           </div>
 
           {/* ============================================================== */}
-          {/* RIGHT PANEL: Customer Profile, Tags, Assignment & Notes        */}
+          {/* 3. RIGHT PANE: Customer Details, Tags, Assignment & Notes      */}
           {/* ============================================================== */}
           {showRightPanel && activeConversation && (
-            <div className="w-80 border-l border-slate-200/90 flex flex-col shrink-0 bg-white overflow-y-auto">
+            <div className="w-72 sm:w-80 border-l border-slate-200/90 flex flex-col shrink-0 bg-white overflow-y-auto">
               <div className="p-5 border-b border-slate-100 text-center">
                 <div className="w-16 h-16 rounded-full bg-slate-900 text-white flex items-center justify-center text-lg font-bold mx-auto mb-3 shadow-subtle">
                   {activeConversation.customerName
@@ -829,12 +859,12 @@ export default function UnifiedInboxPage() {
                 <h3 className="text-sm font-bold text-slate-900">
                   {activeConversation.customerName}
                 </h3>
-                <div className="mt-1">
-                  <ChannelBadge channelType={activeConversation.channelType} size="sm" />
+                <div className="text-xs text-slate-500 font-mono mt-0.5">
+                  {activeConversation.customerIdentifier}
                 </div>
               </div>
 
-              {/* Customer Contact Details */}
+              {/* Contact Information */}
               <div className="p-4 border-b border-slate-100 space-y-2.5 text-xs">
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                   Contact Information
@@ -870,7 +900,7 @@ export default function UnifiedInboxPage() {
               {/* Assigned Agent */}
               <div className="p-4 border-b border-slate-100 space-y-2 text-xs">
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Assigned Team Member
+                  Assigned Agent
                 </div>
                 <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
                   <div className="flex items-center gap-2">
@@ -888,13 +918,13 @@ export default function UnifiedInboxPage() {
                 </div>
               </div>
 
-              {/* Tags Section */}
+              {/* Conversation Tags */}
               <div className="p-4 border-b border-slate-100 space-y-2.5 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Conversation Tags
+                    Tags
                   </span>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-[10px] text-slate-400 font-medium">
                     {activeConversation.tags.length} active
                   </span>
                 </div>
@@ -903,7 +933,7 @@ export default function UnifiedInboxPage() {
                   {activeConversation.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200 group"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200"
                     >
                       <span>{tag}</span>
                       <button
@@ -917,7 +947,7 @@ export default function UnifiedInboxPage() {
                   ))}
                 </div>
 
-                {/* Add Custom Tag Form */}
+                {/* Add Tag Form */}
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -961,7 +991,7 @@ export default function UnifiedInboxPage() {
                 </div>
               </div>
 
-              {/* Internal Notes History in Right Panel */}
+              {/* Internal Notes History */}
               <div className="p-4 space-y-2.5 text-xs flex-1">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
@@ -971,8 +1001,8 @@ export default function UnifiedInboxPage() {
                 </div>
 
                 <div className="space-y-2">
-                  {(!activeConversation.internalNotes ||
-                    activeConversation.internalNotes.length === 0) ? (
+                  {!activeConversation.internalNotes ||
+                  activeConversation.internalNotes.length === 0 ? (
                     <div className="text-[11px] text-slate-400 italic">No notes recorded yet.</div>
                   ) : (
                     activeConversation.internalNotes.map((note) => (
