@@ -39,6 +39,17 @@ html, body {
   background: #94a3b8;
 }
 
+/* Hide scrollbar while preserving scrolling functionality (e.g. sidebars) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+}
+
 /* Badge animations & subtle highlights */
 .badge-pulse {
   animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;

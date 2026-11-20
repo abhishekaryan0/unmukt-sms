@@ -39,7 +39,7 @@ import {
 } from "recharts";
 
 export default function AdminDashboardPage() {
-  const { customers, agencies, campaigns, suppliers, transactions } = useAppStore();
+  const { customers, agencies, campaigns, broadcastCampaigns, suppliers, transactions } = useAppStore();
   const [dateFilter, setDateFilter] = useState<DateFilterOption>("30d");
   const [mounted, setMounted] = useState(false);
 
@@ -467,6 +467,69 @@ export default function AdminDashboardPage() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Tenant Social Broadcasts Activity Monitoring */}
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-card overflow-hidden">
+        <div className="flex items-center justify-between p-4 border-b border-slate-100">
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">Tenant Multi-Channel Broadcast Activity</h3>
+            <p className="text-xs text-slate-500">Live multi-channel broadcast throughput and telemetry across clients</p>
+          </div>
+          <Link
+            href="/admin/campaigns"
+            className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1"
+          >
+            <span>Monitor All Broadcasts</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        <div className="divide-y divide-slate-100">
+          {broadcastCampaigns.slice(0, 4).map((camp) => (
+            <div key={camp.id} className="p-4 flex items-center justify-between text-xs">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-slate-900">{camp.campaignName}</span>
+                  <span className="text-[10px] text-slate-400 font-mono">({camp.customerName})</span>
+                  {camp.status === "sending" && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      ● Live Sending
+                    </span>
+                  )}
+                  {camp.status === "completed" && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+                      Completed
+                    </span>
+                  )}
+                  {camp.status === "scheduled" && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                      Scheduled
+                    </span>
+                  )}
+                </div>
+                <div className="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
+                  <span className="capitalize font-medium text-slate-700">
+                    {camp.channels.join(", ")}
+                  </span>
+                  <span>•</span>
+                  <span>Target: {formatNumber(camp.targetCount)} contacts</span>
+                  <span>•</span>
+                  <span>Created {formatDate(camp.createdDate)}</span>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <div className="font-bold text-emerald-600 font-mono">
+                  {camp.deliveryRate}% Delivered
+                </div>
+                <div className="text-[11px] text-slate-500">
+                  {formatNumber(camp.delivered)} / {formatNumber(camp.targetCount)} msgs
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </AdminLayout>

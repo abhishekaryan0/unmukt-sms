@@ -23,6 +23,8 @@ import {
   SavedReply,
   TeamMember,
   SocialChannelType,
+  BroadcastCampaign,
+  BroadcastStatus,
 } from "@/types";
 import {
   INITIAL_CUSTOMERS,
@@ -44,6 +46,7 @@ import {
   INITIAL_CONVERSATIONS,
   INITIAL_SAVED_REPLIES,
   INITIAL_TEAM_MEMBERS,
+  INITIAL_BROADCAST_CAMPAIGNS,
 } from "./mock-data";
 import { getClientSession, impersonateCustomer, stopImpersonation } from "./auth";
 import { useToast } from "@/components/ui/ToastContext";
@@ -70,6 +73,7 @@ interface AppContextType {
   conversations: Conversation[];
   savedReplies: SavedReply[];
   teamMembers: TeamMember[];
+  broadcastCampaigns: BroadcastCampaign[];
 
   // Social Messaging Actions
   connectChannel: (channel: Omit<ConnectedChannel, "id" | "connectedAt" | "lastSyncAt" | "unreadCount" | "totalConversations">) => ConnectedChannel;
@@ -90,6 +94,18 @@ interface AppContextType {
   deleteSavedReply: (id: string) => void;
   addTeamMember: (member: Omit<TeamMember, "id" | "activeChats">) => TeamMember;
   updateTeamMemberStatus: (id: string, status: TeamMember["status"]) => void;
+
+  // Broadcast Actions (SaleSmartly inspired)
+  createBroadcastCampaign: (
+    campaign: Omit<
+      BroadcastCampaign,
+      "id" | "createdDate" | "sent" | "delivered" | "read" | "failed" | "queued" | "deliveryRate" | "timeline"
+    >
+  ) => BroadcastCampaign;
+  pauseBroadcastCampaign: (id: string) => void;
+  resumeBroadcastCampaign: (id: string) => void;
+  deleteBroadcastCampaign: (id: string) => void;
+  duplicateBroadcastCampaign: (id: string) => BroadcastCampaign;
 
   // Active client context (supports Super Admin impersonation)
   activeCustomerId: string;
@@ -175,6 +191,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
   const [savedReplies, setSavedReplies] = useState<SavedReply[]>(INITIAL_SAVED_REPLIES);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(INITIAL_TEAM_MEMBERS);
+  const [broadcastCampaigns, setBroadcastCampaigns] = useState<BroadcastCampaign[]>(INITIAL_BROADCAST_CAMPAIGNS);
   const [activeCustomerId, setActiveCustomerId] = useState<string>(() => {
     if (typeof window !== "undefined") {
       const session = getClientSession();
@@ -289,6 +306,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const storedTeam = localStorage.getItem("smsunmukt_team_members");
       if (storedTeam) setTeamMembers(JSON.parse(storedTeam));
+
+      const storedBroadcasts = localStorage.getItem("smsunmukt_broadcast_campaigns");
+      if (storedBroadcasts) setBroadcastCampaigns(JSON.parse(storedBroadcasts));
 
       const clientSession = getClientSession();
       if (clientSession && clientSession.id) {
@@ -1524,6 +1544,251 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTeamMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status } : m)));
   }, []);
 
+  // Broadcast Actions (SaleSmartly inspired)
+  const createBroadcastCampaign = useCallback(
+    (
+      campaignData: Omit<
+        BroadcastCampaign,
+        "id" | "createdDate" | "sent" | "delivered" | "read" | "failed" | "queued" | "deliveryRate" | "timeline"
+      >
+    ): BroadcastCampaign => {
+      const nowStr = new Date().toISOString();
+      const isNow = campaignData.deliveryType === "now";
+      const target = campaignData.targetCount || 100;
+
+      const initialChannelStats: Partial<
+        Record<SocialChannelType, { sent: number; delivered: number; read: number; failed: number }>
+      > = {};
+      const chCount = campaignData.channels.length || 1;
+      campaignData.channels.forEach((ch) => {
+        const share = Math.round(target / chCount);
+        initialChannelStats[ch] = isNow
+          ? {
+              sent: Math.round(share * 0.4),
+              delivered: Math.round(share * 0.38),
+              read: Math.round(share * 0.25),
+              failed: Math.round(share * 0.02),
+            }
+          : { sent: 0, delivered: 0, read: 0, failed: 0 };
+      });
+
+      const initialSent = isNow ? Math.round(target * 0.4) : 0;
+      const initialDelivered = isNow ? Math.round(target * 0.38) : 0;
+      const initialRead = isNow ? Math.round(target * 0.25) : 0;
+      const initialFailed = isNow ? Math.round(target * 0.02) : 0;
+      const initialQueued = isNow ? target - initialSent : target;
+      const initialRate = initialSent > 0 ? Number(((initialDelivered / initialSent) * 100).toFixed(1)) : 0;
+
+      const newCampaign: BroadcastCampaign = {
+        ...campaignData,
+        id: `bc-${Date.now().toString().slice(-4)}`,
+        customerId: campaignData.customerId || activeCustomerId,
+        customerName: campaignData.customerName || activeCustomer.businessName,
+        status: isNow ? "sending" : "scheduled",
+        createdDate: nowStr,
+        startedDate: isNow ? nowStr : undefined,
+        sent: initialSent,
+        delivered: initialDelivered,
+        read: initialRead,
+        failed: initialFailed,
+        queued: initialQueued,
+        deliveryRate: initialRate,
+        channelStats: initialChannelStats,
+        timeline: [
+          {
+            id: `evt-${Date.now()}-1`,
+            timestamp: "Just now",
+            event: isNow ? "Broadcast Dispatched" : "Broadcast Scheduled",
+            details: isNow
+              ? `Dispatching to ${target.toLocaleString()} recipients across ${campaignData.channels.join(", ")}.`
+              : `Scheduled for auto-dispatch at ${campaignData.scheduledTime || "selected time"}.`,
+            type: "info",
+          },
+        ],
+      };
+
+      setBroadcastCampaigns((prev) => {
+        const updated = [newCampaign, ...prev];
+        try {
+          localStorage.setItem("smsunmukt_broadcast_campaigns", JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
+
+      toast({
+        title: isNow ? "Broadcast Launched!" : "Campaign Scheduled!",
+        message: `'${campaignData.campaignName}' is queued for ${target.toLocaleString()} contacts.`,
+        type: "success",
+      });
+
+      return newCampaign;
+    },
+    [activeCustomerId, activeCustomer.businessName, toast]
+  );
+
+  const pauseBroadcastCampaign = useCallback(
+    (id: string) => {
+      setBroadcastCampaigns((prev) => {
+        const updated = prev.map((c) => {
+          if (c.id !== id) return c;
+          const newStatus: BroadcastStatus = "paused";
+          return {
+            ...c,
+            status: newStatus,
+            timeline: [
+              {
+                id: `evt-${Date.now()}`,
+                timestamp: "Just now",
+                event: "Campaign Paused",
+                details: "Live dispatch throttled and paused by user.",
+                type: "warning" as const,
+              },
+              ...c.timeline,
+            ],
+          };
+        });
+        try {
+          localStorage.setItem("smsunmukt_broadcast_campaigns", JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
+
+      toast({
+        title: "Broadcast Paused",
+        message: "Message dispatching paused. You can resume at any time.",
+        type: "info",
+      });
+    },
+    [toast]
+  );
+
+  const resumeBroadcastCampaign = useCallback(
+    (id: string) => {
+      setBroadcastCampaigns((prev) => {
+        const updated = prev.map((c) => {
+          if (c.id !== id) return c;
+          const newStatus: BroadcastStatus = "sending";
+          return {
+            ...c,
+            status: newStatus,
+            timeline: [
+              {
+                id: `evt-${Date.now()}`,
+                timestamp: "Just now",
+                event: "Campaign Resumed",
+                details: "Live dispatch queue resumed.",
+                type: "info" as const,
+              },
+              ...c.timeline,
+            ],
+          };
+        });
+        try {
+          localStorage.setItem("smsunmukt_broadcast_campaigns", JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
+
+      toast({
+        title: "Broadcast Resumed",
+        message: "Message queue is active and sending.",
+        type: "success",
+      });
+    },
+    [toast]
+  );
+
+  const deleteBroadcastCampaign = useCallback(
+    (id: string) => {
+      setBroadcastCampaigns((prev) => {
+        const updated = prev.filter((c) => c.id !== id);
+        try {
+          localStorage.setItem("smsunmukt_broadcast_campaigns", JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
+
+      toast({
+        title: "Broadcast Removed",
+        message: "Campaign and delivery metrics deleted.",
+        type: "info",
+      });
+    },
+    [toast]
+  );
+
+  const duplicateBroadcastCampaign = useCallback(
+    (id: string): BroadcastCampaign => {
+      const orig = broadcastCampaigns.find((c) => c.id === id);
+      const newCampaign: BroadcastCampaign = orig
+        ? {
+            ...orig,
+            id: `bc-${Date.now().toString().slice(-4)}`,
+            campaignName: `${orig.campaignName} (Copy)`,
+            status: "draft",
+            sent: 0,
+            delivered: 0,
+            read: 0,
+            failed: 0,
+            queued: orig.targetCount,
+            deliveryRate: 0,
+            createdDate: new Date().toISOString(),
+            timeline: [
+              {
+                id: `evt-${Date.now()}`,
+                timestamp: "Just now",
+                event: "Draft Duplicated",
+                details: `Duplicated from campaign ${orig.campaignName}.`,
+                type: "info",
+              },
+            ],
+          }
+        : {
+            id: `bc-${Date.now().toString().slice(-4)}`,
+            customerId: activeCustomerId,
+            customerName: activeCustomer.businessName,
+            campaignName: "Duplicated Broadcast",
+            channels: ["whatsapp"],
+            selectedChannelIds: ["chan-01"],
+            audienceType: "all",
+            targetCount: 100,
+            excludedCount: 0,
+            messageContent: "New broadcast message",
+            deliveryType: "now",
+            sendingSpeed: "normal",
+            batchSize: 50,
+            batchIntervalSeconds: 10,
+            respect24hWindow: false,
+            status: "draft",
+            sent: 0,
+            delivered: 0,
+            read: 0,
+            failed: 0,
+            queued: 100,
+            deliveryRate: 0,
+            createdDate: new Date().toISOString(),
+            timeline: [],
+          };
+
+      setBroadcastCampaigns((prev) => {
+        const updated = [newCampaign, ...prev];
+        try {
+          localStorage.setItem("smsunmukt_broadcast_campaigns", JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
+
+      toast({
+        title: "Broadcast Duplicated",
+        message: `'${newCampaign.campaignName}' is ready to review.`,
+        type: "success",
+      });
+
+      return newCampaign;
+    },
+    [broadcastCampaigns, activeCustomerId, activeCustomer.businessName, toast]
+  );
+
   const resetAllData = () => {
     localStorage.clear();
     setCustomers(INITIAL_CUSTOMERS);
@@ -1545,6 +1810,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setConversations(INITIAL_CONVERSATIONS);
     setSavedReplies(INITIAL_SAVED_REPLIES);
     setTeamMembers(INITIAL_TEAM_MEMBERS);
+    setBroadcastCampaigns(INITIAL_BROADCAST_CAMPAIGNS);
     setActiveCustomerId("cust-01");
     refreshFromDatabase();
     toast({
@@ -1576,6 +1842,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         conversations,
         savedReplies,
         teamMembers,
+        broadcastCampaigns,
         connectChannel,
         disconnectChannel,
         reconnectChannel,
@@ -1589,6 +1856,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         deleteSavedReply,
         addTeamMember,
         updateTeamMemberStatus,
+        createBroadcastCampaign,
+        pauseBroadcastCampaign,
+        resumeBroadcastCampaign,
+        deleteBroadcastCampaign,
+        duplicateBroadcastCampaign,
         activeCustomerId,
         activeCustomer,
         clientWalletBalance,

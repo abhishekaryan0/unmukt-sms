@@ -356,3 +356,72 @@ export interface TeamMember {
   channels: SocialChannelType[];
 }
 
+// -------------------------------------------------------------
+// Social Media Broadcast / Campaign Types (SaleSmartly-style)
+// -------------------------------------------------------------
+
+export type BroadcastStatus = "draft" | "scheduled" | "sending" | "completed" | "paused" | "failed";
+
+export interface BroadcastTimelineEvent {
+  id: string;
+  timestamp: string;
+  event: string;
+  details: string;
+  type: "info" | "success" | "warning" | "error";
+}
+
+export interface BroadcastChannelStats {
+  sent: number;
+  delivered: number;
+  read: number;
+  failed: number;
+}
+
+export interface BroadcastCampaign {
+  id: string;
+  customerId: string;
+  customerName?: string;
+  campaignName: string;
+  description?: string;
+  channels: SocialChannelType[];
+  selectedChannelIds: string[];
+  audienceType: "all" | "filtered" | "manual";
+  targetCount: number;
+  excludedCount: number;
+  audienceFilter?: {
+    tags: string[];
+    groups: string[];
+    channels: SocialChannelType[];
+    customerStatus: string[];
+    excludeUnsubscribed: boolean;
+    excludeOutside24hWindow: boolean;
+  };
+  selectedContactIds?: string[];
+  messageContent: string;
+  fallbackValues?: Record<string, string>;
+  attachments?: {
+    type: "image" | "file";
+    url: string;
+    name: string;
+    size?: string;
+  }[];
+  deliveryType: "now" | "scheduled";
+  scheduledTime?: string;
+  sendingSpeed: "safe" | "normal" | "fast";
+  batchIntervalSeconds: number;
+  batchSize: number;
+  respect24hWindow: boolean;
+  status: BroadcastStatus;
+  sent: number;
+  delivered: number;
+  read: number;
+  failed: number;
+  queued: number;
+  deliveryRate: number; // percentage, e.g. 98.4
+  createdDate: string;
+  startedDate?: string;
+  completedDate?: string;
+  channelStats?: Partial<Record<SocialChannelType, BroadcastChannelStats>>;
+  timeline: BroadcastTimelineEvent[];
+}
+

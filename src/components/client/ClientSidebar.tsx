@@ -23,6 +23,7 @@ import {
   PlusCircle,
   Plus,
   MessageSquare,
+  Send,
 } from "lucide-react";
 import { cn, formatINR } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
@@ -58,16 +59,17 @@ export function ClientSidebar({ isOpen, onClose }: ClientSidebarProps) {
       badge: `${activeChannelsCount} Active`,
     },
     { name: "Contacts", href: "/contacts", icon: Users },
+    { name: "Broadcasts", href: "/broadcasts", icon: Send, badge: "New" },
+    { name: "Campaign History", href: "/campaigns", icon: History },
     { name: "Contact Groups", href: "/groups", icon: FolderTree },
-    { name: "Conversation History", href: "/campaigns", icon: History },
     { name: "Saved Replies", href: "/saved-replies", icon: MessageSquareQuote },
     { name: "Team Members", href: "/team", icon: UserCheck },
   ];
 
   const financeNavigation = [
+    { name: "Reports & Analytics", href: "/reports", icon: BarChart2 },
     { name: "Subscription & Plans", href: "/subscription", icon: CreditCard, badge: "Pro" },
     { name: "Invoices & Billing", href: "/invoices", icon: FileCheck2 },
-    { name: "Reports & Analytics", href: "/reports", icon: BarChart2 },
     { name: "Support Tickets", href: "/support", icon: HelpCircle },
     { name: "Settings", href: "/settings", icon: Settings },
   ];
@@ -115,7 +117,7 @@ export function ClientSidebar({ isOpen, onClose }: ClientSidebarProps) {
         </div>
 
         {/* Nav lists */}
-        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-5">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-3 py-2 space-y-5">
           {/* Main Messaging & Channels */}
           <div className="space-y-1">
             <div className="px-2.5 pb-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">

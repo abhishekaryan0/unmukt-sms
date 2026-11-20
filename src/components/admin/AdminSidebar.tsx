@@ -71,7 +71,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       </div>
 
       {/* Nav links */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+      <div className="flex-1 overflow-y-auto no-scrollbar px-3 py-4 space-y-1">
         <div className="px-2 pb-2 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
           Platform Administration
         </div>

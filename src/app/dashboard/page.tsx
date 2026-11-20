@@ -30,6 +30,7 @@ import {
   HelpCircle,
   Zap,
   UserCheck,
+  Send,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -149,6 +150,13 @@ export default function ClientDashboardPage() {
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
+            <Link href="/broadcasts/new">
+              <Button variant="outline" size="sm" className="gap-1.5 border-slate-200 text-xs">
+                <Send className="w-3.5 h-3.5 text-blue-600" />
+                <span>New Broadcast</span>
+              </Button>
+            </Link>
+
             <Link href="/channels">
               <Button variant="outline" size="sm" className="gap-1.5 border-slate-200 text-xs">
                 <Radio className="w-3.5 h-3.5 text-emerald-600" />
