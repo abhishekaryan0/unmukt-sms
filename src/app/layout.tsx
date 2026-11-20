@@ -4,9 +4,9 @@ import { AppProvider } from "@/lib/store";
 import { ToastProvider } from "@/components/ui/ToastContext";
 
 export const metadata: Metadata = {
-  title: "SMS Unmukt | SMS & WhatsApp Marketing SaaS Platform",
+  title: "Smsunmukt | Social Messaging Management Platform for Businesses",
   description:
-    "India's premier high-throughput B2B SMS and WhatsApp marketing platform for retail, coaching institutes, restaurants, and digital agencies.",
+    "Manage conversations across your connected messaging channels, engage customers, run campaigns, and empower your team—all from one unified platform.",
 };
 
 export default function RootLayout({
@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="scroll-smooth">
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -23,7 +23,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased bg-[#f8fafc] text-slate-900 selection:bg-slate-900 selection:text-white">
+      <body className="antialiased bg-white text-slate-900 selection:bg-slate-900 selection:text-white">
         <ToastProvider>
           <AppProvider>{children}</AppProvider>
         </ToastProvider>
