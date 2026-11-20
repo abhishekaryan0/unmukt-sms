@@ -204,11 +204,11 @@ export default function TemplatesPage() {
         onClose={() => setShowAddModal(false)}
         size="md"
         title="Submit New Template for Verification"
-        description="Submit custom SMS or WhatsApp message drafts for regulatory review"
+        description="Submit custom social messaging or WhatsApp message drafts for verification."
       >
         <form onSubmit={handleSaveTemplate} className="space-y-4 text-xs">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Template Name *
             </label>
             <Input
@@ -221,71 +221,57 @@ export default function TemplatesPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Channel
               </label>
               <select
                 value={channel}
                 onChange={(e) => setChannel(e.target.value as any)}
-                className="w-full h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                className="w-full h-9 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-xs font-medium text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
-                <option value="sms">SMS (TRAI DLT)</option>
-                <option value="whatsapp">WhatsApp (Meta)</option>
+                <option value="whatsapp" className="dark:bg-slate-900 dark:text-white">WhatsApp (Meta Cloud)</option>
+                <option value="sms" className="dark:bg-slate-900 dark:text-white">Social Broadcast</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as any)}
-                className="w-full h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                className="w-full h-9 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-xs font-medium text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
-                <option value="promotional">Promotional / Marketing</option>
-                <option value="transactional">Transactional / Utility</option>
+                <option value="promotional" className="dark:bg-slate-900 dark:text-white">Promotional / Marketing</option>
+                <option value="transactional" className="dark:bg-slate-900 dark:text-white">Transactional / Utility</option>
               </select>
             </div>
           </div>
 
-          {channel === "sms" && (
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Sender Header
-              </label>
-              <Input
-                value={senderId}
-                onChange={(e) => setSenderId(e.target.value)}
-                placeholder="SHRFSH"
-              />
-            </div>
-          )}
-
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Template Content * (Include {"{{1}}"} for customer variables)
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Template Content * (Include {"{{name}}"} for customer variables)
             </label>
             <textarea
               rows={4}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Dear {{1}}, enjoy Flat 20% off on all sarees at Sharma Fashion Store..."
-              className="w-full rounded-lg border border-slate-300 p-3 text-xs text-slate-900 leading-relaxed focus:outline-none focus:ring-1 focus:ring-slate-900"
+              placeholder="Dear {{name}}, enjoy Flat 20% off on all sarees at Sharma Fashion Store..."
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-xs text-slate-900 dark:text-white leading-relaxed focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400"
               required
             />
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-[11px] text-slate-500">
-            Note: New templates will be marked as <strong>Pending Verification</strong> until reviewed
-            by the telecom registrar.
+          <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-[11px] text-slate-500 dark:text-slate-400">
+            Note: New templates will be verified for Meta & Social Messaging content policy compliance before bulk broadcast dispatch.
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-            <Button variant="outline" type="button" onClick={() => setShowAddModal(false)}>
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button variant="outline" type="button" onClick={() => setShowAddModal(false)} className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">
               Cancel
             </Button>
-            <Button type="submit" className="bg-slate-900 text-white">
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold">
               Submit Template
             </Button>
           </div>

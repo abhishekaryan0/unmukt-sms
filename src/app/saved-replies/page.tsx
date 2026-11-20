@@ -203,7 +203,7 @@ export default function SavedRepliesPage() {
       >
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Title / Description
             </label>
             <Input
@@ -216,7 +216,7 @@ export default function SavedRepliesPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Shortcut (starts with /)
               </label>
               <Input
@@ -227,25 +227,25 @@ export default function SavedRepliesPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as any)}
-                className="w-full h-9 px-3 rounded-lg border border-slate-200 text-xs bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
-                <option value="Greeting">Greeting</option>
-                <option value="Support">Support</option>
-                <option value="Billing">Billing</option>
-                <option value="Sales">Sales</option>
-                <option value="FAQ">FAQ</option>
+                <option value="Greeting" className="dark:bg-slate-900 dark:text-white">Greeting</option>
+                <option value="Support" className="dark:bg-slate-900 dark:text-white">Support</option>
+                <option value="Billing" className="dark:bg-slate-900 dark:text-white">Billing</option>
+                <option value="Sales" className="dark:bg-slate-900 dark:text-white">Sales</option>
+                <option value="FAQ" className="dark:bg-slate-900 dark:text-white">FAQ</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Reply Message Body
             </label>
             <textarea
@@ -253,13 +253,18 @@ export default function SavedRepliesPage() {
               onChange={(e) => setContent(e.target.value)}
               rows={4}
               placeholder="Type the pre-approved response here..."
-              className="w-full p-2.5 text-xs text-slate-900 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+              className="w-full p-2.5 text-xs text-slate-900 dark:text-white bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
               required
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-            <Button variant="outline" type="button" onClick={() => setShowAddModal(false)}>
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => setShowAddModal(false)}
+              className="border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
+            >
               Cancel
             </Button>
             <Button type="submit">

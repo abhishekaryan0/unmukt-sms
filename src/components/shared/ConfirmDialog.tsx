@@ -33,14 +33,16 @@ export function ConfirmDialog({
       <div className="flex items-start gap-3.5">
         <div
           className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-            variant === "destructive" ? "bg-rose-100 text-rose-600" : "bg-blue-100 text-blue-600"
+            variant === "destructive"
+              ? "bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400"
+              : "bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400"
           }`}
         >
           <AlertTriangle className="w-5 h-5" />
         </div>
         <div className="flex-1">
-          <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
-          <div className="text-xs text-slate-600 mt-1 leading-relaxed">{description}</div>
+          <h4 className="text-sm font-semibold text-slate-900 dark:text-white">{title}</h4>
+          <div className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">{description}</div>
         </div>
       </div>
 

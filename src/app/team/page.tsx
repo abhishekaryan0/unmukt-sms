@@ -141,7 +141,7 @@ export default function TeamMembersPage() {
             {teamMembers.map((member) => (
               <div
                 key={member.id}
-                className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-slate-50/80 dark:hover:bg-slate-800/70 transition-colors"
+                className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold ring-2 ring-slate-100 dark:ring-slate-800">
@@ -213,7 +213,7 @@ export default function TeamMembersPage() {
       >
         <form onSubmit={handleAddMember} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Full Name</label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -223,7 +223,7 @@ export default function TeamMembersPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
             <Input
               type="email"
               value={email}
@@ -234,20 +234,20 @@ export default function TeamMembersPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Role</label>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Role</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as any)}
-              className="w-full h-9 px-3 rounded-lg border border-slate-200 text-xs bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
-              <option value="agent">Support Agent (Respond to assigned chats)</option>
-              <option value="manager">Manager (Assign, view reports, modify replies)</option>
-              <option value="admin">Admin (Full channel connection and billing rights)</option>
+              <option value="agent" className="dark:bg-slate-900 dark:text-white">Support Agent (Respond to assigned chats)</option>
+              <option value="manager" className="dark:bg-slate-900 dark:text-white">Manager (Assign, view reports, modify replies)</option>
+              <option value="admin" className="dark:bg-slate-900 dark:text-white">Admin (Full channel connection and billing rights)</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               Assigned Channels
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -259,14 +259,14 @@ export default function TeamMembersPage() {
                       key={ch}
                       type="button"
                       onClick={() => toggleChannel(ch)}
-                      className={`p-2 rounded-lg border text-xs font-semibold capitalize flex items-center justify-between transition-colors ${
+                      className={`p-2 rounded-lg border text-xs font-semibold capitalize flex items-center justify-between transition-colors cursor-pointer ${
                         isChecked
-                          ? "bg-blue-50 text-blue-700 border-blue-300"
-                          : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                          ? "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700"
+                          : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
                       }`}
                     >
                       <span>{ch}</span>
-                      {isChecked && <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />}
+                      {isChecked && <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
                     </button>
                   );
                 }
@@ -274,8 +274,13 @@ export default function TeamMembersPage() {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-            <Button variant="outline" type="button" onClick={() => setShowAddModal(false)}>
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => setShowAddModal(false)}
+              className="border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
+            >
               Cancel
             </Button>
             <Button type="submit">Invite Agent</Button>

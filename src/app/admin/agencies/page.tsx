@@ -117,40 +117,40 @@ export default function AdminAgenciesPage() {
       >
         {selectedAgency && (
           <div className="space-y-4 text-xs">
-            <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+            <div className="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-800/80 p-3.5 rounded-lg border border-slate-200 dark:border-slate-700">
               <div>
-                <span className="text-[11px] text-slate-500">Contact Person</span>
-                <div className="font-bold text-slate-900">{selectedAgency.ownerName}</div>
-                <div className="text-[11px] text-slate-600">{selectedAgency.email}</div>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">Contact Person</span>
+                <div className="font-bold text-slate-900 dark:text-white">{selectedAgency.ownerName}</div>
+                <div className="text-[11px] text-slate-600 dark:text-slate-300">{selectedAgency.email}</div>
               </div>
               <div>
-                <span className="text-[11px] text-slate-500">Agency Balance</span>
-                <div className="text-base font-bold text-slate-900">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">Agency Balance</span>
+                <div className="text-base font-bold text-slate-900 dark:text-white">
                   {formatINR(selectedAgency.walletBalance)}
                 </div>
               </div>
             </div>
 
             <div>
-              <span className="font-bold text-slate-900 block mb-1">
+              <span className="font-bold text-slate-900 dark:text-white block mb-1">
                 Wholesale Agency Reseller Pricing:
               </span>
-              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 grid grid-cols-3 gap-2 text-center">
+              <div className="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-lg border border-slate-200 dark:border-slate-700 grid grid-cols-3 gap-2 text-center">
                 <div>
-                  <div className="text-[10px] text-slate-500">SMS Promo</div>
-                  <div className="font-bold text-slate-900">
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">SMS Promo</div>
+                  <div className="font-bold text-slate-900 dark:text-white">
                     {formatINR(selectedAgency.customPricing?.smsPromo ?? 0.18)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] text-slate-500">SMS Trans</div>
-                  <div className="font-bold text-slate-900">
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">SMS Trans</div>
+                  <div className="font-bold text-slate-900 dark:text-white">
                     {formatINR(selectedAgency.customPricing?.smsTrans ?? 0.20)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] text-slate-500">WhatsApp Marketing</div>
-                  <div className="font-bold text-slate-900">
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">WhatsApp Marketing</div>
+                  <div className="font-bold text-slate-900 dark:text-white">
                     {formatINR(selectedAgency.customPricing?.whatsappMarketing ?? 0.95)}
                   </div>
                 </div>
@@ -158,7 +158,7 @@ export default function AdminAgenciesPage() {
             </div>
 
             <div>
-              <span className="font-bold text-slate-900 block mb-1.5">
+              <span className="font-bold text-slate-900 dark:text-white block mb-1.5">
                 Sub-Accounts Linked ({selectedAgency.managedClientIds?.length || 0}):
               </span>
               <div className="space-y-1.5 max-h-32 overflow-y-auto">
@@ -167,12 +167,12 @@ export default function AdminAgenciesPage() {
                   return (
                     <div
                       key={cid}
-                      className="p-2 rounded bg-slate-50 border border-slate-200 flex justify-between"
+                      className="p-2 rounded bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex justify-between"
                     >
-                      <span className="font-semibold text-slate-800">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">
                         {cust?.businessName || cid}
                       </span>
-                      <span className="text-slate-500">{cust?.businessCategory}</span>
+                      <span className="text-slate-500 dark:text-slate-400">{cust?.businessCategory}</span>
                     </div>
                   );
                 })}

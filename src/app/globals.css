@@ -46,7 +46,13 @@ html.dark .bg-white {
   border-color: #1f2937 !important;
 }
 
-html.dark [class*="bg-slate-50"] {
+html.dark .bg-slate-50,
+html.dark .bg-slate-50\/40,
+html.dark .bg-slate-50\/50,
+html.dark .bg-slate-50\/60,
+html.dark .bg-slate-50\/70,
+html.dark .bg-slate-50\/80,
+html.dark .bg-slate-50\/90 {
   background-color: #0c1220 !important;
   border-color: #1f2937 !important;
 }
@@ -124,6 +130,19 @@ html.dark tr[class*="hover:bg"]:hover {
   background-color: #1e293b !important;
 }
 
+/* Dark mode table pagination footers */
+html.dark [class*="border-t"][class*="px-4"][class*="py-3"] {
+  background-color: #0c1220 !important;
+  border-color: #1f2937 !important;
+}
+
+/* Dark mode modal dialog surfaces */
+html.dark [role="dialog"],
+html.dark div[class*="shadow-2xl"][class*="rounded-xl"] {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+}
+
 /* ========================================================================== */
 /* DARK MODE HOVER STATES & TINTED PILLS (CLIENT & ADMIN)                     */
 /* ========================================================================== */
@@ -134,7 +153,11 @@ html.dark [class*="hover:bg-slate-100"]:hover,
 html.dark [class*="hover:bg-slate-200"]:hover,
 html.dark [class*="hover:bg-gray-50"]:hover,
 html.dark [class*="hover:bg-gray-100"]:hover,
-html.dark [class*="hover:bg-gray-200"]:hover {
+html.dark [class*="hover:bg-gray-200"]:hover,
+html.dark tr:hover,
+html.dark tbody tr:hover,
+html.dark .group:hover,
+html.dark div[class*="hover:bg"]:hover {
   background-color: #1e293b !important;
 }
 
@@ -161,10 +184,13 @@ html.dark [class*="hover:bg-rose-100"]:hover {
 
 /* Dark mode tinted pills/badges */
 html.dark .bg-blue-50,
+html.dark .bg-blue-50\/40,
+html.dark .bg-blue-50\/50,
+html.dark .bg-blue-50\/60,
 html.dark .bg-blue-50\/70,
 html.dark .bg-blue-50\/80 {
-  background-color: rgba(30, 58, 138, 0.25) !important;
-  border-color: rgba(59, 130, 246, 0.3) !important;
+  background-color: rgba(30, 58, 138, 0.3) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
 }
 
 html.dark .bg-blue-100 {
@@ -173,10 +199,13 @@ html.dark .bg-blue-100 {
 }
 
 html.dark .bg-emerald-50,
+html.dark .bg-emerald-50\/40,
+html.dark .bg-emerald-50\/50,
+html.dark .bg-emerald-50\/60,
 html.dark .bg-emerald-50\/70,
 html.dark .bg-emerald-50\/80 {
-  background-color: rgba(6, 78, 59, 0.25) !important;
-  border-color: rgba(16, 185, 129, 0.3) !important;
+  background-color: rgba(6, 78, 59, 0.35) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
 }
 
 html.dark .bg-emerald-100 {
@@ -185,10 +214,13 @@ html.dark .bg-emerald-100 {
 }
 
 html.dark .bg-amber-50,
+html.dark .bg-amber-50\/40,
+html.dark .bg-amber-50\/50,
+html.dark .bg-amber-50\/60,
 html.dark .bg-amber-50\/70,
 html.dark .bg-amber-50\/80 {
-  background-color: rgba(120, 53, 15, 0.25) !important;
-  border-color: rgba(245, 158, 11, 0.3) !important;
+  background-color: rgba(120, 53, 15, 0.35) !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
 }
 
 html.dark .bg-amber-100 {
@@ -197,10 +229,13 @@ html.dark .bg-amber-100 {
 }
 
 html.dark .bg-rose-50,
+html.dark .bg-rose-50\/40,
+html.dark .bg-rose-50\/50,
+html.dark .bg-rose-50\/60,
 html.dark .bg-rose-50\/70,
 html.dark .bg-rose-50\/80 {
-  background-color: rgba(136, 19, 55, 0.25) !important;
-  border-color: rgba(244, 63, 94, 0.3) !important;
+  background-color: rgba(136, 19, 55, 0.35) !important;
+  border-color: rgba(244, 63, 94, 0.4) !important;
 }
 
 html.dark .bg-rose-100 {
@@ -209,10 +244,13 @@ html.dark .bg-rose-100 {
 }
 
 html.dark .bg-purple-50,
+html.dark .bg-purple-50\/40,
+html.dark .bg-purple-50\/50,
+html.dark .bg-purple-50\/60,
 html.dark .bg-purple-50\/70,
 html.dark .bg-purple-50\/80 {
-  background-color: rgba(88, 28, 135, 0.25) !important;
-  border-color: rgba(168, 85, 247, 0.3) !important;
+  background-color: rgba(88, 28, 135, 0.35) !important;
+  border-color: rgba(168, 85, 247, 0.4) !important;
 }
 
 html.dark .bg-purple-100 {

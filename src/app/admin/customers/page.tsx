@@ -447,7 +447,7 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
         <form onSubmit={handleCreateCustomer} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Business / Legal Name *
               </label>
               <Input
@@ -458,7 +458,7 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Owner / Authorized Person *
               </label>
               <Input
@@ -472,7 +472,7 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Email Address *
               </label>
               <Input
@@ -484,7 +484,7 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Mobile Number (+91) *
               </label>
               <Input
@@ -498,16 +498,16 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
           </div>
 
           {/* Client Portal Authentication Credentials */}
-          <div className="bg-slate-50 border border-slate-200/90 rounded-xl p-3.5 space-y-2.5">
+          <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700 rounded-xl p-3.5 space-y-2.5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                <KeyRound className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
+                <KeyRound className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
                 <span>Client Portal Login Credentials</span>
               </div>
               <button
                 type="button"
                 onClick={handleGeneratePassword}
-                className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center gap-1"
+                className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline inline-flex items-center gap-1"
               >
                 <Sparkles className="w-3 h-3 text-blue-500" />
                 <span>Auto-Generate Password</span>
@@ -515,7 +515,7 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Login Password *
               </label>
               <div className="relative">
@@ -530,41 +530,41 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1"
                   tabIndex={-1}
                   title={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <p className="text-[10px] text-slate-500 mt-1">
-                The business owner can login at <span className="font-mono text-slate-700 font-semibold">/login</span> using their email (or phone number) with this password. If left blank, a secure temporary passcode will be assigned.
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                The business owner can login at <span className="font-mono text-slate-700 dark:text-slate-300 font-semibold">/login</span> using their email (or phone number) with this password. If left blank, a secure temporary passcode will be assigned.
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Category
               </label>
               <select
                 value={newCust.businessCategory}
                 onChange={(e) => setNewCust({ ...newCust, businessCategory: e.target.value })}
-                className="w-full h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                className="w-full h-9 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
-                <option value="Retail & Apparel">Retail & Apparel</option>
-                <option value="Consumer Electronics">Consumer Electronics</option>
-                <option value="Education & Coaching">Education & Coaching</option>
-                <option value="Hospitality & Dining">Hospitality & Dining</option>
-                <option value="Real Estate">Real Estate</option>
-                <option value="Digital Marketing Agency">Digital Marketing Agency</option>
-                <option value="Healthcare & Labs">Healthcare & Labs</option>
-                <option value="F&B & Retail">F&B & Retail</option>
+                <option value="Retail & Apparel" className="dark:bg-slate-900 dark:text-white">Retail & Apparel</option>
+                <option value="Consumer Electronics" className="dark:bg-slate-900 dark:text-white">Consumer Electronics</option>
+                <option value="Education & Coaching" className="dark:bg-slate-900 dark:text-white">Education & Coaching</option>
+                <option value="Hospitality & Dining" className="dark:bg-slate-900 dark:text-white">Hospitality & Dining</option>
+                <option value="Real Estate" className="dark:bg-slate-900 dark:text-white">Real Estate</option>
+                <option value="Digital Marketing Agency" className="dark:bg-slate-900 dark:text-white">Digital Marketing Agency</option>
+                <option value="Healthcare & Labs" className="dark:bg-slate-900 dark:text-white">Healthcare & Labs</option>
+                <option value="F&B & Retail" className="dark:bg-slate-900 dark:text-white">F&B & Retail</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 City
               </label>
               <Input
@@ -574,7 +574,7 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 State
               </label>
               <Input
@@ -587,7 +587,7 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 GSTIN (Optional)
               </label>
               <Input
@@ -597,8 +597,8 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                TRAI DLT Entity ID
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                DLT Entity ID
               </label>
               <Input
                 placeholder="Auto-assigned if empty"
@@ -607,8 +607,8 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Initial Wallet Credit (₹)
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Initial Balance (₹)
               </label>
               <Input
                 type="number"
@@ -620,11 +620,11 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-            <Button variant="outline" type="button" onClick={() => setShowAddModal(false)}>
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button variant="outline" type="button" onClick={() => setShowAddModal(false)} className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">
               Cancel
             </Button>
-            <Button type="submit" isLoading={isSubmitting} className="bg-slate-900 text-white gap-1.5">
+            <Button type="submit" isLoading={isSubmitting} className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5 font-semibold">
               <KeyRound className="w-3.5 h-3.5" />
               <span>Onboard & Provision Account</span>
             </Button>
@@ -642,13 +642,13 @@ Please login and configure your TRAI DLT Sender Headers and WhatsApp templates.`
       >
         {createdCredentials && (
           <div className="space-y-4 text-xs">
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+            <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 rounded-xl p-3.5 flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-bold text-emerald-950 text-sm">
+                <h4 className="font-bold text-emerald-950 dark:text-emerald-200 text-sm">
                   {createdCredentials.businessName} is Active!
                 </h4>
-                <p className="text-emerald-800 text-xs mt-0.5">
+                <p className="text-emerald-800 dark:text-emerald-300 text-xs mt-0.5">
                   Authorized Owner: <span className="font-semibold">{createdCredentials.ownerName}</span> • Initial Balance: <span className="font-semibold">{formatINR(createdCredentials.walletBalance)}</span>
                 </p>
               </div>

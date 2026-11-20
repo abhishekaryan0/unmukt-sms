@@ -449,8 +449,8 @@ export default function SubscriptionPage() {
         size="md"
       >
         <div className="space-y-4">
-          <div className="p-3.5 rounded-xl bg-blue-50 border border-blue-100 text-xs text-blue-900 flex items-start gap-2.5">
-            <Sparkles className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/60 text-xs text-blue-900 dark:text-blue-300 flex items-start gap-2.5">
+            <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
             <div>
               You are switching your workspace subscription to the{" "}
               <strong>
@@ -464,20 +464,20 @@ export default function SubscriptionPage() {
             </div>
           </div>
 
-          <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200 text-xs space-y-2">
+          <div className="bg-slate-50 dark:bg-slate-800/90 rounded-xl p-3.5 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
             <div className="flex justify-between">
-              <span className="text-slate-500">New Plan:</span>
-              <span className="font-bold text-slate-900 capitalize">{selectedUpgradePlan}</span>
+              <span className="text-slate-500 dark:text-slate-400">New Plan:</span>
+              <span className="font-bold text-slate-900 dark:text-white capitalize">{selectedUpgradePlan}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Billing Cycle:</span>
-              <span className="font-bold text-slate-900 capitalize">{billingCycle}</span>
+              <span className="text-slate-500 dark:text-slate-400">Billing Cycle:</span>
+              <span className="font-bold text-slate-900 dark:text-white capitalize">{billingCycle}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Payment Card:</span>
-              <span className="font-bold text-slate-900">Visa ending in 4242</span>
+              <span className="text-slate-500 dark:text-slate-400">Payment Card:</span>
+              <span className="font-bold text-slate-900 dark:text-white">Visa ending in 4242</span>
             </div>
-            <div className="flex justify-between pt-2 border-t border-slate-200 font-bold text-slate-900">
+            <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-white">
               <span>Immediate Charge:</span>
               <span>
                 {selectedUpgradePlan === "enterprise"
@@ -489,8 +489,12 @@ export default function SubscriptionPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-            <Button variant="outline" onClick={() => setShowUpgradeModal(false)}>
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              variant="outline"
+              onClick={() => setShowUpgradeModal(false)}
+              className="border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
+            >
               Cancel
             </Button>
             <Button onClick={confirmPlanChange} className="bg-blue-600 hover:bg-blue-700 text-white">

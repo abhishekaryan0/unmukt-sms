@@ -619,17 +619,17 @@ export default function ContactsPage() {
         description="Upload customer phone lists directly into your marketing group with automatic mobile sanitization."
       >
         <div className="space-y-4 text-xs">
-          <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center bg-slate-50 space-y-3">
+          <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-6 text-center bg-slate-50 dark:bg-slate-800/60 space-y-3">
             <Upload className="w-8 h-8 text-slate-400 mx-auto" />
             <div>
-              <h4 className="font-bold text-slate-900">Choose CSV File from Device</h4>
-              <p className="text-[11px] text-slate-500 mt-0.5">
+              <h4 className="font-bold text-slate-900 dark:text-white">Choose CSV File from Device</h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                 Columns required: <code>Name, Mobile, Group, Email, Tags, DND</code>
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-2">
-              <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800">
+              <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900 dark:bg-blue-600 text-white font-semibold text-xs hover:bg-slate-800 dark:hover:bg-blue-700">
                 <FileSpreadsheet className="w-4 h-4" />
                 <span>Select .CSV File</span>
                 <input
@@ -645,7 +645,7 @@ export default function ContactsPage() {
                 variant="outline"
                 type="button"
                 onClick={handleDownloadSampleCSV}
-                className="gap-1.5 text-xs"
+                className="gap-1.5 text-xs border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Download Sample Template</span>
@@ -653,7 +653,7 @@ export default function ContactsPage() {
             </div>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-[11px] text-blue-900 space-y-1">
+          <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 rounded-lg p-3 text-[11px] text-blue-900 dark:text-blue-300 space-y-1">
             <div className="font-bold">Indian Telecom Carrier Scrubbing:</div>
             <div>
               Our system automatically filters out invalid prefixes, standardizes 10-digit formats with +91 country codes, and removes duplicate rows prior to broadcast.
@@ -672,60 +672,60 @@ export default function ContactsPage() {
       >
         {viewingContact && (
           <div className="space-y-3 text-xs">
-            <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
-              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-700 text-sm">
+            <div className="flex items-center gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-700 dark:text-slate-200 text-sm">
                 {viewingContact.name.slice(0, 2).toUpperCase()}
               </div>
               <div>
-                <h4 className="font-bold text-slate-900 text-sm">{viewingContact.name}</h4>
-                <div className="text-[11px] text-slate-500">{viewingContact.group}</div>
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm">{viewingContact.name}</h4>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400">{viewingContact.group}</div>
               </div>
             </div>
 
-            <div className="space-y-2 text-slate-700">
+            <div className="space-y-2 text-slate-700 dark:text-slate-300">
               <div className="flex justify-between">
-                <span className="text-slate-500">Mobile:</span>
-                <span className="font-mono font-bold text-slate-900">
+                <span className="text-slate-500 dark:text-slate-400">Mobile:</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white">
                   {formatIndianMobile(viewingContact.mobile)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Email:</span>
-                <span className="font-medium text-slate-900">{viewingContact.email || "-"}</span>
+                <span className="text-slate-500 dark:text-slate-400">Email:</span>
+                <span className="font-medium text-slate-900 dark:text-white">{viewingContact.email || "-"}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">DND Status:</span>
+                <span className="text-slate-500 dark:text-slate-400">DND Status:</span>
                 <span
                   className={
                     viewingContact.isDnd
-                      ? "text-amber-700 font-bold"
-                      : "text-emerald-700 font-semibold"
+                      ? "text-amber-700 dark:text-amber-400 font-bold"
+                      : "text-emerald-700 dark:text-emerald-400 font-semibold"
                   }
                 >
                   {viewingContact.isDnd ? "Registered on DND" : "Clean (Non-DND)"}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Date Added:</span>
-                <span>{formatDate(viewingContact.dateAdded, false)}</span>
+                <span className="text-slate-500 dark:text-slate-400">Date Added:</span>
+                <span className="text-slate-800 dark:text-slate-200">{formatDate(viewingContact.dateAdded, false)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-500">SMS Consent:</span>
+                <span className="text-slate-500 dark:text-slate-400">SMS Consent:</span>
                 <span
                   className={
-                    viewingContact.smsConsent ? "text-emerald-700 font-bold" : "text-rose-600"
+                    viewingContact.smsConsent ? "text-emerald-700 dark:text-emerald-400 font-bold" : "text-rose-600 dark:text-rose-400"
                   }
                 >
                   {viewingContact.smsConsent ? "Subscribed (Opt-in Verified)" : "Unsubscribed"}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-500">WhatsApp Consent:</span>
+                <span className="text-slate-500 dark:text-slate-400">WhatsApp Consent:</span>
                 <span
                   className={
                     viewingContact.whatsappConsent
-                      ? "text-emerald-700 font-bold"
-                      : "text-rose-600"
+                      ? "text-emerald-700 dark:text-emerald-400 font-bold"
+                      : "text-rose-600 dark:text-rose-400"
                   }
                 >
                   {viewingContact.whatsappConsent ? "Opted In" : "Not Opted In"}
@@ -734,12 +734,12 @@ export default function ContactsPage() {
             </div>
 
             <div className="pt-2">
-              <span className="block text-[11px] font-semibold text-slate-600 mb-1">Tags</span>
+              <span className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Tags</span>
               <div className="flex gap-1 flex-wrap">
                 {viewingContact.tags.map((t, idx) => (
                   <span
                     key={idx}
-                    className="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200"
+                    className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700"
                   >
                     {t}
                   </span>

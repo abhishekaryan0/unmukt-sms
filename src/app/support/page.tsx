@@ -137,41 +137,41 @@ export default function ClientSupportPage() {
         onClose={() => setShowCreateModal(false)}
         size="md"
         title="Create New Support Ticket"
-        description="Our telecom specialists assist with DLT and WhatsApp compliance"
+        description="Our specialist team assists with social messaging integrations, channels, and subscription billing"
       >
         <form onSubmit={handleCreate} className="space-y-4 text-xs">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Issue Category
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as any)}
-              className="w-full h-9 rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-900"
+              className="w-full h-9 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
-              <option value="DLT Approval">DLT Sender ID / Header Approval</option>
-              <option value="WhatsApp Template">WhatsApp Template Categorization</option>
-              <option value="Wallet/Billing">Wallet Recharge & GST Invoicing</option>
-              <option value="Delivery Issue">SMS Carrier Delivery Inquiries</option>
-              <option value="Technical">API & Webhook Assistance</option>
-              <option value="General">General Inquiries</option>
+              <option value="WhatsApp Integration" className="dark:bg-slate-900 dark:text-white">WhatsApp Cloud API & Webhook Connection</option>
+              <option value="Social Channels" className="dark:bg-slate-900 dark:text-white">Instagram / Messenger / Telegram Setup</option>
+              <option value="Subscription/Billing" className="dark:bg-slate-900 dark:text-white">Subscription & Plan Upgrades</option>
+              <option value="Broadcast Issues" className="dark:bg-slate-900 dark:text-white">Broadcast Campaigns Delivery</option>
+              <option value="Technical" className="dark:bg-slate-900 dark:text-white">API & Webhook Assistance</option>
+              <option value="General" className="dark:bg-slate-900 dark:text-white">General Inquiries</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Subject *
             </label>
             <Input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder="e.g. Need second DLT Sender ID approved"
+              placeholder="e.g. Need assistance connecting Instagram Direct webhook"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Describe your issue or query *
             </label>
             <textarea
@@ -179,16 +179,16 @@ export default function ClientSupportPage() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Provide exact details so our support team can verify..."
-              className="w-full rounded-lg border border-slate-300 p-3 text-xs text-slate-900 leading-relaxed focus:outline-none focus:ring-1 focus:ring-slate-900"
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-xs text-slate-900 dark:text-white leading-relaxed focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400"
               required
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-            <Button variant="outline" type="button" onClick={() => setShowCreateModal(false)}>
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button variant="outline" type="button" onClick={() => setShowCreateModal(false)} className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">
               Cancel
             </Button>
-            <Button type="submit" className="bg-slate-900 text-white">
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold">
               Submit Ticket
             </Button>
           </div>
@@ -202,7 +202,7 @@ export default function ClientSupportPage() {
         size="lg"
         title={
           <div className="flex items-center gap-2">
-            <span>{selectedTicket?.subject}</span>
+            <span className="text-slate-900 dark:text-white font-bold">{selectedTicket?.subject}</span>
             {selectedTicket && <StatusBadge status={selectedTicket.status} />}
           </div>
         }
@@ -219,16 +219,16 @@ export default function ClientSupportPage() {
                     key={idx}
                     className={`flex flex-col ${isCustomer ? "items-end" : "items-start"}`}
                   >
-                    <div className="flex items-center gap-2 mb-1 text-[11px] text-slate-500">
-                      <span className="font-semibold text-slate-700">{m.senderName}</span>
+                    <div className="flex items-center gap-2 mb-1 text-[11px] text-slate-500 dark:text-slate-400">
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">{m.senderName}</span>
                       <span>•</span>
                       <span>{formatDate(m.timestamp)}</span>
                     </div>
                     <div
                       className={`p-3 rounded-xl max-w-[85%] text-xs leading-relaxed ${
                         isCustomer
-                          ? "bg-slate-900 text-white rounded-tr-none"
-                          : "bg-slate-100 text-slate-800 rounded-tl-none border border-slate-200"
+                          ? "bg-blue-600 text-white rounded-tr-none"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-200 dark:border-slate-700"
                       }`}
                     >
                       {m.message}
@@ -239,19 +239,19 @@ export default function ClientSupportPage() {
             </div>
 
             {/* Reply Input Box */}
-            <div className="pt-3 border-t border-slate-200">
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
               <div className="flex gap-2">
                 <textarea
                   rows={2}
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   placeholder="Type a reply to the support team..."
-                  className="flex-1 rounded-lg border border-slate-300 p-2 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                  className="flex-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400"
                 />
                 <Button
                   onClick={handleSendReply}
                   disabled={!replyText.trim()}
-                  className="bg-slate-900 text-white self-end h-10 px-4"
+                  className="bg-blue-600 hover:bg-blue-700 text-white self-end h-10 px-4 font-semibold"
                 >
                   <Send className="w-4 h-4 mr-1" />
                   Reply

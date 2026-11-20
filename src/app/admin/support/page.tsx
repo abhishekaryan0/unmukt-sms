@@ -138,7 +138,7 @@ export default function AdminSupportPage() {
         size="lg"
         title={
           <div className="flex items-center gap-2">
-            <span>{selectedTicket?.subject}</span>
+            <span className="text-slate-900 dark:text-white font-bold">{selectedTicket?.subject}</span>
             {selectedTicket && <StatusBadge status={selectedTicket.status} />}
           </div>
         }
@@ -154,8 +154,8 @@ export default function AdminSupportPage() {
                     key={idx}
                     className={`flex flex-col ${isSupport ? "items-end" : "items-start"}`}
                   >
-                    <div className="flex items-center gap-2 mb-1 text-[11px] text-slate-500">
-                      <span className="font-semibold text-slate-700">{m.senderName}</span>
+                    <div className="flex items-center gap-2 mb-1 text-[11px] text-slate-500 dark:text-slate-400">
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">{m.senderName}</span>
                       <span>•</span>
                       <span>{formatDate(m.timestamp)}</span>
                     </div>
@@ -163,7 +163,7 @@ export default function AdminSupportPage() {
                       className={`p-3 rounded-xl max-w-[85%] text-xs leading-relaxed ${
                         isSupport
                           ? "bg-blue-600 text-white rounded-tr-none"
-                          : "bg-slate-100 text-slate-800 rounded-tl-none border border-slate-200"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-200 dark:border-slate-700"
                       }`}
                     >
                       {m.message}
@@ -173,8 +173,8 @@ export default function AdminSupportPage() {
               })}
             </div>
 
-            <div className="pt-3 border-t border-slate-200 space-y-2">
-              <label className="block text-xs font-semibold text-slate-700">
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                 Official Admin Response
               </label>
               <div className="flex gap-2">
@@ -183,12 +183,12 @@ export default function AdminSupportPage() {
                   value={adminReply}
                   onChange={(e) => setAdminReply(e.target.value)}
                   placeholder="Type official operator response..."
-                  className="flex-1 rounded-lg border border-slate-300 p-2 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                  className="flex-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400"
                 />
                 <Button
                   onClick={handleSendAdminReply}
                   disabled={!adminReply.trim()}
-                  className="bg-blue-600 hover:bg-blue-500 text-white self-end h-10 px-4"
+                  className="bg-blue-600 hover:bg-blue-700 text-white self-end h-10 px-4 font-semibold"
                 >
                   <Send className="w-4 h-4 mr-1" />
                   Reply

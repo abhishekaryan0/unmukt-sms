@@ -422,7 +422,7 @@ export default function NewBroadcastCampaignPage() {
                           onClick={() => toggleChannel("whatsapp")}
                           className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
                             isSel
-                              ? "border-emerald-500 dark:border-emerald-500 bg-emerald-50/80 dark:bg-emerald-950/40 shadow-sm ring-2 ring-emerald-500/30 dark:ring-emerald-500/40"
+                              ? "border-emerald-500 dark:border-emerald-500 bg-emerald-50/70 dark:bg-slate-800/90 shadow-sm ring-2 ring-emerald-500/20 dark:ring-emerald-500/40"
                               : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 opacity-80"
                           }`}
                         >
@@ -441,13 +441,13 @@ export default function NewBroadcastCampaignPage() {
                                 WhatsApp Business
                               </span>
                               <div className="flex items-center gap-1.5">
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded-full">
+                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-700 px-2 py-0.5 rounded-full">
                                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                   Connected
                                 </span>
                                 {isSel ? (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 dark:text-emerald-200 bg-emerald-200/80 dark:bg-emerald-900/60 border border-emerald-400/80 dark:border-emerald-700 px-2 py-0.5 rounded-full shadow-xs">
-                                    <Check className="w-3 h-3 text-emerald-700 dark:text-emerald-300" />
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-emerald-600 dark:bg-emerald-600 px-2 py-0.5 rounded-full shadow-xs">
+                                    <Check className="w-3 h-3 text-white" />
                                     Active
                                   </span>
                                 ) : (
@@ -473,7 +473,7 @@ export default function NewBroadcastCampaignPage() {
                           onClick={() => toggleChannel("instagram")}
                           className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
                             isSel
-                              ? "border-pink-500 dark:border-pink-500 bg-pink-50/80 dark:bg-pink-950/40 shadow-sm ring-2 ring-pink-500/30 dark:ring-pink-500/40"
+                              ? "border-pink-500 dark:border-pink-500 bg-pink-50/70 dark:bg-slate-800/90 shadow-sm ring-2 ring-pink-500/20 dark:ring-pink-500/40"
                               : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 opacity-80"
                           }`}
                         >
@@ -492,13 +492,13 @@ export default function NewBroadcastCampaignPage() {
                                 Instagram Direct
                               </span>
                               <div className="flex items-center gap-1.5">
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded-full">
+                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-700 px-2 py-0.5 rounded-full">
                                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                   Connected
                                 </span>
                                 {isSel ? (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-pink-800 dark:text-pink-200 bg-pink-200/80 dark:bg-pink-900/60 border border-pink-400/80 dark:border-pink-700 px-2 py-0.5 rounded-full shadow-xs">
-                                    <Check className="w-3 h-3 text-pink-700 dark:text-pink-300" />
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-pink-600 dark:bg-pink-600 px-2 py-0.5 rounded-full shadow-xs">
+                                    <Check className="w-3 h-3 text-white" />
                                     Active
                                   </span>
                                 ) : (
@@ -524,7 +524,7 @@ export default function NewBroadcastCampaignPage() {
                           onClick={() => toggleChannel("messenger")}
                           className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
                             isSel
-                              ? "border-blue-500 dark:border-blue-500 bg-blue-50/80 dark:bg-blue-950/40 shadow-sm ring-2 ring-blue-500/30 dark:ring-blue-500/40"
+                              ? "border-blue-500 dark:border-blue-500 bg-blue-50/70 dark:bg-slate-800/90 shadow-sm ring-2 ring-blue-500/20 dark:ring-blue-500/40"
                               : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 opacity-80"
                           }`}
                         >
@@ -543,13 +543,13 @@ export default function NewBroadcastCampaignPage() {
                                 Facebook Messenger
                               </span>
                               <div className="flex items-center gap-1.5">
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded-full">
+                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-700 px-2 py-0.5 rounded-full">
                                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                   Connected
                                 </span>
                                 {isSel ? (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-800 dark:text-blue-200 bg-blue-200/80 dark:bg-blue-900/60 border border-blue-400/80 dark:border-blue-700 px-2 py-0.5 rounded-full shadow-xs">
-                                    <Check className="w-3 h-3 text-blue-700 dark:text-blue-300" />
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-blue-600 dark:bg-blue-600 px-2 py-0.5 rounded-full shadow-xs">
+                                    <Check className="w-3 h-3 text-white" />
                                     Active
                                   </span>
                                 ) : (
@@ -575,7 +575,7 @@ export default function NewBroadcastCampaignPage() {
                           onClick={() => toggleChannel("telegram")}
                           className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
                             isSel
-                              ? "border-sky-500 dark:border-sky-500 bg-sky-50/80 dark:bg-sky-950/40 shadow-sm ring-2 ring-sky-500/30 dark:ring-sky-500/40"
+                              ? "border-sky-500 dark:border-sky-500 bg-sky-50/70 dark:bg-slate-800/90 shadow-sm ring-2 ring-sky-500/20 dark:ring-sky-500/40"
                               : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 opacity-80"
                           }`}
                         >
@@ -594,13 +594,13 @@ export default function NewBroadcastCampaignPage() {
                                 Telegram Bot
                               </span>
                               <div className="flex items-center gap-1.5">
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded-full">
+                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-700 px-2 py-0.5 rounded-full">
                                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                   Connected
                                 </span>
                                 {isSel ? (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-sky-800 dark:text-sky-200 bg-sky-200/80 dark:bg-sky-900/60 border border-sky-400/80 dark:border-sky-700 px-2 py-0.5 rounded-full shadow-xs">
-                                    <Check className="w-3 h-3 text-sky-700 dark:text-sky-300" />
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-sky-600 dark:bg-sky-600 px-2 py-0.5 rounded-full shadow-xs">
+                                    <Check className="w-3 h-3 text-white" />
                                     Active
                                   </span>
                                 ) : (
@@ -611,7 +611,7 @@ export default function NewBroadcastCampaignPage() {
                               </div>
                             </div>
                             <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                              Zero throttling limits, channel broadcast to subscriber group.
+                              Send instant broadcast alerts to Telegram bot subscribers and VIP groups.
                             </p>
                           </div>
                         </div>

@@ -473,28 +473,28 @@ export default function AdminCampaignsPage() {
             title={`Campaign Throughput & Delivery Audit: ${inspectCampaign.id}`}
           >
             <div className="space-y-5 text-xs">
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-2 gap-3">
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-2 gap-3">
                 <div>
-                  <span className="text-[11px] text-slate-500">Client Tenant:</span>
-                  <div className="font-bold text-slate-900 text-sm">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Client Tenant:</span>
+                  <div className="font-bold text-slate-900 dark:text-white text-sm">
                     {inspectCampaign.customerName}
                   </div>
                 </div>
                 <div>
-                  <span className="text-[11px] text-slate-500">Campaign Name:</span>
-                  <div className="font-bold text-slate-900 text-sm">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Campaign Name:</span>
+                  <div className="font-bold text-slate-900 dark:text-white text-sm">
                     {inspectCampaign.campaignName}
                   </div>
                 </div>
                 <div>
-                  <span className="text-[11px] text-slate-500">Target Audience:</span>
-                  <div className="font-bold text-blue-600 text-sm">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Target Audience:</span>
+                  <div className="font-bold text-blue-600 dark:text-blue-400 text-sm">
                     {formatNumber(inspectCampaign.targetCount)} recipients
                   </div>
                 </div>
                 <div>
-                  <span className="text-[11px] text-slate-500">Delivery Status:</span>
-                  <div className="font-bold capitalize text-slate-800 text-sm">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Delivery Status:</span>
+                  <div className="font-bold capitalize text-slate-800 dark:text-slate-200 text-sm">
                     {inspectCampaign.status} ({inspectCampaign.deliveryRate}%)
                   </div>
                 </div>
@@ -502,32 +502,32 @@ export default function AdminCampaignsPage() {
 
               {/* Delivery Stats Bar */}
               <div className="space-y-2">
-                <div className="flex justify-between font-semibold text-slate-700">
+                <div className="flex justify-between font-semibold text-slate-700 dark:text-slate-300">
                   <span>Throughput Pipeline Metrics</span>
-                  <span className="text-emerald-600">{inspectCampaign.deliveryRate}% Success</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">{inspectCampaign.deliveryRate}% Success</span>
                 </div>
                 <div className="grid grid-cols-4 gap-2 text-center">
-                  <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200">
-                    <div className="text-[10px] text-slate-400">Total Sent</div>
-                    <div className="font-bold text-slate-900 mt-0.5">
+                  <div className="p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Total Sent</div>
+                    <div className="font-bold text-slate-900 dark:text-white mt-0.5">
                       {formatNumber(inspectCampaign.sent)}
                     </div>
                   </div>
-                  <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200">
-                    <div className="text-[10px] text-slate-400">Delivered</div>
-                    <div className="font-bold text-emerald-600 mt-0.5">
+                  <div className="p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Delivered</div>
+                    <div className="font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
                       {formatNumber(inspectCampaign.delivered)}
                     </div>
                   </div>
-                  <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200">
-                    <div className="text-[10px] text-slate-400">Read Receipts</div>
-                    <div className="font-bold text-purple-600 mt-0.5">
+                  <div className="p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Read Receipts</div>
+                    <div className="font-bold text-purple-600 dark:text-purple-400 mt-0.5">
                       {formatNumber(inspectCampaign.read)}
                     </div>
                   </div>
-                  <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200">
-                    <div className="text-[10px] text-slate-400">Failed</div>
-                    <div className="font-bold text-rose-600 mt-0.5">
+                  <div className="p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Failed</div>
+                    <div className="font-bold text-rose-600 dark:text-rose-400 mt-0.5">
                       {formatNumber(inspectCampaign.failed)}
                     </div>
                   </div>
@@ -536,12 +536,12 @@ export default function AdminCampaignsPage() {
 
               {/* Channel Stats */}
               <div className="space-y-2">
-                <div className="font-semibold text-slate-700">Channels Dispatched</div>
+                <div className="font-semibold text-slate-700 dark:text-slate-300">Channels Dispatched</div>
                 <div className="flex items-center gap-2">
                   {inspectCampaign.channels.map((ch) => (
                     <span
                       key={ch}
-                      className="px-2.5 py-1 rounded-lg border bg-white text-slate-800 font-bold uppercase text-[10px]"
+                      className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold uppercase text-[10px]"
                     >
                       {ch}
                     </span>
@@ -550,8 +550,8 @@ export default function AdminCampaignsPage() {
               </div>
 
               {/* Privacy Notice */}
-              <div className="p-3 bg-blue-50/70 rounded-xl text-[11px] text-blue-700 flex items-start gap-2">
-                <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+              <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 rounded-xl text-[11px] text-blue-700 dark:text-blue-300 flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                 <span>
                   <strong>Tenant Privacy Protection:</strong> Private customer message content and individual phone logs are masked in compliance with enterprise tenant isolation standards.
                 </span>
@@ -560,7 +560,7 @@ export default function AdminCampaignsPage() {
               <div className="pt-2 flex justify-end">
                 <Button
                   onClick={() => setInspectCampaign(null)}
-                  className="bg-slate-900 text-white text-xs px-4"
+                  className="bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-700 text-white text-xs px-4"
                 >
                   Close Audit
                 </Button>

@@ -423,7 +423,7 @@ export default function ClientDashboardPage() {
               {conversations.slice(0, 5).map((conv) => (
                 <div
                   key={conv.id}
-                  className="py-3 flex items-center justify-between gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-800/70 rounded-lg px-2 transition-colors cursor-pointer group"
+                  className="py-3 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/80 rounded-lg px-2 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0 ring-1 ring-slate-200 dark:ring-slate-800">

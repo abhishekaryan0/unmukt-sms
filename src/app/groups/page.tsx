@@ -177,7 +177,7 @@ export default function ContactGroupsPage() {
       >
         <form onSubmit={handleCreateGroup} className="space-y-4 text-xs">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Group Name *
             </label>
             <Input
@@ -189,7 +189,7 @@ export default function ContactGroupsPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Description
             </label>
             <Input
@@ -199,11 +199,16 @@ export default function ContactGroupsPage() {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-            <Button variant="outline" type="button" onClick={() => setShowAddModal(false)}>
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => setShowAddModal(false)}
+              className="border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
+            >
               Cancel
             </Button>
-            <Button type="submit" className="bg-slate-900 text-white">
+            <Button type="submit" className="bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-700 text-white">
               Create Group
             </Button>
           </div>

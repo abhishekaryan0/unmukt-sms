@@ -41,8 +41,8 @@ export default function CampaignHistoryPage() {
       accessorKey: "campaignName",
       cell: (row) => (
         <div>
-          <div className="font-bold text-slate-900">{row.campaignName}</div>
-          <div className="text-[11px] text-slate-500 font-mono">ID: {row.id}</div>
+          <div className="font-bold text-slate-900 dark:text-white">{row.campaignName}</div>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">ID: {row.id}</div>
         </div>
       ),
     },
@@ -52,7 +52,7 @@ export default function CampaignHistoryPage() {
       cell: (row) => (
         <span
           className={`inline-flex items-center gap-1 font-bold text-xs ${
-            row.channel === "whatsapp" ? "text-[#075E54]" : "text-blue-600"
+            row.channel === "whatsapp" ? "text-[#075E54] dark:text-emerald-400" : "text-blue-600 dark:text-blue-400"
           }`}
         >
           {row.channel === "whatsapp" ? (
@@ -68,7 +68,7 @@ export default function CampaignHistoryPage() {
       header: "Recipients",
       accessorKey: "totalRecipients",
       cell: (row) => (
-        <span className="font-semibold text-slate-900">
+        <span className="font-semibold text-slate-900 dark:text-white">
           {formatNumber(row.totalRecipients)}
         </span>
       ),
@@ -77,9 +77,9 @@ export default function CampaignHistoryPage() {
       header: "Delivered",
       accessorKey: "delivered",
       cell: (row) => (
-        <div className="text-emerald-700 font-semibold">
+        <div className="text-emerald-700 dark:text-emerald-400 font-semibold">
           {formatNumber(row.delivered)}
-          <span className="text-[10px] text-emerald-600 font-normal ml-1">
+          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal ml-1">
             ({((row.delivered / (row.totalRecipients || 1)) * 100).toFixed(0)}%)
           </span>
         </div>
@@ -89,7 +89,7 @@ export default function CampaignHistoryPage() {
       header: "Failed",
       accessorKey: "failed",
       cell: (row) => (
-        <span className={row.failed > 0 ? "text-rose-600 font-medium" : "text-slate-400"}>
+        <span className={row.failed > 0 ? "text-rose-600 dark:text-rose-400 font-medium" : "text-slate-400 dark:text-slate-500"}>
           {formatNumber(row.failed)}
         </span>
       ),
@@ -97,13 +97,13 @@ export default function CampaignHistoryPage() {
     {
       header: "Total Cost",
       accessorKey: "cost",
-      cell: (row) => <span className="font-bold text-slate-900">{formatINR(row.cost)}</span>,
+      cell: (row) => <span className="font-bold text-slate-900 dark:text-white">{formatINR(row.cost)}</span>,
     },
     {
       header: "Date",
       accessorKey: "createdDate",
       cell: (row) => (
-        <span className="text-slate-500 text-[11px]">{formatDate(row.createdDate)}</span>
+        <span className="text-slate-500 dark:text-slate-400 text-[11px]">{formatDate(row.createdDate)}</span>
       ),
     },
     {
@@ -118,7 +118,7 @@ export default function CampaignHistoryPage() {
           variant="outline"
           size="sm"
           onClick={() => setSelectedCampaign(row)}
-          className="h-7 px-2.5 text-xs gap-1"
+          className="h-7 px-2.5 text-xs gap-1 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
         >
           <Eye className="w-3.5 h-3.5" />
           <span>Report</span>
@@ -130,12 +130,12 @@ export default function CampaignHistoryPage() {
   return (
     <ClientLayout>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             Campaign History & Reports
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Full audit log of SMS and WhatsApp broadcasts, delivery funnels, and debited costs
           </p>
         </div>

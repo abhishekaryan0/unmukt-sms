@@ -133,17 +133,17 @@ export default function AdminPricingPage() {
       >
         {editingConfig && (
           <form onSubmit={handleSave} className="space-y-4 text-xs">
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-slate-600">
+            <div className="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
               <div className="flex justify-between">
                 <span>Carrier Wholesale Cost:</span>
-                <span className="font-bold text-slate-900">
+                <span className="font-bold text-slate-900 dark:text-white">
                   {formatINR(editingConfig.supplierCost)}
                 </span>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 New Customer Selling Price (INR) *
               </label>
               <Input
@@ -158,14 +158,14 @@ export default function AdminPricingPage() {
 
             {/* Live calculation */}
             {parseFloat(newSellingPrice) > editingConfig.supplierCost && (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-emerald-900 space-y-1">
+              <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg p-3 text-emerald-900 dark:text-emerald-200 space-y-1">
                 <div className="flex justify-between font-bold">
                   <span>Gross Contribution:</span>
                   <span>
                     +{formatINR(parseFloat(newSellingPrice) - editingConfig.supplierCost)}
                   </span>
                 </div>
-                <div className="flex justify-between text-[11px] text-emerald-700">
+                <div className="flex justify-between text-[11px] text-emerald-700 dark:text-emerald-400">
                   <span>Gross Profit Margin:</span>
                   <span>
                     {(
@@ -179,11 +179,11 @@ export default function AdminPricingPage() {
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-              <Button variant="outline" type="button" onClick={() => setEditingConfig(null)}>
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <Button variant="outline" type="button" onClick={() => setEditingConfig(null)} className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">
                 Cancel
               </Button>
-              <Button type="submit" className="bg-slate-900 text-white">
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold">
                 Save Price
               </Button>
             </div>

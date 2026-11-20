@@ -68,7 +68,7 @@ export function RechargeModal({ isOpen, onClose, onSuccess }: RechargeModalProps
       <div className="space-y-4">
         {/* Preset Amounts */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-2">
+          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
             Select Recharge Pack
           </label>
           <div className="grid grid-cols-4 gap-2">
@@ -82,14 +82,14 @@ export function RechargeModal({ isOpen, onClose, onSuccess }: RechargeModalProps
                     setIsCustom(false);
                     setSelectedAmount(amt);
                   }}
-                  className={`py-2 px-2 rounded-lg border text-xs font-semibold flex flex-col items-center justify-center transition-all ${
+                  className={`py-2 px-2 rounded-lg border text-xs font-semibold flex flex-col items-center justify-center transition-all cursor-pointer ${
                     active
-                      ? "border-slate-900 bg-slate-900 text-white shadow-sm"
-                      : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
+                      ? "border-slate-900 bg-slate-900 text-white dark:border-blue-500 dark:bg-blue-600 shadow-sm"
+                      : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
                   }`}
                 >
                   <span>₹{amt}</span>
-                  <span className={`text-[10px] font-normal ${active ? "text-slate-300" : "text-slate-500"}`}>
+                  <span className={`text-[10px] font-normal ${active ? "text-slate-300" : "text-slate-500 dark:text-slate-400"}`}>
                     Popular
                   </span>
                 </button>
@@ -104,7 +104,7 @@ export function RechargeModal({ isOpen, onClose, onSuccess }: RechargeModalProps
             type="button"
             onClick={() => setIsCustom(true)}
             className={`text-xs font-medium underline mb-1.5 inline-block ${
-              isCustom ? "text-slate-900 font-semibold" : "text-slate-600 hover:text-slate-900"
+              isCustom ? "text-slate-900 dark:text-white font-semibold" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             Or enter custom amount
@@ -122,105 +122,105 @@ export function RechargeModal({ isOpen, onClose, onSuccess }: RechargeModalProps
 
         {/* Payment Methods */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-2">
+          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
             Payment Method (Instant Demo)
           </label>
           <div className="grid grid-cols-2 gap-2 text-xs">
             <button
               type="button"
               onClick={() => setMethod("UPI")}
-              className={`p-3 rounded-lg border flex items-center gap-2.5 transition-all text-left ${
+              className={`p-3 rounded-lg border flex items-center gap-2.5 transition-all text-left cursor-pointer ${
                 method === "UPI"
-                  ? "border-slate-900 bg-slate-50 font-semibold text-slate-900 ring-1 ring-slate-900"
-                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "border-slate-900 bg-slate-50 font-semibold text-slate-900 ring-1 ring-slate-900 dark:border-blue-500 dark:bg-blue-950/40 dark:text-white dark:ring-blue-500"
+                  : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
               }`}
             >
               <Smartphone className="w-4 h-4 text-emerald-600 shrink-0" />
               <div className="flex-1">
                 <div>UPI / QR Code</div>
-                <div className="text-[10px] text-slate-500 font-normal">GPay, PhonePe, Paytm</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">GPay, PhonePe, Paytm</div>
               </div>
-              {method === "UPI" && <Check className="w-3.5 h-3.5 text-slate-900" />}
+              {method === "UPI" && <Check className="w-3.5 h-3.5 text-slate-900 dark:text-blue-400" />}
             </button>
 
             <button
               type="button"
               onClick={() => setMethod("Net Banking")}
-              className={`p-3 rounded-lg border flex items-center gap-2.5 transition-all text-left ${
+              className={`p-3 rounded-lg border flex items-center gap-2.5 transition-all text-left cursor-pointer ${
                 method === "Net Banking"
-                  ? "border-slate-900 bg-slate-50 font-semibold text-slate-900 ring-1 ring-slate-900"
-                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "border-slate-900 bg-slate-50 font-semibold text-slate-900 ring-1 ring-slate-900 dark:border-blue-500 dark:bg-blue-950/40 dark:text-white dark:ring-blue-500"
+                  : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
               }`}
             >
               <Building2 className="w-4 h-4 text-blue-600 shrink-0" />
               <div className="flex-1">
                 <div>Net Banking</div>
-                <div className="text-[10px] text-slate-500 font-normal">SBI, HDFC, ICICI</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">SBI, HDFC, ICICI</div>
               </div>
-              {method === "Net Banking" && <Check className="w-3.5 h-3.5 text-slate-900" />}
+              {method === "Net Banking" && <Check className="w-3.5 h-3.5 text-slate-900 dark:text-blue-400" />}
             </button>
 
             <button
               type="button"
               onClick={() => setMethod("Credit Card")}
-              className={`p-3 rounded-lg border flex items-center gap-2.5 transition-all text-left ${
+              className={`p-3 rounded-lg border flex items-center gap-2.5 transition-all text-left cursor-pointer ${
                 method === "Credit Card"
-                  ? "border-slate-900 bg-slate-50 font-semibold text-slate-900 ring-1 ring-slate-900"
-                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "border-slate-900 bg-slate-50 font-semibold text-slate-900 ring-1 ring-slate-900 dark:border-blue-500 dark:bg-blue-950/40 dark:text-white dark:ring-blue-500"
+                  : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
               }`}
             >
               <CreditCard className="w-4 h-4 text-indigo-600 shrink-0" />
               <div className="flex-1">
                 <div>Credit Card</div>
-                <div className="text-[10px] text-slate-500 font-normal">Visa, Mastercard, RuPay</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Visa, Mastercard, RuPay</div>
               </div>
-              {method === "Credit Card" && <Check className="w-3.5 h-3.5 text-slate-900" />}
+              {method === "Credit Card" && <Check className="w-3.5 h-3.5 text-slate-900 dark:text-blue-400" />}
             </button>
 
             <button
               type="button"
               onClick={() => setMethod("Debit Card")}
-              className={`p-3 rounded-lg border flex items-center gap-2.5 transition-all text-left ${
+              className={`p-3 rounded-lg border flex items-center gap-2.5 transition-all text-left cursor-pointer ${
                 method === "Debit Card"
-                  ? "border-slate-900 bg-slate-50 font-semibold text-slate-900 ring-1 ring-slate-900"
-                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "border-slate-900 bg-slate-50 font-semibold text-slate-900 ring-1 ring-slate-900 dark:border-blue-500 dark:bg-blue-950/40 dark:text-white dark:ring-blue-500"
+                  : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
               }`}
             >
               <CreditCard className="w-4 h-4 text-amber-600 shrink-0" />
               <div className="flex-1">
                 <div>Debit Card</div>
-                <div className="text-[10px] text-slate-500 font-normal">All Indian Banks</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">All Indian Banks</div>
               </div>
-              {method === "Debit Card" && <Check className="w-3.5 h-3.5 text-slate-900" />}
+              {method === "Debit Card" && <Check className="w-3.5 h-3.5 text-slate-900 dark:text-blue-400" />}
             </button>
           </div>
         </div>
 
         {/* GST & Total Breakdown Box */}
-        <div className="bg-slate-50 rounded-lg p-3.5 border border-slate-200 text-xs space-y-1.5">
-          <div className="flex justify-between text-slate-600">
+        <div className="bg-slate-50 dark:bg-slate-800/90 rounded-lg p-3.5 border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
+          <div className="flex justify-between text-slate-600 dark:text-slate-400">
             <span>Base Recharge Amount:</span>
             <span>{formatINR(amountToCharge)}</span>
           </div>
-          <div className="flex justify-between text-slate-600">
+          <div className="flex justify-between text-slate-600 dark:text-slate-400">
             <span>GST (18% - CGST 9% + SGST 9%):</span>
             <span>{formatINR(gstAmount)}</span>
           </div>
-          <div className="border-t border-slate-200 pt-1.5 flex justify-between font-bold text-slate-900 text-sm">
+          <div className="border-t border-slate-200 dark:border-slate-700 pt-1.5 flex justify-between font-bold text-slate-900 dark:text-white text-sm">
             <span>Total Payable:</span>
             <span>{formatINR(totalPayable)}</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span>Demo checkout: Instantly updates your wallet balance and generates GST invoice.</span>
         </div>
 
         <Button
           onClick={handlePay}
           isLoading={isProcessing}
-          className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold h-10 mt-2"
+          className="w-full bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-700 text-white font-semibold h-10 mt-2"
         >
           Pay {formatINR(totalPayable)} & Add to Wallet
         </Button>

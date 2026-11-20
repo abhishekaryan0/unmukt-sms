@@ -93,7 +93,7 @@ export function DataTable<T extends Record<string, any>>({
         <div className="overflow-x-auto">
           <table className={cn("w-full text-left border-collapse", tableClassName || "min-w-full")}>
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {columns.map((col, idx) => (
                   <th key={idx} className={`py-3 px-4 ${col.className || ""}`}>
                     {col.header}
@@ -106,7 +106,7 @@ export function DataTable<T extends Record<string, any>>({
                 paginatedData.map((row, rowIdx) => (
                   <tr
                     key={row.id || rowIdx}
-                    className="hover:bg-slate-50/80 dark:hover:bg-slate-800/70 transition-colors group"
+                    className="hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors group"
                   >
                     {columns.map((col, colIdx) => (
                       <td key={colIdx} className={`py-3.5 px-4 ${col.className || ""}`}>
@@ -132,37 +132,39 @@ export function DataTable<T extends Record<string, any>>({
 
         {/* Pagination footer */}
         {filteredData.length > 0 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900 text-xs text-slate-500 dark:text-slate-400">
-            <div>
+          <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs text-slate-600 dark:text-slate-300">
+            <div className="text-slate-600 dark:text-slate-300 font-medium">
               Showing{" "}
-              <span className="font-semibold text-slate-700 dark:text-slate-200">
+              <span className="font-bold text-slate-900 dark:text-white">
                 {startIndex + 1}
               </span>{" "}
               to{" "}
-              <span className="font-semibold text-slate-700 dark:text-slate-200">
+              <span className="font-bold text-slate-900 dark:text-white">
                 {Math.min(startIndex + pageSize, filteredData.length)}
               </span>{" "}
               of{" "}
-              <span className="font-semibold text-slate-700 dark:text-slate-200">
+              <span className="font-bold text-slate-900 dark:text-white">
                 {filteredData.length}
               </span>{" "}
               results
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={validCurrentPage <= 1}
-                className="p-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-colors shadow-2xs cursor-pointer"
+                title="Previous page"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <span className="px-2 font-medium text-slate-700 dark:text-slate-300">
+              <span className="px-2.5 py-1 text-xs font-semibold rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-2xs">
                 Page {validCurrentPage} of {totalPages}
               </span>
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={validCurrentPage >= totalPages}
-                className="p-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-colors shadow-2xs cursor-pointer"
+                title="Next page"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
