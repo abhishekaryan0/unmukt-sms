@@ -574,17 +574,17 @@ export default function UnifiedInboxPage() {
                       return (
                         <div
                           key={msg.id}
-                          className="bg-amber-50/90 border border-amber-200 rounded-xl p-3.5 my-3 max-w-lg mx-auto shadow-subtle"
+                          className="bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 rounded-xl p-3.5 my-3 max-w-lg mx-auto shadow-subtle"
                         >
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-amber-800 mb-1">
-                            <Lock className="w-3.5 h-3.5 text-amber-600" />
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-amber-800 dark:text-amber-300 mb-1">
+                            <Lock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                             <span>Internal Team Note (Private)</span>
-                            <span className="text-[10px] text-amber-600 font-normal ml-auto">
+                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-normal ml-auto">
                               {msg.timestamp}
                             </span>
                           </div>
-                          <p className="text-xs text-amber-950 leading-relaxed">{msg.content}</p>
-                          <div className="text-[10px] text-amber-700 font-medium mt-1">
+                          <p className="text-xs text-slate-900 dark:text-amber-100 leading-relaxed font-normal">{msg.content}</p>
+                          <div className="text-[10px] text-amber-700 dark:text-amber-400 font-medium mt-1">
                             By {msg.senderName}
                           </div>
                         </div>
@@ -1042,12 +1042,12 @@ export default function UnifiedInboxPage() {
                     activeConversation.internalNotes.map((note) => (
                       <div
                         key={note.id}
-                        className="p-2.5 rounded-lg bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-950 dark:text-amber-200 text-xs"
+                        className="p-3 rounded-xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 text-xs shadow-xs"
                       >
-                        <p className="leading-snug">{note.content}</p>
-                        <div className="mt-1 flex items-center justify-between text-[10px] text-amber-700 dark:text-amber-400 font-medium">
-                          <span>{note.author}</span>
-                          <span>{note.createdAt}</span>
+                        <p className="leading-relaxed text-slate-900 dark:text-amber-100 font-normal text-xs">{note.content}</p>
+                        <div className="mt-2 flex items-center justify-between text-[11px] text-amber-800 dark:text-amber-300 font-medium pt-1.5 border-t border-amber-200/50 dark:border-amber-800/40">
+                          <span className="font-semibold">{note.author}</span>
+                          <span className="text-amber-700 dark:text-amber-400 text-[10px]">{note.createdAt}</span>
                         </div>
                       </div>
                     ))

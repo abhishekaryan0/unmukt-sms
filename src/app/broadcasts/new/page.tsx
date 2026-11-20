@@ -422,7 +422,7 @@ export default function NewBroadcastCampaignPage() {
                           onClick={() => toggleChannel("whatsapp")}
                           className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
                             isSel
-                              ? "border-emerald-500 dark:border-emerald-500 bg-emerald-50/70 dark:bg-slate-800/90 shadow-sm ring-2 ring-emerald-500/20 dark:ring-emerald-500/40"
+                              ? "border-emerald-500 dark:border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/40 shadow-sm ring-2 ring-emerald-500/20 dark:ring-emerald-500/30"
                               : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 opacity-80"
                           }`}
                         >
@@ -473,7 +473,7 @@ export default function NewBroadcastCampaignPage() {
                           onClick={() => toggleChannel("instagram")}
                           className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
                             isSel
-                              ? "border-pink-500 dark:border-pink-500 bg-pink-50/70 dark:bg-slate-800/90 shadow-sm ring-2 ring-pink-500/20 dark:ring-pink-500/40"
+                              ? "border-pink-500 dark:border-pink-500 bg-pink-50/70 dark:bg-pink-950/40 shadow-sm ring-2 ring-pink-500/20 dark:ring-pink-500/30"
                               : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 opacity-80"
                           }`}
                         >
@@ -524,7 +524,7 @@ export default function NewBroadcastCampaignPage() {
                           onClick={() => toggleChannel("messenger")}
                           className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
                             isSel
-                              ? "border-blue-500 dark:border-blue-500 bg-blue-50/70 dark:bg-slate-800/90 shadow-sm ring-2 ring-blue-500/20 dark:ring-blue-500/40"
+                              ? "border-blue-500 dark:border-blue-500 bg-blue-50/70 dark:bg-blue-950/40 shadow-sm ring-2 ring-blue-500/20 dark:ring-blue-500/30"
                               : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 opacity-80"
                           }`}
                         >
@@ -575,7 +575,7 @@ export default function NewBroadcastCampaignPage() {
                           onClick={() => toggleChannel("telegram")}
                           className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
                             isSel
-                              ? "border-sky-500 dark:border-sky-500 bg-sky-50/70 dark:bg-slate-800/90 shadow-sm ring-2 ring-sky-500/20 dark:ring-sky-500/40"
+                              ? "border-sky-500 dark:border-sky-500 bg-sky-50/70 dark:bg-sky-950/40 shadow-sm ring-2 ring-sky-500/20 dark:ring-sky-500/30"
                               : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 opacity-80"
                           }`}
                         >
@@ -1140,8 +1140,8 @@ export default function NewBroadcastCampaignPage() {
                       onClick={() => setPreviewTab(ch)}
                       className={`px-2.5 py-1 rounded-md text-[11px] font-semibold flex items-center gap-1.5 transition-all ${
                         previewTab === ch
-                          ? "bg-white text-slate-900 shadow-sm border border-slate-200"
-                          : "text-slate-500 hover:text-slate-800"
+                          ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700"
+                          : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                       }`}
                     >
                       {ch === "whatsapp" && <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366]" />}
@@ -1154,7 +1154,7 @@ export default function NewBroadcastCampaignPage() {
                 </div>
 
                 {/* Device Frame */}
-                <div className="p-4 bg-slate-100/80 min-h-[440px] flex flex-col justify-end">
+                <div className="p-4 bg-slate-100/80 dark:bg-slate-900/60 min-h-[440px] flex flex-col justify-end">
                   {/* WhatsApp Style */}
                   {previewTab === "whatsapp" && (
                     <div className="bg-[#efeae2] p-4 rounded-xl shadow-inner border border-slate-200 space-y-3">
@@ -1256,7 +1256,7 @@ export default function NewBroadcastCampaignPage() {
                   )}
                 </div>
 
-                <div className="p-3 bg-slate-50 border-t border-slate-200 text-center text-[11px] text-slate-500">
+                <div className="p-3 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 text-center text-[11px] text-slate-500 dark:text-slate-400">
                   Live preview based on sample contact: Pooja Verma
                 </div>
               </div>
